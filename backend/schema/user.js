@@ -11,7 +11,7 @@ const userSchema = new mongoose.Schema({
   yearOfStudy: String,
   department: String,
   isClubMember: { type: Boolean, default: false },
-  clubName: { type: String, default: null }  // optional
+  club: { type: mongoose.Schema.Types.ObjectId, ref: 'Club', default: null }
 }, { timestamps: true });
 
 module.exports = mongoose.model('User', userSchema);
