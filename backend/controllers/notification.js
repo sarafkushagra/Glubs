@@ -1,4 +1,4 @@
-const notification = require('../schema/notification');
+const Notification = require('../schema/notification');
 
 module.exports.showAllNotifications = async (req, res) => {
     const notifications = await Notification.find({ user: req.params.userId });

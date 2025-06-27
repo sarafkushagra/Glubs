@@ -1,4 +1,4 @@
-const announcement = require('../schema/announcement');
+const Announcement = require('../schema/announcement');
 
 
 module.exports.showAllAnnouncements = async (req, res) => {

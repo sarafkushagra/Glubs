@@ -1,4 +1,4 @@
-const feedback = require('../schema/feedback');
+const Feedback = require('../schema/feedback');
 
 module.exports.showAllFeedbacks = async (req, res) => {
    const feedbacks = await Feedback.find({ event: req.params.eventId });

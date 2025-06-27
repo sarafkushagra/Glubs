@@ -8,3 +8,4 @@ router.get('/:id', clubController.showClub);
 router.put('/:id', clubController.updateClub);
 router.delete('/:id', clubController.deleteClub);
 
+module.exports = router;

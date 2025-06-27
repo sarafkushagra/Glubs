@@ -1,4 +1,4 @@
-const club = require('../schema/club');
+const Club = require('../schema/club');
 
 module.exports.showAllClubs = async (req, res) => {
     const clubs = await Club.find();

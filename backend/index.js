@@ -19,20 +19,31 @@ app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
 const userRouter = require("./routers/user");
-app.use("/", userRouter);
+app.use("/users/", userRouter);
 
 const clubAdminRouter = require("./routers/clubadmin");
-app.use("/", clubAdminRouter);
+app.use("/clubadmins", clubAdminRouter);
 
 const eventRouter = require("./routers/event");
-app.use("/", eventRouter);
+app.use("/event", eventRouter);
 
 const eventRegistrationRouter = require("./routers/eventreg");
-app.use("/", eventRegistrationRouter);
+app.use("/eventreg", eventRegistrationRouter);
 
 const eventStatsRouter = require("./routers/eventstats");
-app.use("/", eventStatsRouter);
+app.use("/eventstat", eventStatsRouter);
 
+const clubRouter = require("./routers/club");
+app.use("/club", clubRouter);
+
+const announcementRouter = require("./routers/announcement");
+app.use("/announcement", announcementRouter);
+
+const feedbackRouter = require("./routers/feedback");
+app.use("/feedback", feedbackRouter);
+
+const notificationRouter = require("./routers/notification");
+app.use("/notification", notificationRouter);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");
