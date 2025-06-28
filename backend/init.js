@@ -1,6 +1,8 @@
 const mongoose = require("mongoose");
 const faker = require('@faker-js/faker').faker;
 const bcrypt = require('bcrypt');
+ require("dotenv").config();    
+const dburl = process.env.ATLASDB_URL;
 
 const Auth = require("./schema/auth");
 const ClubAdmin = require("./schema/clubadmin");
@@ -14,7 +16,7 @@ const feedback = require("./schema/feedback");
 const notification = require("./schema/notification");
 
 const seedDB = async () => {
-    await mongoose.connect('mongodb://localhost:27017/glubs');
+    await mongoose.connect(dburl);
 
     await Auth.deleteMany({});
     await User.deleteMany({});
