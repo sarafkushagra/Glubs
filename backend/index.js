@@ -1,6 +1,14 @@
  require("dotenv").config();
 const express = require("express");
 const app = express();
+const path = require("path");
+const ejs = require("ejs");
+const methodOverride = require("method-override");
+
+app.set("view engine", "ejs");
+app.set("views", path.join(__dirname, "views"));
+
+app.use(express.static(path.join(__dirname, "public")));
 
 const mongoose = require("mongoose");
 
@@ -15,11 +23,15 @@ async function main() {
   await mongoose.connect(dburl);
 }
 app.get("/", (req, res) => {
-  res.send("Welcome to the Glubs Backend API");   
+  // res.send("Welcome to the Glubs Backend API"); 
+  res.render("html/index.ejs");  
 });
+
+
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+
 
 const userRouter = require("./routers/user");
 app.use("/users", userRouter);

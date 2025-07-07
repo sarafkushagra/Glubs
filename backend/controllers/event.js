@@ -1,5 +1,9 @@
 const Event = require("../schema/event");
 
+module.exports.showCreateEventForm = (req, res) => {
+    res.render("html/createEvent.ejs");
+};
+
 module.exports.showAllEvents = async (req, res) => {
     const events = await Event.find({});
     res.json(events);

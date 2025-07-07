@@ -70,3 +70,7 @@ module.exports.deleteClubAdmin = async (req, res) => {
         res.status(400).json({ message: "Error deleting club admin", error: error.message });
     }
 };
+
+module.exports.showCreateClubAdminForm = (req, res) => {
+    res.render("html/clubAdmin.ejs");
+};
