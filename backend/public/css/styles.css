@@ -103,6 +103,15 @@ nav img {
     padding: 13.2px 34px;
 }
 
+.contact-us-btn{
+    
+    background-color: rgb(115, 115, 255);
+    color: white;
+    border: none;
+    padding: 13.2px 34px;
+
+}
+
 .btn1:hover, .btn2:hover {
     border: 1px solid rgb(255, 239, 239);
     box-shadow: 5px 5px 10px rgba(0, 0, 0, .15);
@@ -259,18 +268,18 @@ h3{
 .cta{
     margin: 100px auto;
     width:80%;
-    background-image: linear-gradient(rgba(0,0,0,0.8),rgba(0,0,0,0.8)),url(images/business-people-standing-together-as-team_3482-8671.jpg);
+    height: 83vh;
+    padding: 20px;
+    background-color: skyblue;
     background-position: center;
     background-size: cover;
     border-radius: 10px;
     text-align: center;
-    padding: 100px 0;
-
 }
 
 .cta h1{
-    color:white;
-    margin-bottom: 40px;
+    color:black;
+    margin-bottom: 20px;
     padding: 0;
 
 }
