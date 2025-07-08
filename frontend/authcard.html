@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Auth Card</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+  <div id="authCard" class="relative w-full max-w-6xl bg-white rounded-xl shadow-xl flex overflow-hidden transition-all duration-700">
+
+    <!-- Left side -->
+    <div id="leftPanel" class="w-1/2 flex items-center justify-center bg-white p-8 transition-all duration-700">
+      <!-- Sign In Form -->
+      <div id="signInForm" class="w-full max-w-md">
+        <h2 class="text-2xl font-bold text-[#3d348b] mb-6 text-center">Sign in to KagJaat</h2>
+        <div class="flex justify-center gap-4 mb-4">
+          <button class="bg-white rounded-full shadow p-3 w-12">f</button>
+          <button class="bg-white rounded-full shadow p-3 w-12">G+</button>
+          <button class="bg-white rounded-full shadow p-3 w-12">in</button>
+        </div>
+        <p class="text-center text-sm text-gray-500 mb-4">or use your email account:</p>
+        <form class="space-y-4">
+          <input type="email" placeholder="Email" class="w-full p-2 border rounded" />
+          <input type="password" placeholder="Password" class="w-full p-2 border rounded" />
+          <p class="text-sm text-right text-gray-500 hover:underline cursor-pointer">Forgot your password?</p>
+          <button type="button" class="bg-[#3d348b] text-white w-full py-2 rounded hover:bg-[#00509d]">SIGN IN</button>
+        </form>
+      </div>
+
+      <!-- Sign Up Form -->
+      <div id="signUpForm" class="hidden w-full max-w-md">
+        <h2 class="text-2xl font-bold text-[#3d348b] mb-4 text-center">Create Account</h2>
+        <div class="flex justify-center gap-4 mb-4">
+          <button class="bg-white rounded-full shadow p-3 w-12">f</button>
+          <button class="bg-white rounded-full shadow p-3 w-12">G+</button>
+          <button class="bg-white rounded-full shadow p-3 w-12">in</button>
+        </div>
+        <p class="text-center text-sm text-gray-500 mb-4">or use your email for registration:</p>
+        <form class="space-y-4">
+          <input type="text" placeholder="Name" class="w-full p-2 border rounded" />
+          <input type="email" placeholder="Email" class="w-full p-2 border rounded" />
+          <input type="password" placeholder="Password" class="w-full p-2 border rounded" />
+          <button type="button" class="bg-[#3d348b] text-white w-full py-2 rounded hover:bg-[#00509d]">SIGN UP</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Right Panel -->
+    <div id="rightPanel" class="w-1/2 bg-gradient-to-br from-[#00509d] to-[#3d348b] text-white flex flex-col items-center justify-center text-center p-8 transition-all duration-700">
+      <h2 id="panelTitle" class="text-3xl font-bold mb-2">Hello, Friend!</h2>
+      <p id="panelText" class="mb-6">Enter your personal details and start your journey with us</p>
+      <button id="toggleButton" type="button" class="border border-white px-6 py-2 rounded-full hover:bg-white hover:text-teal-600 transition">
+        SIGN UP
+      </button>
+    </div>
+
+  </div>
+
+  <script>
+    const toggleButton = document.getElementById("toggleButton");
+    const signInForm = document.getElementById("signInForm");
+    const signUpForm = document.getElementById("signUpForm");
+    const panelTitle = document.getElementById("panelTitle");
+    const panelText = document.getElementById("panelText");
+    let isSignIn = true;
+
+    toggleButton.addEventListener("click", () => {
+      isSignIn = !isSignIn;
+
+      if (isSignIn) {
+        signInForm.classList.remove("hidden");
+        signUpForm.classList.add("hidden");
+        panelTitle.textContent = "Hello, Friend!";
+        panelText.textContent = "Enter your personal details and start your journey with us";
+        toggleButton.textContent = "SIGN UP";
+      } else {
+        signInForm.classList.add("hidden");
+        signUpForm.classList.remove("hidden");
+        panelTitle.textContent = "Welcome Back!";
+        panelText.textContent = "To keep connected with us please login with your personal info";
+        toggleButton.textContent = "SIGN IN";
+      }
+    });
+  </script>
+
+</body>
+</html>
