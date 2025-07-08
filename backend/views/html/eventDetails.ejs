@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title><%= event.title %> | Glubs</title>
+    <link rel="stylesheet" href="../css/event_detail.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@100;300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="/css/output.css" rel="stylesheet">
+</head>
+<body>
+    <section class="header_events">
+        <nav>
+            <a href="/"><img src="../images/Preview.png"></a>
+            <div class="nav-links" id="nav-links">
+                <ul>
+                    <li><a href="/">HOME</a></li>
+                    <li><a href="/about">ABOUT</a></li>
+                    <li><a href="/events">EVENTS</a></li>
+                    <li id="login"><a href="/users/login">LOGIN</a></li>
+                </ul>
+            </div>
+        </nav>
+    </section>
+    <section class="event-detail container mt-5">
+        <div class="card p-4">
+            <h1 class="event-title mb-3"><%= event.title %></h1>
+            <p class="event-date text-muted mb-2">Date: <%= event.date %></p>
+            <p class="event-description mb-4"><%= event.description %></p>
+            <% if (event.location) { %>
+                <p class="event-location mb-2">Location: <%= event.location %></p>
+            <% } %>
+            <% if (event.organizer) { %>
+                <p class="event-organizer mb-2">Organized by: <%= event.organizer %></p>
+            <% } %>
+           
+                <div class="admin-actions mt-4">
+                    <a href="/events/<%= event._id %>/edit" class="btn btn-warning me-2">Edit</a>
+                    <form action="/events/<%= event._id %>?_method=DELETE" method="POST" style="display:inline;">
+                        <button type="submit" class="btn btn-danger">Delete</button>
+                    </form>
+                </div>
+           
+        </div>
+    </section>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.7/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 
