@@ -6,8 +6,8 @@ module.exports.showCreateEventForm = (req, res) => {
 
 module.exports.showAllEvents = async (req, res) => {
     const events = await Event.find({});
-    // res.json(events);
-    res.render("html/events.ejs", { events: events });
+    res.json(events);
+    // res.render("html/events.ejs", { events: events });
 };
 
 module.exports.showEvent = async (req, res) => {
