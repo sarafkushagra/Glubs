@@ -5,6 +5,7 @@
     import SignUpForm from './AuthCard/SignUp';
     import LandingPage from './Pages/Home';
     import OrganizerSignIn from './ClubAdmin/ClubAdmin';
+    import About from './Pages/About';
 
 export default function Router() {
   return (
@@ -16,6 +17,8 @@ export default function Router() {
 
         <Route path='/' element={<LandingPage />} />
         <Route path='/clubadmin/details' element={<OrganizerSignIn />} />
+        
+        <Route path='/about' element={<About/>}/>
       </Routes>
   )
 }
