@@ -6,6 +6,7 @@
     import LandingPage from './Pages/Home';
     import OrganizerSignIn from './ClubAdmin/ClubAdmin';
     import About from './Pages/About';
+    import EventLanding from './Events/EventLanding';
 
 export default function Router() {
   return (
@@ -13,8 +14,7 @@ export default function Router() {
         <Route path='/auth' element={<AuthCard />} />
         <Route path='/auth/signin' element={<SignInForm />} />
         <Route path='/auth/signup' element={<SignUpForm />} />
-
-
+        <Route path='/events' element={<EventLanding />} />
         <Route path='/' element={<LandingPage />} />
         <Route path='/clubadmin/details' element={<OrganizerSignIn />} />
         

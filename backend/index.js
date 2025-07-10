@@ -2,6 +2,7 @@
 const express = require("express");
 const app = express();
 const path = require("path");
+const cors = require("cors");
 const ejs = require("ejs");
 const methodOverride = require("method-override");
 
@@ -13,6 +14,8 @@ app.use(express.static(path.join(__dirname, "public")));
 const mongoose = require("mongoose");
 
 const dburl = process.env.ATLASDB_URL;
+
+app.use(cors())
   
 main().then(() => {
   console.log("Connected to MongoDB");

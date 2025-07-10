@@ -1,15 +1,28 @@
-import React, { useState } from 'react';
-
-export default function EventsPage({ events }) {
+import React, { useState,useEffect } from 'react';
+import axios from 'axios';
+export default function EventsPage({  }) {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
+  
+  const [events, setEvent] = useState([]);
 
+  useEffect(() => {
+          const fetchData = async () => {
+              try {
+                  const res = await axios.get("http://localhost:3000/event"); // Change port if needed
+                  setEvent(Array.isArray(res.data) ? res.data : []);
+              } catch (error) {
+                  console.error(error);
+              }
+          };
+          fetchData();
+      }, []);
   const filteredEvents = events.filter(event => {
     const searchMatch =
       event.title.toLowerCase().includes(search.toLowerCase()) ||
       event.description.toLowerCase().includes(search.toLowerCase());
 
-    const categoryMatch = category === 'All' || event.category === category;
+    const categoryMatch = category === 'All' || event.eventType === category;
 
     return searchMatch && categoryMatch;
   });
@@ -64,9 +77,9 @@ export default function EventsPage({ events }) {
               className="bg-white rounded-lg shadow hover:shadow-lg transition transform hover:-translate-y-2 flex flex-col"
             >
               <div className="relative bg-gray-200 h-40 rounded-t-lg flex items-center justify-center text-gray-500">
-                {event.category && (
+                {event.eventType && (
                   <span className="absolute top-2 left-2 bg-white px-3 py-1 rounded-full text-sm font-semibold">
-                    {event.category}
+                    {event.eventType}
                   </span>
                 )}
                 {event.date && (
@@ -74,9 +87,9 @@ export default function EventsPage({ events }) {
                     {event.date}
                   </span>
                 )}
-                {event.imageUrl ? (
+                {event.media ? (
                   <img
-                    src={event.imageUrl}
+                    src={event.media}
                     alt={event.title}
                     className="object-cover h-full w-full rounded-t-lg"
                   />
@@ -88,9 +101,8 @@ export default function EventsPage({ events }) {
                 <h3 className="text-lg font-bold mb-2 text-gray-800">{event.title}</h3>
                 <p className="text-sm text-gray-600 mb-3">{event.description}</p>
                 <div className="text-xs text-gray-500 mb-2 space-y-1">
-                  {event.location && <p><strong>Location:</strong> {event.location}</p>}
+                  {event.venue && <p><strong>Location:</strong> {event.venue}</p>}
                   {event.time && <p><strong>Time:</strong> {event.time}</p>}
-                  {event.attendees && <p><strong>Attendees:</strong> {event.attendees}</p>}
                 </div>
                 <a
                   href={`/events/${event._id}`}

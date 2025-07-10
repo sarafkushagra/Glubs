@@ -1,7 +1,7 @@
 const SignInForm = () => {
   return (
    <div className="w-full max-w-md p-8 h-[550px]">
-      <h2 className="text-2xl font-bold text-[#3d348b] mt-12 mb-8 text-center">Sign in to KagJaat</h2>
+      <h2 className="text-2xl font-bold text-[#3d348b] mt-12 mb-8 text-center">Sign in to Glubs</h2>
       <div className="flex justify-center gap-4 mb-4">
         <button className="bg-white rounded-full shadow p-3 w-12">f</button>
         <button className="bg-white rounded-full shadow p-3 w-12">G+</button>
