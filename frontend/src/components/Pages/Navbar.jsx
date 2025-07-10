@@ -1,5 +1,7 @@
 import React from 'react';
+import { QrCode } from 'lucide-react';
 import { Link } from 'react-router-dom';
+
 
 export default function Navbar() {
   return (
@@ -25,6 +27,14 @@ export default function Navbar() {
         <li className="border border-black rounded px-2 hover:bg-gray-100 transition">
           <Link className="hover:text-purple-700" to="/auth">LOGIN</Link>
         </li>
+        <Link
+          to="/dashboard/scan"
+            className="ml-4 text-indigo-600 hover:text-indigo-800"
+            title="Mark Attendance"
+                >
+            <QrCode className="w-6 h-6" />
+        </Link>
+
       </ul>
     </nav>
   );
