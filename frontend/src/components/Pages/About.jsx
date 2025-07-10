@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; 
 import Footer from './Footer';
 import kushagraImg from '../images/kushagra.jpg';
 const About = () => {
@@ -14,9 +15,11 @@ const About = () => {
             <p className="text-xl text-gray-600 mb-8">
               GLUBS is your ultimate platform for seamless event management, connecting students and organizations with a world of opportunities. From hackathons to workshops, we make event organization and participation effortless.
             </p>
+           <Link to="/events">
             <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
-              Explore Events
-            </button>
+             Explore Events
+           </button>
+           </Link>
           </div>
         </section>
 
