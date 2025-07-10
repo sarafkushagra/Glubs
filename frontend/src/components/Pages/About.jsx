@@ -23,23 +23,6 @@ const About = () => {
           </div>
         </section>
 
-        {/* About Section */}
-        <section className="py-12 border-t border-gray-200">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">About GLUBS</h2>
-            <div className="space-y-4 text-gray-600 max-w-3xl mx-auto">
-              <p>
-                GLUBS is dedicated to transforming campus event experiences. We provide intuitive tools and resources to help student organizations host impactful events and empower students to discover and engage with opportunities that shape their academic and professional journeys.
-              </p>
-              <p>
-                Our mission is to foster a vibrant campus community by simplifying the complexities of event planning and accessibility. We believe that every student deserves the chance to participate in enriching activities, and every organization deserves the tools to manage them efficiently.
-              </p>
-              <p>
-                Whether you're a student looking for your next challenge, an organizer planning a major seminar, or a club hosting a small workshop, GLUBS is designed to meet your needs. We are constantly evolving our platform to better serve the dynamic landscape of university life.
-              </p>
-            </div>
-          </div>
-        </section>
 
         {/* How It Works Section */}
         <section className="py-12 border-t border-gray-200">
@@ -64,6 +47,24 @@ const About = () => {
                   <p className="text-gray-600">{step.desc}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+        
+        {/* About Section */}
+        <section className="py-12 border-t border-gray-200">
+          <div>
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">About GLUBS</h2>
+            <div className="space-y-4 text-gray-600 max-w-3xl mx-auto">
+              <p>
+                GLUBS is dedicated to transforming campus event experiences. We provide intuitive tools and resources to help student organizations host impactful events and empower students to discover and engage with opportunities that shape their academic and professional journeys.
+              </p>
+              <p>
+                Our mission is to foster a vibrant campus community by simplifying the complexities of event planning and accessibility. We believe that every student deserves the chance to participate in enriching activities, and every organization deserves the tools to manage them efficiently.
+              </p>
+              <p>
+                Whether you're a student looking for your next challenge, an organizer planning a major seminar, or a club hosting a small workshop, GLUBS is designed to meet your needs. We are constantly evolving our platform to better serve the dynamic landscape of university life.
+              </p>
             </div>
           </div>
         </section>

@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import img1 from '../images/business-people-standing-together-as-team_3482-8671.jpg';
 import img2 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp';
+import Footer from './Footer';
 
 export default function LandingPage() {
   return (
@@ -112,14 +113,7 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-indigo-900 text-white text-left py-8 mt-16 px-8">
-        <h3 className="text-xl font-semibold mb-4">About Us</h3>
-        <p>
-          Glubs helps students discover, register, and attend university events, hackathons, and workshops,
-          building connections and skills for their future.
-        </p>
-        <p className="text-gray-400 text-sm mt-2">&copy; 2025 Glubs. All rights reserved.</p>
-      </footer>
+   <Footer/>
     </div>
   );
 }
