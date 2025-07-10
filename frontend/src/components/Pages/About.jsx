@@ -70,29 +70,31 @@ const About = () => {
 
         {/* Key Features Section */}
         <section className="py-12 border-t border-gray-200">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-8">Key Features</h2>
-            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-              GLUBS is packed with features designed to enhance every aspect of event management and participation, making your experience seamless and effective.
-            </p>
+  <div>
+    <h2 className="text-3xl font-bold text-gray-800 mb-8">Key Features</h2>
+    <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+      GLUBS is packed with features designed to enhance every aspect of event management and participation, making your experience seamless and effective.
+    </p>
 
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                ['QR Registration', 'Fast, contactless check-in using unique QR codes for every participant, ensuring smooth event entry.'],
-                ['Secure Payments', 'Process event fees securely with integrated, trusted payment gateways for peace of mind.'],
-                ['Event Analytics', 'Gain deep insights into event performance with comprehensive attendance data and engagement metrics.'],
-                ['Feedback System', 'Provide instant feedback post-event to help us continuously improve and tailor future experiences.'],
-                ['Personalized Dashboards', 'Manage your registered events, tickets, and profile details efficiently, all in one intuitive place.'],
-                ['Resource Hub', 'Access event materials, detailed schedules, and insightful speaker bios easily before and after events.'],
-              ].map(([title, desc], idx) => (
-                <div key={idx} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
-                  <h3 className="font-bold text-xl mb-3 text-indigo-700">{title}</h3>
-                  <p className="text-gray-600">{desc}</p>
-                </div>
-              ))}
-            </div>
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[
+        ['QR Registration', 'Fast check-in using unique QR codes.', '/features/qr-registration'],
+        ['Secure Payments', 'Pay securely with trusted gateways.', '/features/secure-payments'],
+        ['Event Analytics', 'Track event performance & metrics.', '/features/event-analytics'],
+        ['Feedback System', 'Share post-event feedback.', '/features/feedback'],
+        ['Personalized Dashboards', 'Manage your profile/events easily.', '/features/dashboard'],
+        ['Resource Hub', 'Access materials & schedules.', '/features/resource-hub'],
+      ].map(([title, desc, link], idx) => (
+        <Link to={link} key={idx}>
+          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center hover:cursor-pointer">
+            <h3 className="font-bold text-xl mb-3 text-indigo-700">{title}</h3>
+            <p className="text-gray-600">{desc}</p>
           </div>
-        </section>
+        </Link>
+      ))}
+    </div>
+  </div>
+</section>
 
         {/* Team Section */}
         <section className="py-12 border-t border-gray-200">
