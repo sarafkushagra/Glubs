@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import img1 from '../images/business-people-standing-together-as-team_3482-8671.jpg';
 import img2 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp';
+import event1 from '../images/EventA.jpg';
+import event2 from '../images/EventB.jpg';
+import event3 from '../images/EventC.jpg';
+
 import Footer from './Footer';
 
 export default function LandingPage() {
@@ -28,7 +32,7 @@ export default function LandingPage() {
             Explore Events
           </Link>
           <Link
-            to="/auth"
+            to="/Organizers"
             className="border border-white text-black rounded px-6 py-3 hover:bg-white hover:text-indigo-600 transition shadow-md"
           >
             For Organizers
@@ -60,12 +64,15 @@ export default function LandingPage() {
         <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-indigo-700">Event Gallery Preview</h2>
         <p className="text-gray-600 mb-8">Carousel of Event Images (visible for 10 days)</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto px-4">
-          {[1, 2, 3].map((_, idx) => (
-            <div key={idx} className="bg-gray-200 aspect-video rounded-lg flex items-center justify-center text-gray-500">
-              Event Image
-            </div>
-          ))}
-        </div>
+  {[event1, event2, event3].map((image, idx) => (
+    <img
+      key={idx}
+      src={image}
+      alt={`Event Preview ${idx + 1}`}
+      className="rounded-lg shadow-md hover:scale-105 transition-transform duration-300 object-cover w-full h-64"
+    />
+  ))}
+</div>
       </section>
 
       {/* Testimonials */}

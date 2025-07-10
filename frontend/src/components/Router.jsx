@@ -11,6 +11,7 @@
     import EditEvent from './Events/EditEvent';
     import QRRegistration from './Pages/Features/QRRegistration';
     import EventAnalytics from './Pages/Features/EventAnalytics';
+    import Organizers from './Pages/Organizers'; 
     
 export default function Router() {
   return (
@@ -25,6 +26,7 @@ export default function Router() {
         <Route path='/clubadmin/details' element={<OrganizerSignIn />} />
         <Route path="/features/qr-registration" element={<QRRegistration />} />
         <Route path="/features/event-analytics" element={<EventAnalytics />} />
+        <Route path="/organizers" element={<Organizers />} />
         
         
         <Route path='/about' element={<About/>}/>
