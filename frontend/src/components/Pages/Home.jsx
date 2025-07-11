@@ -3,9 +3,7 @@ import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import img1 from '../images/business-people-standing-together-as-team_3482-8671.jpg';
 import img2 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp';
-import event1 from '../images/EventA.jpg';
-import event2 from '../images/EventB.jpg';
-import event3 from '../images/EventC.jpg';
+
 
 import Footer from './Footer';
 
@@ -124,14 +122,8 @@ export default function LandingPage() {
       </section>
 
       {/* Footer */}
-      <footer className="bg-black text-white py-12 mt-16 px-8">
-        <h3 className="text-xl font-semibold mb-4">About GLUBS</h3>
-        <p className="max-w-2xl">
-          Glubs helps students discover, register, and attend university events, hackathons, and workshops,
-          building real-world connections and skills for a brighter future.
-        </p>
-        <p className="text-gray-400 text-sm mt-4">&copy; 2025 Glubs. All rights reserved.</p>
-      </footer>
+      
+      <Footer />
     </div>
   );
 }
