@@ -6,29 +6,27 @@ import img2 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon
 
 export default function LandingPage() {
   return (
-    <div className="flex flex-col min-h-screen font-poppins">
-      {/* Navbar */}
+    <div className="flex flex-col min-h-screen font-poppins bg-white text-gray-800">
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-screen bg-gradient-to-b from-indigo-600  to-white flex flex-col justify-center items-center text-center px-4">
-        
-        <h1 className="text-4xl md:text-5xl font-bold mb-4 text-black drop-shadow-lg">
+      <section className="relative min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-b from-black via-indigo-900 to-white text-white transition-all duration-700 ease-in-out">
+        <h1 className="text-4xl md:text-6xl font-extrabold mb-4 animate-fade-in-down">
           Gateway to Campus Opportunities
         </h1>
-        <p className="text-lg md:text-xl text-gray-500 mb-6 max-w-lg">
+        <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-xl animate-fade-in-up">
           Discover, register, and attend university events, hackathons, and workshops to level up your campus journey.
         </p>
-        <div className="flex gap-4 flex-wrap justify-center">
+        <div className="flex gap-4 flex-wrap justify-center animate-fade-in-up">
           <Link
             to="/events"
-            className="bg-white text-indigo-600 rounded px-6 py-3 hover:bg-indigo-600 hover:text-white transition shadow-md"
+            className="bg-white text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-700 hover:text-white transition-all duration-300 shadow hover:scale-105"
           >
             Explore Events
           </Link>
           <Link
             to="/auth"
-            className="border border-white text-black rounded px-6 py-3 hover:bg-white hover:text-indigo-600 transition shadow-md"
+            className="border border-white text-white font-semibold rounded-full px-6 py-3 hover:bg-white hover:text-indigo-700 transition-all duration-300 shadow hover:scale-105"
           >
             For Organizers
           </Link>
@@ -36,18 +34,21 @@ export default function LandingPage() {
       </section>
 
       {/* How It Works Section */}
-      <section className="max-w-6xl mx-auto text-center py-16 px-4">
-        <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-indigo-700">How it Works - 4 Simple Steps</h2>
-        <p className="text-gray-600 mb-8">Get started in minutes and never miss an opportunity</p>
+      <section className="max-w-6xl mx-auto text-center py-20 px-4">
+        <h2 className="text-4xl font-bold mb-4 text-indigo-700">How it Works</h2>
+        <p className="text-gray-500 mb-12">Get started in 4 simple steps</p>
         <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
           {[
-            { title: '1. Discover', desc: 'Browse campus events, hackathons, and workshops' },
-            { title: '2. Register', desc: 'Quick registration and instant confirmation' },
-            { title: '3. Attend', desc: 'QR check-in for seamless attendance' },
-            { title: '4. Get Recognized', desc: 'Receive certificates and build your profile' }
+            { title: 'Discover', desc: 'Browse campus events, hackathons, and workshops' },
+            { title: 'Register', desc: 'Quick registration and instant confirmation' },
+            { title: 'Attend', desc: 'QR check-in for seamless attendance' },
+            { title: 'Get Recognized', desc: 'Receive certificates and build your profile' }
           ].map((item, idx) => (
-            <div key={idx} className="bg-white rounded-lg p-6 shadow hover:shadow-lg transition">
-              <h3 className="text-xl font-semibold mb-2 text-indigo-700">{item.title}</h3>
+            <div
+              key={idx}
+              className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 duration-300"
+            >
+              <h3 className="text-2xl font-semibold mb-2 text-indigo-700">{item.title}</h3>
               <p className="text-gray-600">{item.desc}</p>
             </div>
           ))}
@@ -55,12 +56,15 @@ export default function LandingPage() {
       </section>
 
       {/* Event Gallery */}
-      <section className="bg-gradient-to-r from-purple-100 via-indigo-100 to-white py-16 text-center">
-        <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-indigo-700">Event Gallery Preview</h2>
-        <p className="text-gray-600 mb-8">Carousel of Event Images (visible for 10 days)</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto px-4">
+      <section className="bg-gradient-to-r from-purple-50 via-indigo-100 to-white py-20 text-center">
+        <h2 className="text-4xl font-bold mb-4 text-indigo-700">Event Gallery</h2>
+        <p className="text-gray-600 mb-8">A sneak peek into our vibrant campus events</p>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4">
           {[1, 2, 3].map((_, idx) => (
-            <div key={idx} className="bg-gray-200 aspect-video rounded-lg flex items-center justify-center text-gray-500">
+            <div
+              key={idx}
+              className="bg-gray-200 aspect-video rounded-xl flex items-center justify-center text-gray-500 hover:scale-105 transition duration-300"
+            >
               Event Image
             </div>
           ))}
@@ -68,10 +72,10 @@ export default function LandingPage() {
       </section>
 
       {/* Testimonials */}
-      <section className="max-w-5xl mx-auto py-16 px-4 text-center">
-        <h2 className="text-3xl md:text-4xl font-semibold mb-4 text-indigo-700">Testimonials</h2>
-        <p className="text-gray-600 mb-8">What our community says about GLUBS</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <section className="max-w-5xl mx-auto py-20 px-4 text-center">
+        <h2 className="text-4xl font-bold mb-4 text-indigo-700">What Students Say</h2>
+        <p className="text-gray-500 mb-12">Voices from our happy users</p>
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {[
             {
               img: img2,
@@ -84,8 +88,11 @@ export default function LandingPage() {
               name: 'Katrina Kaif'
             }
           ].map((item, idx) => (
-            <div key={idx} className="bg-white p-6 rounded-lg flex items-center shadow hover:shadow-lg transition">
-              <img src={item.img} alt={item.name} className="w-16 h-16 rounded-full border border-gray-300 mr-6" />
+            <div
+              key={idx}
+              className="bg-white p-6 rounded-xl flex items-center shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 duration-300"
+            >
+              <img src={item.img} alt={item.name} className="w-16 h-16 rounded-full border mr-6" />
               <div className="text-left">
                 <p className="text-gray-700 mb-2 italic">{item.text}</p>
                 <h3 className="font-semibold text-indigo-700">{item.name}</h3>
@@ -96,29 +103,29 @@ export default function LandingPage() {
       </section>
 
       {/* Call To Action */}
-      <section className="bg-indigo-600 text-white text-center py-16 px-4 rounded-lg max-w-3xl mx-auto mt-16 shadow-lg">
+      <section className="bg-indigo-700 text-white text-center py-20 px-4 rounded-2xl max-w-3xl mx-auto mt-16 shadow-xl">
         <img
           src={img1}
           alt="Call to Action"
-          className="mx-auto rounded-lg mb-6 max-h-64 object-cover shadow-md"
+          className="mx-auto rounded-xl mb-6 max-h-64 object-cover shadow-lg"
         />
-        <h2 className="text-3xl md:text-4xl font-semibold mb-4">Enroll For Various Opportunities</h2>
+        <h2 className="text-4xl font-bold mb-4">Enroll in Opportunities</h2>
         <Link
           to="/contact"
-          className="bg-white text-indigo-600 rounded px-6 py-3 hover:bg-indigo-700 hover:text-white transition inline-block shadow"
+          className="bg-white text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-800 hover:text-white transition-all duration-300 inline-block shadow hover:scale-105"
         >
           Contact us
         </Link>
       </section>
 
       {/* Footer */}
-      <footer className="bg-indigo-900 text-white text-left py-8 mt-16 px-8">
-        <h3 className="text-xl font-semibold mb-4">About Us</h3>
-        <p>
+      <footer className="bg-black text-white py-12 mt-16 px-8">
+        <h3 className="text-xl font-semibold mb-4">About GLUBS</h3>
+        <p className="max-w-2xl">
           Glubs helps students discover, register, and attend university events, hackathons, and workshops,
-          building connections and skills for their future.
+          building real-world connections and skills for a brighter future.
         </p>
-        <p className="text-gray-400 text-sm mt-2">&copy; 2025 Glubs. All rights reserved.</p>
+        <p className="text-gray-400 text-sm mt-4">&copy; 2025 Glubs. All rights reserved.</p>
       </footer>
     </div>
   );
