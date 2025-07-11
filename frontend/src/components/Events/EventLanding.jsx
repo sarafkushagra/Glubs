@@ -1,30 +1,44 @@
-import React, { useState,useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
-export default function EventsPage({  }) {
+import dayjs from 'dayjs';
+
+export default function EventsPage() {
   const [search, setSearch] = useState('');
   const [category, setCategory] = useState('All');
-  
+  const [filterTab, setFilterTab] = useState('All'); // New tab state
   const [events, setEvent] = useState([]);
 
   useEffect(() => {
-          const fetchData = async () => {
-              try {
-                  const res = await axios.get("http://localhost:3000/event"); // Change port if needed
-                  setEvent(Array.isArray(res.data) ? res.data : []);
-              } catch (error) {
-                  console.error(error);
-              }
-          };
-          fetchData();
-      }, []);
-  const filteredEvents = events.filter(event => {
+    const fetchData = async () => {
+      try {
+        const res = await axios.get('http://localhost:3000/event');
+        setEvent(Array.isArray(res.data) ? res.data : []);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchData();
+  }, []);
+
+  // Helper functions
+  const isUpcoming = (date) => dayjs(date).isAfter(dayjs());
+  const isPast = (date) => dayjs(date).isBefore(dayjs());
+
+  const filteredEvents = events.filter((event) => {
     const searchMatch =
       event.title.toLowerCase().includes(search.toLowerCase()) ||
       event.description.toLowerCase().includes(search.toLowerCase());
 
     const categoryMatch = category === 'All' || event.eventType === category;
 
-    return searchMatch && categoryMatch;
+    const dateMatch =
+      filterTab === 'Upcoming'
+        ? isUpcoming(event.date)
+        : filterTab === 'Past'
+        ? isPast(event.date)
+        : true;
+
+    return searchMatch && categoryMatch && dateMatch;
   });
 
   return (
@@ -40,25 +54,44 @@ export default function EventsPage({  }) {
         <a href="/Organizers" className="bg-purple-700 text-white px-4 py-2 rounded">Host Event</a>
       </header>
 
-      {/* Hero Section */}
-      <section className="text-center py-16 bg-white">
-        <h1 className="text-5xl font-bold mb-4">Discover Amazing <span className="text-purple-700">College Events</span></h1>
-        <p className="text-gray-600 max-w-xl mx-auto">Join hackathons, workshops, conferences, and networking events. Connect with like-minded students and build your future.</p>
+      {/* Hero */}
+      <section className="text-center py-12 bg-white">
+        <h1 className="text-4xl font-bold mb-2">Glubs University Events</h1>
+        <p className="text-gray-500 max-w-2xl mx-auto">
+          Discover and join exciting hackathons, workshops, and student-run activities!
+        </p>
       </section>
 
-      {/* Search & Filter Bar */}
-      <div className="text-center my-6 space-y-2">
+      {/* Filter Bar */}
+      <div className="flex flex-wrap justify-center gap-4 my-4">
+        {['All', 'Upcoming', 'Past'].map((tab) => (
+          <button
+            key={tab}
+            onClick={() => setFilterTab(tab)}
+            className={`px-4 py-2 rounded ${
+              filterTab === tab
+                ? 'bg-purple-700 text-white'
+                : 'bg-white text-purple-700 border border-purple-700'
+            }`}
+          >
+            {tab}
+          </button>
+        ))}
+      </div>
+
+      {/* Search & Category */}
+      <div className="flex flex-wrap justify-center gap-4 px-4 mb-6">
         <input
           type="text"
           placeholder="Search events..."
           value={search}
           onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-64 max-w-full"
+          className="border p-2 rounded w-64"
         />
         <select
           value={category}
           onChange={(e) => setCategory(e.target.value)}
-          className="border p-2 rounded w-64 max-w-full"
+          className="border p-2 rounded w-64"
         >
           <option value="All">All Categories</option>
           <option value="Hackathon">Hackathon</option>
@@ -69,44 +102,33 @@ export default function EventsPage({  }) {
       </div>
 
       {/* Events Grid */}
-      <section className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6 p-6">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-6">
         {filteredEvents.length > 0 ? (
-          filteredEvents.map(event => (
-            <div
-              key={event._id}
-              className="bg-white rounded-lg shadow hover:shadow-lg transition transform hover:-translate-y-2 flex flex-col"
-            >
-              <div className="relative bg-gray-200 h-40 rounded-t-lg flex items-center justify-center text-gray-500">
-                {event.eventType && (
-                  <span className="absolute top-2 left-2 bg-white px-3 py-1 rounded-full text-sm font-semibold">
-                    {event.eventType}
-                  </span>
-                )}
-                {event.date && (
-                  <span className="absolute top-2 right-2 bg-white px-3 py-1 rounded text-xs">
-                    {event.date}
-                  </span>
-                )}
+          filteredEvents.map((event) => (
+            <div key={event._id} className="bg-white rounded-lg shadow hover:shadow-lg transition transform hover:-translate-y-1">
+              <div className="relative h-40 bg-gray-200 rounded-t-lg overflow-hidden">
                 {event.media ? (
-                  <img
-                    src={event.media}
-                    alt={event.title}
-                    className="object-cover h-full w-full rounded-t-lg"
-                  />
+                  <img src={event.media} alt="event" className="w-full h-full object-cover" />
                 ) : (
-                  <span className="text-lg font-semibold">Event Image</span>
+                  <div className="flex items-center justify-center h-full text-gray-400">No Image</div>
                 )}
+                <span className="absolute top-2 left-2 bg-purple-700 text-white px-3 py-1 text-xs rounded-full">
+                  {event.eventType}
+                </span>
+                <span className="absolute top-2 right-2 bg-white px-3 py-1 text-xs rounded">
+                  {dayjs(event.date).format('MMM D')}
+                </span>
               </div>
-              <div className="p-4 flex flex-col flex-1">
-                <h3 className="text-lg font-bold mb-2 text-gray-800">{event.title}</h3>
-                <p className="text-sm text-gray-600 mb-3">{event.description}</p>
-                <div className="text-xs text-gray-500 mb-2 space-y-1">
-                  {event.venue && <p><strong>Location:</strong> {event.venue}</p>}
-                  {event.time && <p><strong>Time:</strong> {event.time}</p>}
+              <div className="p-4">
+                <h3 className="text-lg font-bold">{event.title}</h3>
+                <p className="text-sm text-gray-500">{event.description.slice(0, 80)}...</p>
+                <div className="text-xs text-gray-600 mt-2">
+                  <p><strong>Location:</strong> {event.venue}</p>
+                  <p><strong>Time:</strong> {event.time}</p>
                 </div>
                 <a
                   href={`/events/${event._id}`}
-                  className="bg-purple-700 text-white text-center block py-2 rounded hover:bg-purple-800 transition mt-auto"
+                  className="block text-center bg-purple-700 text-white py-2 mt-4 rounded hover:bg-purple-800"
                 >
                   View Details
                 </a>
@@ -114,15 +136,15 @@ export default function EventsPage({  }) {
             </div>
           ))
         ) : (
-          <p className="text-center col-span-full text-gray-500">No events found matching your criteria.</p>
+          <p className="col-span-full text-center text-gray-600">No events found.</p>
         )}
-      </section>
+      </div>
 
       {/* Footer */}
       <footer className="bg-gray-900 text-white text-center py-6 mt-auto">
         <div className="text-lg font-bold mb-2">Glubs</div>
-        <p className="text-gray-400">Connecting students through amazing college events</p>
-        <p className="text-gray-500 text-sm mt-1">&copy; 2025 Glubs. All rights reserved.</p>
+        <p className="text-gray-400">Connecting students through events & opportunities</p>
+        <p className="text-sm mt-2 text-gray-500">&copy; 2025 Glubs. All rights reserved.</p>
       </footer>
     </div>
   );

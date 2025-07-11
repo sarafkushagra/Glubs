@@ -91,7 +91,7 @@ export default function Navbar() {
             ))}
             <li>
               <Link
-                to="/dashboard/scan"
+                to="/scan"
                 className="text-indigo-600 hover:text-indigo-800 flex items-center gap-2"
                 onClick={() => setMenuOpen(false)}
               >

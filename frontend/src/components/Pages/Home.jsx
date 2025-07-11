@@ -67,15 +67,15 @@ export default function LandingPage() {
         <h2 className="text-4xl font-bold mb-4 text-indigo-700">Event Gallery</h2>
         <p className="text-gray-600 mb-8">A sneak peek into our vibrant campus events</p>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto px-4">
-  {[event1, event2, event3].map((image, idx) => (
+    {[event1, event2, event3].map((image, idx) => (
     <img
       key={idx}
       src={image}
       alt={`Event Preview ${idx + 1}`}
       className="rounded-lg shadow-md hover:scale-105 transition-transform duration-300 object-cover w-full h-64"
     />
-  ))}
-</div>
+    ))}
+    </div>
       </section>
 
       {/* Testimonials */}
