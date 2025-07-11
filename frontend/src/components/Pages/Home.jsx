@@ -3,6 +3,11 @@ import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import img1 from '../images/business-people-standing-together-as-team_3482-8671.jpg';
 import img2 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp';
+import event1 from '../images/EventA.jpg';
+import event2 from '../images/EventB.jpg';
+import event3 from '../images/EventC.jpg';
+
+import Footer from './Footer';
 
 export default function LandingPage() {
   return (
@@ -25,7 +30,7 @@ export default function LandingPage() {
             Explore Events
           </Link>
           <Link
-            to="/auth"
+            to="/Organizers"
             className="border border-white text-white font-semibold rounded-full px-6 py-3 hover:bg-white hover:text-indigo-700 transition-all duration-300 shadow hover:scale-105"
           >
             For Organizers

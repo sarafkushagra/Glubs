@@ -1,5 +1,9 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
+import React from 'react';
+import { QrCode } from 'lucide-react';
+
+
 
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -50,6 +54,27 @@ export default function Navbar() {
             )}
           </li>
         ))}
+      <ul className="flex space-x-6 text-black text-lg font-medium">
+        <li>
+          <Link to="/" className="hover:underline">HOME</Link>
+        </li>
+        <li>
+          <Link to="/about" className="hover:underline">ABOUT</Link>
+        </li>
+        <li>
+          <Link to="/events" className="hover:underline">EVENTS</Link>
+        </li>
+        <li className="border border-black rounded px-2 hover:bg-gray-100 transition">
+          <Link className="hover:text-purple-700" to="/auth">LOGIN</Link>
+        </li>
+        <Link
+          to="/dashboard/scan"
+            className="ml-4 text-indigo-600 hover:text-indigo-800"
+            title="Mark Attendance"
+                >
+            <QrCode className="w-6 h-6" />
+        </Link>
+
       </ul>
 
       {/* Mobile Menu Icon */}

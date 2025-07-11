@@ -1,4 +1,5 @@
 import React from 'react';
+import { Link } from 'react-router-dom'; 
 import Footer from './Footer';
 import kushagraImg from '../images/kushagra.jpg';
 const About = () => {
@@ -14,29 +15,14 @@ const About = () => {
             <p className="text-xl text-gray-600 mb-8">
               GLUBS is your ultimate platform for seamless event management, connecting students and organizations with a world of opportunities. From hackathons to workshops, we make event organization and participation effortless.
             </p>
+           <Link to="/events">
             <button className="bg-indigo-600 hover:bg-indigo-700 text-white font-bold py-3 px-6 rounded-lg text-lg">
-              Explore Events
-            </button>
+             Explore Events
+           </button>
+           </Link>
           </div>
         </section>
 
-        {/* About Section */}
-        <section className="py-12 border-t border-gray-200">
-          <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-6">About GLUBS</h2>
-            <div className="space-y-4 text-gray-600 max-w-3xl mx-auto">
-              <p>
-                GLUBS is dedicated to transforming campus event experiences. We provide intuitive tools and resources to help student organizations host impactful events and empower students to discover and engage with opportunities that shape their academic and professional journeys.
-              </p>
-              <p>
-                Our mission is to foster a vibrant campus community by simplifying the complexities of event planning and accessibility. We believe that every student deserves the chance to participate in enriching activities, and every organization deserves the tools to manage them efficiently.
-              </p>
-              <p>
-                Whether you're a student looking for your next challenge, an organizer planning a major seminar, or a club hosting a small workshop, GLUBS is designed to meet your needs. We are constantly evolving our platform to better serve the dynamic landscape of university life.
-              </p>
-            </div>
-          </div>
-        </section>
 
         {/* How It Works Section */}
         <section className="py-12 border-t border-gray-200">
@@ -64,32 +50,52 @@ const About = () => {
             </div>
           </div>
         </section>
-
-        {/* Key Features Section */}
+        
+        {/* About Section */}
         <section className="py-12 border-t border-gray-200">
           <div>
-            <h2 className="text-3xl font-bold text-gray-800 mb-8">Key Features</h2>
-            <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
-              GLUBS is packed with features designed to enhance every aspect of event management and participation, making your experience seamless and effective.
-            </p>
-
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {[
-                ['QR Registration', 'Fast, contactless check-in using unique QR codes for every participant, ensuring smooth event entry.'],
-                ['Secure Payments', 'Process event fees securely with integrated, trusted payment gateways for peace of mind.'],
-                ['Event Analytics', 'Gain deep insights into event performance with comprehensive attendance data and engagement metrics.'],
-                ['Feedback System', 'Provide instant feedback post-event to help us continuously improve and tailor future experiences.'],
-                ['Personalized Dashboards', 'Manage your registered events, tickets, and profile details efficiently, all in one intuitive place.'],
-                ['Resource Hub', 'Access event materials, detailed schedules, and insightful speaker bios easily before and after events.'],
-              ].map(([title, desc], idx) => (
-                <div key={idx} className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center">
-                  <h3 className="font-bold text-xl mb-3 text-indigo-700">{title}</h3>
-                  <p className="text-gray-600">{desc}</p>
-                </div>
-              ))}
+            <h2 className="text-3xl font-bold text-gray-800 mb-6">About GLUBS</h2>
+            <div className="space-y-4 text-gray-600 max-w-3xl mx-auto">
+              <p>
+                GLUBS is dedicated to transforming campus event experiences. We provide intuitive tools and resources to help student organizations host impactful events and empower students to discover and engage with opportunities that shape their academic and professional journeys.
+              </p>
+              <p>
+                Our mission is to foster a vibrant campus community by simplifying the complexities of event planning and accessibility. We believe that every student deserves the chance to participate in enriching activities, and every organization deserves the tools to manage them efficiently.
+              </p>
+              <p>
+                Whether you're a student looking for your next challenge, an organizer planning a major seminar, or a club hosting a small workshop, GLUBS is designed to meet your needs. We are constantly evolving our platform to better serve the dynamic landscape of university life.
+              </p>
             </div>
           </div>
         </section>
+
+        {/* Key Features Section */}
+        <section className="py-12 border-t border-gray-200">
+  <div>
+    <h2 className="text-3xl font-bold text-gray-800 mb-8">Key Features</h2>
+    <p className="text-gray-600 mb-8 max-w-2xl mx-auto">
+      GLUBS is packed with features designed to enhance every aspect of event management and participation, making your experience seamless and effective.
+    </p>
+
+    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+      {[
+        ['QR Registration', 'Fast check-in using unique QR codes.', '/features/qr-registration'],
+        ['Secure Payments', 'Pay securely with trusted gateways.', '/features/secure-payments'],
+        ['Event Analytics', 'Track event performance & metrics.', '/features/event-analytics'],
+        ['Feedback System', 'Share post-event feedback.', '/features/feedback'],
+        ['Personalized Dashboards', 'Manage your profile/events easily.', '/features/dashboard'],
+        ['Resource Hub', 'Access materials & schedules.', '/features/resource-hub'],
+      ].map(([title, desc, link], idx) => (
+        <Link to={link} key={idx}>
+          <div className="bg-white p-6 rounded-lg shadow-md hover:shadow-lg transition-shadow text-center hover:cursor-pointer">
+            <h3 className="font-bold text-xl mb-3 text-indigo-700">{title}</h3>
+            <p className="text-gray-600">{desc}</p>
+          </div>
+        </Link>
+      ))}
+    </div>
+  </div>
+</section>
 
         {/* Team Section */}
         <section className="py-12 border-t border-gray-200">
