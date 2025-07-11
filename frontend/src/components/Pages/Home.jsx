@@ -3,6 +3,10 @@ import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
 import img1 from '../images/business-people-standing-together-as-team_3482-8671.jpg';
 import img2 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp';
+import event1 from '../images/EventA.jpg';
+import event2 from '../images/EventB.jpg';
+import event3 from '../images/EventC.jpg';
+
 
 
 import Footer from './Footer';
@@ -62,16 +66,16 @@ export default function LandingPage() {
       <section className="bg-gradient-to-r from-purple-50 via-indigo-100 to-white py-20 text-center">
         <h2 className="text-4xl font-bold mb-4 text-indigo-700">Event Gallery</h2>
         <p className="text-gray-600 mb-8">A sneak peek into our vibrant campus events</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 max-w-5xl mx-auto px-4">
-          {[1, 2, 3].map((_, idx) => (
-            <div
-              key={idx}
-              className="bg-gray-200 aspect-video rounded-xl flex items-center justify-center text-gray-500 hover:scale-105 transition duration-300"
-            >
-              Event Image
-            </div>
-          ))}
-        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto px-4">
+  {[event1, event2, event3].map((image, idx) => (
+    <img
+      key={idx}
+      src={image}
+      alt={`Event Preview ${idx + 1}`}
+      className="rounded-lg shadow-md hover:scale-105 transition-transform duration-300 object-cover w-full h-64"
+    />
+  ))}
+</div>
       </section>
 
       {/* Testimonials */}

@@ -37,7 +37,7 @@ export default function EventsPage({  }) {
           <a href="/about" className="text-gray-700 hover:text-purple-700">About</a>
           <a href="/events" className="text-gray-700 hover:text-purple-700">Events</a>
         </nav>
-        <a href="/events/new" className="bg-purple-700 text-white px-4 py-2 rounded">Host Event</a>
+        <a href="/Organizers" className="bg-purple-700 text-white px-4 py-2 rounded">Host Event</a>
       </header>
 
       {/* Hero Section */}
