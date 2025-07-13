@@ -1,10 +1,6 @@
 const Event = require("../schema/event");
 const Feedback = require('../schema/feedback');
 
-module.exports.showCreateEventForm = (req, res) => {
-    res.render("html/createEvent.ejs");
-};
-
 module.exports.showAllEvents = async (req, res) => {
     const events = await Event.find({});
     res.json(events);
@@ -31,8 +27,15 @@ module.exports.showEvent = async (req, res) => {
 
 module.exports.createEvent = async (req, res) => {
     try {
-        const newEvent = new Event(req.body);
+        // merge createdBy safely
+        const eventData = {
+            ...req.body,
+            createdBy: req.user ? req.user._id : '662f0a93b46c5c5c77b59d29' // fallback ClubAdmin _id for testing
+        };
+
+        const newEvent = new Event(eventData);
         const savedEvent = await newEvent.save();
+
         res.status(201).json({
             message: 'Event created successfully!',
             event: savedEvent
