@@ -14,7 +14,8 @@ import EventAnalytics from './Pages/Features/EventAnalytics';
 import Organizers from './Pages/Organizers';
 import QRCodeGenerator from './QR/QR_Generator';
 import QRScanner from './QR/QR_Scanner';
-
+import HostOpportunityPage from "./Events/HostOpportunityPage";
+import HostBasicDetails from "./Events/HostBasicDetails";
 
 
 
@@ -35,6 +36,8 @@ export default function Router() {
       <Route path="/qr-gen" element={<QRCodeGenerator />} />
       <Route path="/qr-scan" element={<QRScanner />} />
       <Route path='/about' element={<About />} />
+      <Route path="/host" element={<HostOpportunityPage />} />
+      <Route path="/host/basic-details" element={<HostBasicDetails />} />
     </Routes>
   )
 }
