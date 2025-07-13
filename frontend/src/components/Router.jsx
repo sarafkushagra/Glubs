@@ -14,12 +14,12 @@ import EventAnalytics from './Pages/Features/EventAnalytics';
 import Organizers from './Pages/Organizers';
 import QRCodeGenerator from './QR/QR_Generator';
 import QRScanner from './QR/QR_Scanner';
-import HostBasicDetails from "./Pages/HostBasicDetails";
+import HostBasicDetails from "./Events/HostBasicDetails";
 import MyProfile from './Pages/SideBar/SideBar_Contents/MyProfile';
-import HostOpportunityPage from './Pages/HostOpportunityPage';
+import HostOpportunityPage from "./Events/HostOpportunityPage";
+import Hostreg from "./Events/Hostreg";
+import HostForm from "./Events/HostForm";
 import AddEvent from './Events/AddEvent';
-
-
 
 export default function Router() {
   return (
@@ -29,7 +29,7 @@ export default function Router() {
       <Route path='/auth/signin' element={<SignInForm />} />
       <Route path='/auth/signup' element={<SignUpForm />} />
       <Route path='/events' element={<EventLanding />} />
-      <Route path="/events/add" element={ <AddEvent/>} />
+      <Route path="/events/add" element={<AddEvent />} />
       <Route path="/events/:eventId" element={<EventDetails />} />
       <Route path="/events/edit/:eventId" element={<EditEvent />} />
       <Route path="/qr-gen" element={<QRCodeGenerator />} />
@@ -38,11 +38,13 @@ export default function Router() {
 
       <Route path="/features/qr-registration" element={<QRRegistration />} />
       <Route path="/features/event-analytics" element={<EventAnalytics />} />
-      <Route path="/features/organizers" element={<Organizers />} />     
+      <Route path="/features/organizers" element={<Organizers />} />
       <Route path='/about' element={<About />} />
-      <Route path="/host" element={<HostOpportunityPage/>} />
+      <Route path="/host" element={<HostOpportunityPage />} />
       <Route path="/host/basic-details" element={<HostBasicDetails />} />
       <Route path="/dashboard/profile" element={<MyProfile />} />
+      <Route path="/host/registration" element={<Hostreg />} />
+      <Route path="/host/hostform" element={<HostForm />} />
     </Routes>
   )
 }

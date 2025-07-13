@@ -27,7 +27,7 @@ const opportunitySections = [
 
 export default function HostOpportunityPage() {
   return (
-    <div className="relative min-h-screen bg-gradient-to-tr from-blue-50 via-white to-blue-100 flex flex-col items-center justify-center py-12 px-6 overflow-hidden">
+    <div className="relative min-h-screen bg-gradient-to-tr from-purple-200 via-purple-100 to-purple-300 flex flex-col items-center justify-center py-12 px-6 overflow-hidden">
       <img
         src="/assets/undraw_online-community_3o0l.svg"
         alt="background"
@@ -54,15 +54,24 @@ export default function HostOpportunityPage() {
               {section.options.slice(0, 4).map((opt, index) => (
                 <div
                   key={index}
-                  className="group p-8 w-72 rounded-2xl border border-gray-200 bg-white hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center gap-4 h-52 justify-center"
+                  className="group p-8 w-72 rounded-2xl border border-purple-200 bg-white hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center gap-4 h-52 justify-center"
                 >
-                  <div className="flex items-center justify-center w-14 h-14 bg-gray-100 rounded-full group-hover:bg-blue-100 transition">
-                    <opt.icon size={26} className="text-gray-600 group-hover:text-blue-500" />
+                  <div className="flex items-center justify-center w-14 h-14 bg-purple-50 rounded-full group-hover:bg-purple-100 transition">
+                    <opt.icon
+                      size={26}
+                      className={
+                        opt.title.includes('Hackathon') ? 'text-red-500 group-hover:text-red-600' :
+                          opt.title.includes('Quiz') ? 'text-green-500 group-hover:text-green-600' :
+                            opt.title.includes('Showcase') ? 'text-yellow-500 group-hover:text-yellow-600' :
+                              opt.title.includes('Innovation') ? 'text-blue-500 group-hover:text-blue-600' :
+                                'text-purple-600 group-hover:text-purple-700'
+                      }
+                    />
                   </div>
-                  <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition">
+                  <h3 className="font-semibold text-gray-900 text-lg group-hover:text-purple-700 transition">
                     {opt.title}
                   </h3>
-                  <div className="text-blue-500 font-medium text-sm opacity-90 group-hover:underline">
+                  <div className="text-purple-600 font-medium text-sm opacity-90 group-hover:underline">
                     {opt.action} →
                   </div>
                 </div>
@@ -74,15 +83,23 @@ export default function HostOpportunityPage() {
               {section.options.slice(4, 7).map((opt, index) => (
                 <div
                   key={index}
-                  className="group p-8 w-72 rounded-2xl border border-gray-200 bg-white hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center gap-4 h-52 justify-center"
+                  className="group p-8 w-72 rounded-2xl border border-purple-200 bg-white hover:shadow-xl hover:-translate-y-1 transition-all cursor-pointer flex flex-col items-center gap-4 h-52 justify-center"
                 >
-                  <div className="flex items-center justify-center w-14 h-14 bg-gray-100 rounded-full group-hover:bg-blue-100 transition">
-                    <opt.icon size={26} className="text-gray-600 group-hover:text-blue-500" />
+                  <div className="flex items-center justify-center w-14 h-14 bg-purple-50 rounded-full group-hover:bg-purple-100 transition">
+                    <opt.icon
+                      size={26}
+                      className={
+                        opt.title.includes('Workshop') ? 'text-indigo-500 group-hover:text-indigo-600' :
+                          opt.title.includes('Conference') ? 'text-teal-500 group-hover:text-teal-600' :
+                            opt.title.includes('Case') ? 'text-orange-500 group-hover:text-orange-600' :
+                              'text-purple-600 group-hover:text-purple-700'
+                      }
+                    />
                   </div>
-                  <h3 className="font-semibold text-gray-900 text-lg group-hover:text-blue-600 transition">
+                  <h3 className="font-semibold text-gray-900 text-lg group-hover:text-purple-700 transition">
                     {opt.title}
                   </h3>
-                  <div className="text-blue-500 font-medium text-sm opacity-90 group-hover:underline">
+                  <div className="text-purple-600 font-medium text-sm opacity-90 group-hover:underline">
                     {opt.action} →
                   </div>
                 </div>
