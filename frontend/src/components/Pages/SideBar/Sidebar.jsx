@@ -9,7 +9,7 @@ export default function Sidebar({ isOpen, toggleSidebar }) {
         <Link to="/dashboard/profile" onClick={toggleSidebar} className="hover:text-indigo-600">My Profile</Link>
         <Link to="/events" onClick={toggleSidebar} className="hover:text-indigo-600">Discover Events</Link>
         <Link to="/dashboard/notifications" onClick={toggleSidebar} className="hover:text-indigo-600">Notifications</Link>
-        <Link to="/dashboard/scan" onClick={toggleSidebar} className="hover:text-indigo-600">QR Attendance</Link>
+        <Link to="qr-scan" onClick={toggleSidebar} className="hover:text-indigo-600">QR Attendance</Link>
         <button onClick={toggleSidebar} className="text-left text-red-600 hover:text-red-800">Close</button>
       </nav>
     </aside>

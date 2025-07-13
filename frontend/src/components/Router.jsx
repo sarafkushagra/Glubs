@@ -16,6 +16,7 @@ import QRCodeGenerator from './QR/QR_Generator';
 import QRScanner from './QR/QR_Scanner';
 import HostOpportunityPage from "./Events/HostOpportunityPage";
 import HostBasicDetails from "./Events/HostBasicDetails";
+import MyProfile from './Pages/SideBar/SideBar_Contents/MyProfile';
 
 
 
@@ -38,6 +39,7 @@ export default function Router() {
       <Route path='/about' element={<About />} />
       <Route path="/host" element={<HostOpportunityPage />} />
       <Route path="/host/basic-details" element={<HostBasicDetails />} />
+      <Route path="/dashboard/profile" element={<MyProfile />} />
     </Routes>
   )
 }
