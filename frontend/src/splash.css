@@ -1,0 +1,56 @@
+/* Full-screen center alignment */
+.splash-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  background: #ffffff;
+}
+
+/* Stack logo + ring */
+.logo-wrapper {
+  position: relative;
+  width: 220px;
+  height: 220px;
+}
+
+/* Static logo */
+.center-logo {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  z-index: 2;
+}
+
+/* Glowing ring animation */
+.glow-ring {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  z-index: 1;
+  animation: pulseRing 2s ease-in-out infinite;
+  background: radial-gradient(
+    circle,
+    rgba(173, 255, 47, 0.5) 30%,
+    rgba(255, 255, 102, 0.2) 60%,
+    rgba(255, 255, 255, 0) 80%
+  );
+}
+
+/* Ring animation */
+@keyframes pulseRing {
+  0% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.4);
+    opacity: 0.2;
+  }
+  100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+}

@@ -1,6 +1,7 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
+import Sidebar from './SideBar/Sidebar.jsx';
 import img1 from '../images/business-people-standing-together-as-team_3482-8671.jpg';
 import img2 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp';
 import event1 from '../images/EventA.jpg';
@@ -12,9 +13,23 @@ import event3 from '../images/EventC.jpg';
 import Footer from './Footer';
 
 export default function LandingPage() {
+  const [isSidebarOpen, setSidebarOpen] = useState(false);
+  const toggleSidebar = () => setSidebarOpen(prev => !prev);
+
   return (
     <div className="flex flex-col min-h-screen font-poppins bg-white text-gray-800">
       <Navbar />
+      
+
+      {/* Sidebar and Toggle Button */}
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <button
+        onClick={toggleSidebar}
+        className="fixed top-24 left-4 z-50 bg-indigo-600 text-white px-3 py-2 rounded hover:bg-indigo-700"
+      >
+        ☰ Menu
+      </button>
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-b from-black via-indigo-900 to-white text-white transition-all duration-700 ease-in-out">
