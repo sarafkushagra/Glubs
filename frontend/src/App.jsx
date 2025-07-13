@@ -6,7 +6,7 @@ function App() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 5000); // 5 seconds splash
+    const timer = setTimeout(() => setLoading(false), 100); // 5 seconds splash
     return () => clearTimeout(timer);
   }, []);
 

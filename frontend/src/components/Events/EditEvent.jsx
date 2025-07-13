@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import axios from 'axios';
 
 const EditEvent = () => {
   const { eventId } = useParams();
@@ -10,51 +11,53 @@ const EditEvent = () => {
     eventType: '',
     date: '',
     venue: '',
-    feedback: '',
+    // feedback removed
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    // Fetch event details to prefill form
-    fetch(`/api/events/${eventId}`)
-      .then(res => res.json())
-      .then(data => {
+    const fetchEvent = async () => {
+      try {
+        const res = await axios.get(`http://localhost:3000/event/${eventId}`);
+        const data = res.data.event; // ✅ extract event only
+
         setForm({
           title: data.title || '',
           description: data.description || '',
           eventType: data.eventType || '',
-          date: data.date ? data.date.slice(0, 16) : '', // for datetime-local
+          date: data.date ? new Date(data.date).toISOString().slice(0, 16) : '',
           venue: data.venue || '',
-          feedback: data.feedback || '',
         });
+      } catch (err) {
+        console.error(err);
+        setError('Failed to load event.');
+      } finally {
         setLoading(false);
-      })
-      .catch(err => {
-        setError('Failed to load event');
-        setLoading(false);
-      });
+      }
+    };
+
+    fetchEvent();
   }, [eventId]);
 
-  const handleChange = e => {
+  const handleChange = (e) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async e => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await fetch(`/api/events/${eventId}`, {
-        method: 'PUT',
+      const res = await axios.put(`http://localhost:3000/event/${eventId}`, form, {
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(form),
       });
-      if (res.ok) {
-        navigate(`/event/${eventId}`);
+      if (res.status === 200) {
+        navigate(`/events/${eventId}`);
       } else {
-        alert('Failed to update event');
+        alert('Failed to update event.');
       }
     } catch (err) {
-      alert('Error updating event');
+      console.error(err);
+      alert('Error updating event.');
     }
   };
 
@@ -67,15 +70,32 @@ const EditEvent = () => {
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label className="block font-semibold mb-1">Title</label>
-          <input name="title" value={form.title} onChange={handleChange} className="w-full p-2 border rounded" required />
+          <input
+            name="title"
+            value={form.title}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
         <div>
           <label className="block font-semibold mb-1">Description</label>
-          <textarea name="description" value={form.description} onChange={handleChange} className="w-full p-2 border rounded" />
+          <textarea
+            name="description"
+            value={form.description}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
         </div>
         <div>
           <label className="block font-semibold mb-1">Type</label>
-          <select name="eventType" value={form.eventType} onChange={handleChange} className="w-full p-2 border rounded" required>
+          <select
+            name="eventType"
+            value={form.eventType}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          >
             <option value="">Select type</option>
             <option value="Hackathon">Hackathon</option>
             <option value="Workshop">Workshop</option>
@@ -85,20 +105,34 @@ const EditEvent = () => {
         </div>
         <div>
           <label className="block font-semibold mb-1">Date & Time</label>
-          <input type="datetime-local" name="date" value={form.date} onChange={handleChange} className="w-full p-2 border rounded" required />
+          <input
+            type="datetime-local"
+            name="date"
+            value={form.date}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+            required
+          />
         </div>
         <div>
           <label className="block font-semibold mb-1">Venue</label>
-          <input name="venue" value={form.venue} onChange={handleChange} className="w-full p-2 border rounded" />
+          <input
+            name="venue"
+            value={form.venue}
+            onChange={handleChange}
+            className="w-full p-2 border rounded"
+          />
         </div>
-        <div>
-          <label className="block font-semibold mb-1">Feedback</label>
-          <textarea name="feedback" value={form.feedback} onChange={handleChange} className="w-full p-2 border rounded" />
-        </div>
-        <button type="submit" className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Update Event</button>
+
+        <button
+          type="submit"
+          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
+        >
+          Update Event
+        </button>
       </form>
     </div>
   );
 };
 
-export default EditEvent; 
+export default EditEvent;

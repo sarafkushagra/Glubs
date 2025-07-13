@@ -14,9 +14,9 @@ import EventAnalytics from './Pages/Features/EventAnalytics';
 import Organizers from './Pages/Organizers';
 import QRCodeGenerator from './QR/QR_Generator';
 import QRScanner from './QR/QR_Scanner';
-import HostOpportunityPage from "./Events/HostOpportunityPage";
-import HostBasicDetails from "./Events/HostBasicDetails";
+import HostBasicDetails from "./Pages/HostBasicDetails";
 import MyProfile from './Pages/SideBar/SideBar_Contents/MyProfile';
+import HostOpportunityPage from './Pages/HostOpportunityPage';
 
 
 
@@ -28,7 +28,7 @@ export default function Router() {
       <Route path='/auth/signup' element={<SignUpForm />} />
       <Route path='/events' element={<EventLanding />} />
       <Route path="/events/:eventId" element={<EventDetails />} />
-      <Route path="/event/edit/:eventId" element={<EditEvent />} />
+      <Route path="/events/edit/:eventId" element={<EditEvent />} />
       <Route path='/' element={<LandingPage />} />
       <Route path='/clubadmin/details' element={<OrganizerSignIn />} />
       <Route path="/features/qr-registration" element={<QRRegistration />} />
@@ -37,7 +37,7 @@ export default function Router() {
       <Route path="/qr-gen" element={<QRCodeGenerator />} />
       <Route path="/qr-scan" element={<QRScanner />} />
       <Route path='/about' element={<About />} />
-      <Route path="/host" element={<HostOpportunityPage />} />
+      <Route path="/host" element={<HostOpportunityPage/>} />
       <Route path="/host/basic-details" element={<HostBasicDetails />} />
       <Route path="/dashboard/profile" element={<MyProfile />} />
     </Routes>

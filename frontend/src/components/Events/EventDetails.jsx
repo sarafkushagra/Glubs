@@ -6,26 +6,30 @@ const EventDetails = () => {
   const { eventId } = useParams();
   const navigate = useNavigate();
   const [event, setEvent] = useState(null);
+  const [feedbacks, setFeedbacks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-          const fetchData = async () => {
-              try {
-                  const res = await axios.get("http://localhost:3000/event"); 
-                  console.log(res);// Change port if needed
-                  // setEvent(Array.isArray(res.data) ? res.data : []);
-              } catch (error) {
-                  console.error(error);
-              }
-          };
-          fetchData();
-      }, []);
+    const fetchData = async () => {
+      try {
+        const res = await axios.get(`http://localhost:3000/event/${eventId}`);
+        setEvent(res.data.event); // ✅ CORRECT: extracting event
+        setFeedbacks(res.data.feedbacks); // ✅ CORRECT: extracting feedbacks
+      } catch (error) {
+        console.error(error);
+        setError("Failed to fetch event details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, [eventId]);
 
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this event?')) return;
     try {
-      const res = await fetch(`/api/events/${eventId}`, { method: 'DELETE' });
+      const res = await fetch(`http://localhost:3000/event/${eventId}`, { method: 'DELETE' });
       if (res.ok) {
         navigate('/events');
       } else {
@@ -37,12 +41,12 @@ const EventDetails = () => {
   };
 
   const handleEdit = () => {
-    navigate(`/event/edit/${eventId}`);
+    navigate(`/events/edit/${eventId}`);
   };
 
-  // if (loading) return <div>Loading...</div>;
-  // if (error) return <div>{error}</div>;
-  // if (!event) return <div>No event found.</div>;
+  if (loading) return <div>Loading...</div>;
+  if (error) return <div>{error}</div>;
+  if (!event) return <div>No event found.</div>;
 
   return (
     <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow mt-8">
@@ -68,30 +72,33 @@ const EventDetails = () => {
         <button onClick={handleEdit} className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600">Edit</button>
         <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600">Delete</button>
       </div>
+
+      {/* REMOVE DUPLICATE FEEDBACK */}
       <div className="mb-4">
         <h2 className="text-xl font-semibold mb-2">Feedback</h2>
-        {event.feedback ? (
-          <div className="bg-gray-100 p-3 rounded">{event.feedback}</div>
-        ) : (
-          <div>No feedback yet.</div>
-        )}
-      </div>
-      <div className="mb-4">
-        <h2 className="text-xl font-semibold mb-2">Comments</h2>
-        {event.comments && event.comments.length > 0 ? (
-          <ul>
-            {event.comments.map((c, i) => (
-              <li key={i} className="mb-2 border-b pb-2">
-                <b>{c.user?.name || c.user}:</b> {c.text} <span className="text-xs text-gray-500">({new Date(c.timestamp).toLocaleString()})</span>
+        {feedbacks.length > 0 ? (
+          <ul className="space-y-2">
+            {feedbacks.map((fb, idx) => (
+              <li key={idx} className="p-3 bg-gray-100 rounded shadow-sm">
+                <div className="flex justify-between items-center mb-1">
+                  <span className="font-semibold text-blue-700">
+                    {fb.user?.name || "Anonymous"}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {new Date(fb.createdAt).toLocaleString()}
+                  </span>
+                </div>
+                <p className="text-gray-800">{fb.review}</p>
+                <p className="text-yellow-600 text-sm">Rating: {fb.rating}/5</p>
               </li>
             ))}
           </ul>
         ) : (
-          <div>No comments yet.</div>
+          <p>No feedback yet.</p>
         )}
       </div>
     </div>
   );
 };
 
-export default EventDetails; 
+export default EventDetails;

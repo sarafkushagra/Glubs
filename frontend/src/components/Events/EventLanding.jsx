@@ -35,8 +35,8 @@ export default function EventsPage() {
       filterTab === 'Upcoming'
         ? isUpcoming(event.date)
         : filterTab === 'Past'
-        ? isPast(event.date)
-        : true;
+          ? isPast(event.date)
+          : true;
 
     return searchMatch && categoryMatch && dateMatch;
   });
@@ -68,11 +68,10 @@ export default function EventsPage() {
           <button
             key={tab}
             onClick={() => setFilterTab(tab)}
-            className={`px-4 py-2 rounded ${
-              filterTab === tab
+            className={`px-4 py-2 rounded ${filterTab === tab
                 ? 'bg-purple-700 text-white'
                 : 'bg-white text-purple-700 border border-purple-700'
-            }`}
+              }`}
           >
             {tab}
           </button>
@@ -107,11 +106,13 @@ export default function EventsPage() {
           filteredEvents.map((event) => (
             <div key={event._id} className="bg-white rounded-lg shadow hover:shadow-lg transition transform hover:-translate-y-1">
               <div className="relative h-40 bg-gray-200 rounded-t-lg overflow-hidden">
-                {event.media ? (
-                  <img src={event.media} alt="event" className="w-full h-full object-cover" />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">No Image</div>
-                )}
+                {event.media && event.media.length > 0 ? event.media.map((m, i) => (
+                  m.type === 'image' ? (
+                    <img key={i} src={m.url} alt="event media" className="w-full h-full object-contain object-center rounded" />
+                  ) : (
+                    <video key={i} src={m.url} controls className="w-24 h-24 rounded" />
+                  )
+                )) : 'No media'}
                 <span className="absolute top-2 left-2 bg-purple-700 text-white px-3 py-1 text-xs rounded-full">
                   {event.eventType}
                 </span>

@@ -1,4 +1,5 @@
 const Event = require("../schema/event");
+const Feedback = require('../schema/feedback');
 
 module.exports.showCreateEventForm = (req, res) => {
     res.render("html/createEvent.ejs");
@@ -7,16 +8,25 @@ module.exports.showCreateEventForm = (req, res) => {
 module.exports.showAllEvents = async (req, res) => {
     const events = await Event.find({});
     res.json(events);
-    // res.render("html/events.ejs", { events: events });
 };
 
 module.exports.showEvent = async (req, res) => {
-    const event = await Event.findById(req.params.id);
-    if (!event) {
-        return res.status(404).json({ message: "Event not found" });
+    try {
+        const event = await Event.findById(req.params.id);
+
+        if (!event) {
+            return res.status(404).json({ message: "Event not found" });
+        }
+
+        // fetch feedbacks for this event, populating user info
+        const feedbacks = await Feedback.find({ event: event._id })
+            .populate('user', 'name email');
+
+        res.json({ event, feedbacks });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: "Server error", error: error.message });
     }
-    // res.json(event);
-    res.render("html/eventDetails.ejs", { event: event });
 };
 
 module.exports.createEvent = async (req, res) => {
@@ -105,44 +115,6 @@ module.exports.verifyEntry = async (req, res) => {
                 email: participant.userId.email
             }
         });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ success: false, message: 'Server error.' });
-    }
-};
-module.exports.verifyEntry = async (req, res) => {
-    const { eventId, participantId } = req.body;
-
-    try {
-        const event = await Event.findById(eventId);
-
-        if (!event) {
-            return res.status(404).json({ success: false, message: 'Event not found.' });
-        }
-
-        const participant = event.registeredUsers.find(
-            user => user.userId && user.userId._id.toString() === participantId
-        );
-
-        if (!participant) {
-            return res.json({ success: false, message: 'Participant not registered for this event.' });
-        }
-
-        if (participant.checkedIn) {
-            return res.json({ success: false, message: 'Participant has already checked in.' });
-        }
-
-        participant.checkedIn = true;
-        await event.save(); // Save the event to persist the checkedIn change
-
-        res.send("ok");
-        // res.json({
-        //     success: true,
-        //     participant: {
-        //         name: participant.userId.name,
-        //         email: participant.userId.email
-        //     }
-        // });
     } catch (error) {
         console.error(error);
         res.status(500).json({ success: false, message: 'Server error.' });
