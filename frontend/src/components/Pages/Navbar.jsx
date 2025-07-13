@@ -49,7 +49,7 @@ export default function Navbar() {
         {/* QR Icon */}
         <li>
           <Link
-            to="/dashboard/scan"
+            to="/qr-scan"
             title="Mark Attendance"
             className="text-indigo-400 hover:text-indigo-600 transition"
           >

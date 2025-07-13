@@ -72,3 +72,79 @@ module.exports.deleteEvent = async (req, res) => {
         res.status(400).json({ message: "Error deleting event", error: error.message });
     }
 };
+
+module.exports.verifyEntry = async (req, res) => {
+    const { eventId, participantId } = req.body;
+
+    try {
+        const event = await Event.findById(eventId).populate('registeredUsers.userId');
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: 'Event not found.' });
+        }
+
+        const participant = event.registeredUsers.find(
+            user => user.userId && user.userId._id.toString() === participantId
+        );
+
+        if (!participant) {
+            return res.json({ success: false, message: 'Participant not registered for this event.' });
+        }
+
+        if (participant.checkedIn) {
+            return res.json({ success: false, message: 'Participant has already checked in.' });
+        }
+
+        participant.checkedIn = true;
+        await event.save(); // Save the event to persist the checkedIn change
+
+        res.json({
+            success: true,
+            participant: {
+                name: participant.userId.name,
+                email: participant.userId.email
+            }
+        });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
+module.exports.verifyEntry = async (req, res) => {
+    const { eventId, participantId } = req.body;
+
+    try {
+        const event = await Event.findById(eventId);
+
+        if (!event) {
+            return res.status(404).json({ success: false, message: 'Event not found.' });
+        }
+
+        const participant = event.registeredUsers.find(
+            user => user.userId && user.userId._id.toString() === participantId
+        );
+
+        if (!participant) {
+            return res.json({ success: false, message: 'Participant not registered for this event.' });
+        }
+
+        if (participant.checkedIn) {
+            return res.json({ success: false, message: 'Participant has already checked in.' });
+        }
+
+        participant.checkedIn = true;
+        await event.save(); // Save the event to persist the checkedIn change
+
+        res.send("ok");
+        // res.json({
+        //     success: true,
+        //     participant: {
+        //         name: participant.userId.name,
+        //         email: participant.userId.email
+        //     }
+        // });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ success: false, message: 'Server error.' });
+    }
+};
