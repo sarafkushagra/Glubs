@@ -20,6 +20,8 @@ import HostOpportunityPage from "./Events/HostOpportunityPage";
 import Hostreg from "./Events/Hostreg";
 import HostForm from "./Events/HostForm";
 import AddEvent from './Events/AddEvent';
+import Dashboard from './Events/user.admin_dash';
+import DashSwitch from './Events/dash.switch';
 
 export default function Router() {
   return (
@@ -45,6 +47,8 @@ export default function Router() {
       <Route path="/dashboard/profile" element={<MyProfile />} />
       <Route path="/host/registration" element={<Hostreg />} />
       <Route path="/host/hostform" element={<HostForm />} />
+      <Route path="/host/dash" element={<Dashboard />} />
+      <Route path="/host/dashswitch" element={<DashSwitch/>} />
     </Routes>
   )
 }
