@@ -30,7 +30,7 @@ import {
   Bell,
 } from "lucide-react";
 import "../../splash.css"
- // For custom keyframes if needed
+// For custom keyframes if needed
 
 // Helper to get initials from a name
 function getInitials(name) {
@@ -332,11 +332,10 @@ export default function ClubAdminDashboard() {
                         </div>
                         <div className="flex gap-2 md:gap-3 items-center mt-2 sm:mt-0">
                           <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${
-                              status === "accepted"
+                            className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${status === "accepted"
                                 ? "bg-green-100 text-green-700"
                                 : "bg-blue-100 text-blue-700"
-                            }`}
+                              }`}
                           >
                             {status}
                           </span>
@@ -427,9 +426,8 @@ export default function ClubAdminDashboard() {
                       </div>
                       <span className="font-medium">{name}</span>
                     </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${
-                      status === "accepted" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
-                    }`}>
+                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${status === "accepted" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
+                      }`}>
                       {status}
                     </span>
                   </div>
@@ -516,7 +514,7 @@ export default function ClubAdminDashboard() {
       <div className="w-full flex flex-col min-h-screen sm:min-h-[80vh] sm:max-w-7xl sm:bg-white sm:rounded-2xl sm:shadow-2xl sm:flex-row sm:my-8 sm:overflow-hidden">
         {/* Mobile sidebar overlay */}
         {mobileSidebarOpen && (
-          <div 
+          <div
             className="fixed inset-0 z-40 bg-black bg-opacity-50 sm:hidden"
             onClick={() => setMobileSidebarOpen(false)}
           />
@@ -571,11 +569,10 @@ export default function ClubAdminDashboard() {
                       setActiveSection(item.id);
                       setMobileSidebarOpen(false);
                     }}
-                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition text-base ${
-                      activeSection === item.id
+                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition text-base ${activeSection === item.id
                         ? 'bg-blue-50 text-blue-700 border border-blue-200'
                         : 'text-slate-600 hover:bg-slate-100'
-                    }`}
+                      }`}
                   >
                     <Icon className="w-5 h-5 flex-shrink-0" />
                     {sidebarOpen && <span className="font-medium">{item.label}</span>}
