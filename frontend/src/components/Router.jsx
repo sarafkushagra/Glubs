@@ -22,6 +22,7 @@ import HostForm from "./Events/HostForm";
 import AddEvent from './Events/AddEvent';
 import Dashboard from './Events/UserAdminDashboard';
 import DashSwitch from './Events/DashSwitch';
+import ClubAdminDashboard from './ClubAdmin/AdminDeshboard';
 import HomePageSkeleton from './Check';
 import ClubDetails from './Clubs/ClubDetails';
 import ClubMembers from './Clubs/ClubMembers';
@@ -62,8 +63,7 @@ export default function Router() {
       <Route path="/host/registration" element={<Hostreg />} />
       <Route path="/host/hostform" element={<HostForm />} />
       <Route path="/host/dash" element={<Dashboard />} />
-      <Route path="/host/dashswitch" element={<DashSwitch />} />
-      <Route path="/check" element={<HomePageSkeleton />} />
+      <Route path="/host/dashswitch" element={<DashSwitch/>} />
     </Routes>
   )
 }
