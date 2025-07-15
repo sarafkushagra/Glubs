@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import Navbar from './Navbar';
-import Sidebar from './SideBar/Sidebar.jsx';
 import img1 from '../images/business-people-standing-together-as-team_3482-8671.jpg';
 import img2 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp';
 import event1 from '../images/EventA.jpg';
@@ -21,7 +20,7 @@ export default function LandingPage() {
       <Navbar />
       
 
-      {/* Sidebar and Toggle Button */}
+      {/* Sidebar and Toggle Button
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
       <button
         onClick={toggleSidebar}
@@ -29,7 +28,7 @@ export default function LandingPage() {
       >
         ☰ Menu
       </button>
-      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} />
+      <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} /> */}
 
       {/* Hero Section */}
       <section className="relative min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-b from-black via-indigo-900 to-white text-white transition-all duration-700 ease-in-out">
@@ -47,7 +46,7 @@ export default function LandingPage() {
             Explore Events
           </Link>
           <Link
-            to="/Organizers"
+            to="/features/Organizers"
             className="border border-white text-white font-semibold rounded-full px-6 py-3 hover:bg-white hover:text-indigo-700 transition-all duration-300 shadow hover:scale-105"
           >
             For Organizers

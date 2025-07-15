@@ -1,5 +1,5 @@
 import React from 'react';
-import logo from './images/Adobe Express - file (1).png'; 
+import logo from '../images/Adobe Express - file (1).png'; 
 
 export default function LogoWithRipples() {
   return (

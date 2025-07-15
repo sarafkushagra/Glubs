@@ -11,7 +11,7 @@ import EventDetails from './Events/EventDetails';
 import EditEvent from './Events/EditEvent';
 import QRRegistration from './Pages/Features/QRRegistration';
 import EventAnalytics from './Pages/Features/EventAnalytics';
-import Organizers from './Pages/Organizers';
+import Organizers from './Pages/Features/Organizers';
 import QRCodeGenerator from './QR/QR_Generator';
 import QRScanner from './QR/QR_Scanner';
 import HostBasicDetails from "./Events/HostBasicDetails";
@@ -22,6 +22,13 @@ import HostForm from "./Events/HostForm";
 import AddEvent from './Events/AddEvent';
 import Dashboard from './Events/UserAdminDashboard';
 import DashSwitch from './Events/DashSwitch';
+import HomePageSkeleton from './Check';
+import ClubDetails from './Clubs/ClubDetails';
+import ClubMembers from './Clubs/ClubMembers';
+import ClubEvents from './Clubs/ClubEvents';
+import AllClubs from './Clubs/AllClubs';
+import EditClub from './Clubs/EditClub';
+import AddClub from './Clubs/AddClub';
 
 export default function Router() {
   return (
@@ -37,10 +44,17 @@ export default function Router() {
       <Route path="/qr-gen" element={<QRCodeGenerator />} />
       <Route path="/qr-scan" element={<QRScanner />} />
       <Route path='/clubadmin/details' element={<OrganizerSignIn />} />
-
+      <Route path="/clubs" element={<AllClubs />} />
+      <Route path="/clubs/:clubId" element={<ClubDetails />} />
+      <Route path="/clubs/edit/:clubId" element={<EditClub />} />
+      <Route path="/clubs/add" element={<AddClub />} />
+      <Route path="/clubs/:clubId/members" element={<ClubMembers />} />
+      <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
+      
       <Route path="/features/qr-registration" element={<QRRegistration />} />
       <Route path="/features/event-analytics" element={<EventAnalytics />} />
       <Route path="/features/organizers" element={<Organizers />} />
+      
       <Route path='/about' element={<About />} />
       <Route path="/host" element={<HostOpportunityPage />} />
       <Route path="/host/basic-details" element={<HostBasicDetails />} />
@@ -48,7 +62,8 @@ export default function Router() {
       <Route path="/host/registration" element={<Hostreg />} />
       <Route path="/host/hostform" element={<HostForm />} />
       <Route path="/host/dash" element={<Dashboard />} />
-      <Route path="/host/dashswitch" element={<DashSwitch/>} />
+      <Route path="/host/dashswitch" element={<DashSwitch />} />
+      <Route path="/check" element={<HomePageSkeleton />} />
     </Routes>
   )
 }

@@ -52,7 +52,7 @@ const eventStatsRouter = require("./routers/eventstats");
 app.use("/eventstat", eventStatsRouter);
 
 const clubRouter = require("./routers/club");
-app.use("/club", clubRouter);
+app.use("/clubs", clubRouter);
 
 const announcementRouter = require("./routers/announcement");
 app.use("/announcement", announcementRouter);

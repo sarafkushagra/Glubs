@@ -10,6 +10,7 @@ export default function Navbar() {
     { title: "Home", to: "/" },
     { title: "About", to: "/about" },
     { title: "Events", to: "/events" },
+    { title: "Clubs", to: "/clubs" },
     { title: "Login", to: "/auth", isButton: true }
   ];
 
