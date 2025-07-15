@@ -20,8 +20,8 @@ import HostOpportunityPage from "./Events/HostOpportunityPage";
 import Hostreg from "./Events/Hostreg";
 import HostForm from "./Events/HostForm";
 import AddEvent from './Events/AddEvent';
-import Dashboard from './Events/user.admin_dash';
-import DashSwitch from './Events/dash.switch';
+import Dashboard from './Events/UserAdminDashboard';
+import DashSwitch from './Events/DashSwitch';
 
 export default function Router() {
   return (

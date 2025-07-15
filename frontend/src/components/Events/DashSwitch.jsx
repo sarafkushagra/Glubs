@@ -1,6 +1,6 @@
 // App.jsx
 import React, { useState } from "react";
-import Dashboard from "./user.admin_dash";
+import Dashboard from "./UserAdminDashboard";
 
 export default function App() {
   const [role, setRole] = useState("user");
