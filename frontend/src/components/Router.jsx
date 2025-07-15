@@ -22,6 +22,7 @@ import HostForm from "./Events/HostForm";
 import AddEvent from './Events/AddEvent';
 import Dashboard from './Events/UserAdminDashboard';
 import DashSwitch from './Events/DashSwitch';
+import ClubAdminDashboard from './ClubAdmin/AdminDeshboard';
 
 export default function Router() {
   return (
@@ -49,6 +50,7 @@ export default function Router() {
       <Route path="/host/hostform" element={<HostForm />} />
       <Route path="/host/dash" element={<Dashboard />} />
       <Route path="/host/dashswitch" element={<DashSwitch/>} />
+      <Route path="/host/dashboard" element={<ClubAdminDashboard />} /> // by piyush
     </Routes>
   )
 }

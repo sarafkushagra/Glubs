@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import Router from './components/Router';
 import LogoWithRipples from './components/LogoWithRipples';
-import './Splash.css'; 
+import './splash.css'; 
 function App() {
   const [loading, setLoading] = useState(true);
 
