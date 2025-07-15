@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ClubNavbar from './ClubNavbar';
+import Footer from '../Pages/Footer';
 
 const AllClubs = () => {
   const [clubs, setClubs] = useState([]);
@@ -31,33 +33,28 @@ const AllClubs = () => {
   if (error) return <div className="text-red-500 text-center mt-8">{error}</div>;
 
   return (
-    <div className="max-w-5xl mx-auto p-6">
-      <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6 gap-4">
-        <h1 className="text-3xl font-bold">All Clubs</h1>
-        <button
-          onClick={() => navigate('/clubs/add')}
-          className="bg-green-500 text-white px-5 py-2 rounded shadow hover:bg-green-600 transition"
-        >
-          + Add Club
-        </button>
-      </div>
+    <>
+    <div className='bg-purple-50'>
+    <ClubNavbar />
+    <div className="max-w-5xl mt-20 mx-auto p-6">
+      
       <div className="mb-6 flex justify-center">
         <input
           type="text"
           placeholder="Search clubs..."
           value={search}
           onChange={e => setSearch(e.target.value)}
-          className="w-full md:w-1/2 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-green-400"
+          className="w-full md:w-1/2 p-2 border border-gray-300 rounded shadow-sm focus:outline-none focus:ring-2 focus:ring-purple-400"
         />
       </div>
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+      <div className="grid  grid-cols-1 md:grid-cols-3 gap-8">
         {filteredClubs.length > 0 ? filteredClubs.map((club) => (
           <Link
             to={`/clubs/${club._id}`}
             key={club._id}
-            className="block bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition border border-gray-100 hover:border-green-400 group"
+            className="block bg-white rounded-xl shadow-lg p-6 hover:shadow-2xl transition border border-gray-100 hover:border-purple-400 group"
           >
-            <h2 className="text-xl font-semibold mb-2 group-hover:text-green-600 transition">{club.name}</h2>
+            <h2 className="text-xl font-semibold mb-2 group-hover:text-purple-600 transition">{club.name}</h2>
             <p className="text-gray-600 line-clamp-3">{club.description}</p>
           </Link>
         )) : (
@@ -65,6 +62,9 @@ const AllClubs = () => {
         )}
       </div>
     </div>
+    <Footer />
+    </div>
+    </>
   );
 };
 

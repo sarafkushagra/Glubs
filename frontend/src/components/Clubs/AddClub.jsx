@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ClubNavbar from './ClubNavbar';
+import Footer from '../Pages/Footer';
 
 const AddClub = () => {
   const navigate = useNavigate();
@@ -33,8 +35,10 @@ const AddClub = () => {
   };
 
   return (
-    <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-10">
-      <h1 className="text-2xl font-bold mb-6 text-green-700">Add New Club</h1>
+    <>
+    <ClubNavbar/>
+    <div className="max-w-4xl mx-auto mt-30 mb-10 p-8 bg-purple-50 rounded-xl shadow-lg ">
+      <h1 className="text-2xl font-bold mb-6 text-purple-700">Add New Club</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
           <label className="block font-semibold mb-2">Name</label>
@@ -42,7 +46,7 @@ const AddClub = () => {
             name="name"
             value={form.name}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
             required
           />
         </div>
@@ -52,12 +56,12 @@ const AddClub = () => {
             name="description"
             value={form.description}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-green-400"
+            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
         </div>
         <button
           type="submit"
-          className="bg-green-500 text-white px-6 py-2 rounded shadow hover:bg-green-600 transition"
+          className="bg-purple-500 text-white px-6 py-2 rounded shadow hover:bg-purple-600 transition"
           disabled={loading}
         >
           {loading ? 'Adding...' : 'Add Club'}
@@ -65,6 +69,8 @@ const AddClub = () => {
         {error && <div className="text-red-500 mt-2">{error}</div>}
       </form>
     </div>
+    <Footer/>
+    </>
   );
 };
 

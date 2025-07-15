@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import Footer from '../Pages/Footer';
+import EventNavbar from './EventNavbar'; 
 
 const AddEvent = () => {
   const navigate = useNavigate();
@@ -51,7 +53,9 @@ const AddEvent = () => {
   };
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded shadow mt-8">
+    <>
+    <EventNavbar />
+    <div className="max-w-4xl mx-auto p-8 mt-30 my-16 bg-purple-50 rounded shadow mt-8">
       <h1 className="text-2xl font-bold mb-4">Add New Event</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -135,6 +139,8 @@ const AddEvent = () => {
         </button>
       </form>
     </div>
+    <Footer/>
+    </>
   );
 };
 

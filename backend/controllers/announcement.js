@@ -7,7 +7,7 @@ module.exports.showAllAnnouncements = async (req, res) => {
 };
 
 module.exports.createAnnouncement = async (req, res) => {
-     try {
+    try {
         const announcement = new Announcement(req.body);
         await announcement.save();
         res.status(201).json(announcement);
@@ -17,6 +17,6 @@ module.exports.createAnnouncement = async (req, res) => {
 };
 
 module.exports.deleteAnnouncement = async (req, res) => {
-     await Announcement.findByIdAndDelete(req.params.id);
+    await Announcement.findByIdAndDelete(req.params.id);
     res.json({ message: 'Announcement deleted' });
 };

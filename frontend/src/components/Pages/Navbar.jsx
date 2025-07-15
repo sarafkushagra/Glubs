@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { QrCode } from "lucide-react";
-
+import img1 from "../images/Adobe Express - file (1).png"
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
@@ -11,6 +11,7 @@ export default function Navbar() {
     { title: "About", to: "/about" },
     { title: "Events", to: "/events" },
     { title: "Clubs", to: "/clubs" },
+    { title: "Hosts", to: "/host" },
     { title: "Login", to: "/auth", isButton: true }
   ];
 
@@ -19,9 +20,9 @@ export default function Navbar() {
       {/* Logo */}
       <Link to="/">
         <img
-          src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
+          src={img1}
           alt="logo"
-          className="w-[124px] h-[32px] object-contain"
+          className="w-[124px] h-[36px] object-contain"
         />
       </Link>
 

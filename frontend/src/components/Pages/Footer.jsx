@@ -5,7 +5,7 @@ import { FaYoutube } from "react-icons/fa";
 import { FaInstagram } from "react-icons/fa";
 function Footer() {
   return (
-    <footer className="mt-12 bg-gradient-to-b from-[#1e3c72] to-[#2a5298] text-white py-12 w-full">
+    <footer className=" bg-gradient-to-b from-[#15052e] to-[#39107a] text-white py-12 w-full">
       <div className="max-w-7xl mx-auto px-6 sm:px-12 lg:px-20">
         <div className="grid md:grid-cols-3 gap-20 text-center md:text-left">
           {/* Column 1 */}
@@ -24,19 +24,19 @@ function Footer() {
                 <FaFacebook size={32} />
               </a>
               <a
-                href="#"
+                href="https://www.twitter.com/glubs"
                 className="bg-white text-black flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-200"
               >
                 <FaTwitter size={32} />
               </a>
               <a
-                href="#"
+                href="https://www.youtube.com/glubs"
                 className="bg-white text-black flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-200"
               >
                 <FaYoutube size={32} />
               </a>
               <a
-                href="#"
+                href="https://www.instagram.com/glubs"
                 className="bg-white text-black flex items-center justify-center h-10 w-10 rounded-full hover:bg-gray-200"
               >
                 <FaInstagram  size={32} />
@@ -48,7 +48,7 @@ function Footer() {
           <div>
             <h3 className="font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2">
-              <li><a href="#" className="hover:underline">About Us</a></li>
+              <li><a href="/about" className="hover:underline">About Us</a></li>
               <li><a href="#" className="hover:underline">Team</a></li>
               <li><a href="#" className="hover:underline">FAQ</a></li>
               <li><a href="#" className="hover:underline">Events</a></li>

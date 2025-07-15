@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import EventNavbar from './EventNavbar';
+import Footer from '../Pages/Footer';
 
 const EditEvent = () => {
   const { eventId } = useParams();
@@ -65,7 +67,9 @@ const EditEvent = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="max-w-2xl mx-auto p-6 bg-white rounded shadow mt-8">
+    <>
+      <EventNavbar />
+    <div className="max-w-4xl mx-auto p-6 mt-30 mb-10 bg-purple-50 rounded shadow mt-8">
       <h1 className="text-2xl font-bold mb-4">Edit Event</h1>
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
@@ -132,6 +136,8 @@ const EditEvent = () => {
         </button>
       </form>
     </div>
+    <Footer />
+    </>
   );
 };
 

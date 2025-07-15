@@ -34,8 +34,8 @@ export default function HostBasicDetails() {
   };
 
   return (
-    <div className="max-w-5xl mx-auto px-6 py-10 space-y-10 bg-gradient-to-br from-purple-200 via-purple-300 to-purple-400 rounded-xl shadow-2xl animate-fadeIn">
-      <h2 className="text-5xl font-extrabold text-white text-center drop-shadow-md">🚀 Host Basic Details</h2>
+    <div className="max-w-5xl mx-auto px-6 py-10 space-y-10 bg-purple-50 rounded-xl shadow-2xl animate-fadeIn">
+      <h2 className="text-5xl font-extrabold text-black text-center drop-shadow-md">🚀 Host Basic Details</h2>
 
       {/* Upload Section */}
       <div className="bg-white shadow-lg rounded-2xl p-6 space-y-3">

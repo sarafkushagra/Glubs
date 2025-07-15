@@ -11,7 +11,7 @@ export default function RegistrationDetails() {
   const [registrationCount, setRegistrationCount] = useState('');
 
   return (
-    <div className="p-8 max-w-3xl mx-auto bg-purple-50 shadow-xl rounded-2xl border border-purple-200">
+    <div className="p-8 max-w-5xl mx-auto bg-purple-50 shadow-xl rounded-2xl border border-purple-200">
       <h2 className="text-2xl font-bold mb-6 text-purple-700">Registration Details</h2>
 
       <p className="text-sm bg-yellow-100 text-yellow-900 p-3 mb-5 rounded-md border-l-4 border-yellow-400">

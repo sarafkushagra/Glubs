@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import EventNavbar from './EventNavbar';
+import Footer from '../Pages/Footer';
 
 const EventDetails = () => {
   const { eventId } = useParams();
@@ -49,7 +51,9 @@ const EventDetails = () => {
   if (!event) return <div>No event found.</div>;
 
   return (
-    <div className="max-w-3xl mx-auto p-6 bg-white rounded shadow mt-8">
+    <>
+    <EventNavbar />
+    <div className="max-w-4xl mx-auto mt-30 p-6 bg-purple-50 rounded shadow mb-10">
       <h1 className="text-3xl font-bold mb-2">{event.title}</h1>
       <p className="text-gray-700 mb-4">{event.description}</p>
       <div className="mb-2"><b>Type:</b> {event.eventType}</div>
@@ -98,6 +102,8 @@ const EventDetails = () => {
         )}
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 

@@ -31,7 +31,7 @@ export default function LandingPage() {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} /> */}
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-b from-black via-indigo-900 to-white text-white transition-all duration-700 ease-in-out">
+      <section className="relative min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-b from-black via-indigo-900 to-purple-50 text-white transition-all duration-700 ease-in-out">
         <h1 className="text-4xl md:text-6xl font-extrabold mb-4 animate-fade-in-down">
           Gateway to Campus Opportunities
         </h1>
@@ -124,20 +124,27 @@ export default function LandingPage() {
       </section>
 
       {/* Call To Action */}
-      <section className="bg-indigo-700 text-white text-center py-20 px-4 rounded-2xl max-w-3xl mx-auto mt-16 shadow-xl">
-        <img
-          src={img1}
-          alt="Call to Action"
-          className="mx-auto rounded-xl mb-6 max-h-64 object-cover shadow-lg"
-        />
-        <h2 className="text-4xl font-bold mb-4">Enroll in Opportunities</h2>
-        <Link
-          to="/contact"
-          className="bg-white text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-800 hover:text-white transition-all duration-300 inline-block shadow hover:scale-105"
-        >
-          Contact us
-        </Link>
-      </section>
+      {/* Call To Action */}
+<section className="bg-gradient-to-r from-indigo-700 via-purple-700 to-indigo-800 text-white text-center py-16 px-6 rounded-xl mb-12 max-w-5xl mx-auto  shadow-lg">
+  <div className="max-w-4xl mx-auto space-y-6">
+    <img
+      src={img1}
+      alt="Join Opportunities"
+      className="mx-auto rounded-lg shadow-lg max-h-64 w-full object-cover border-4 border-white"
+    />
+    <h2 className="text-3xl sm:text-4xl font-bold">Enroll in Opportunities Today</h2>
+    <p className="text-purple-100 max-w-xl mx-auto">
+      Start your journey by participating in campus events, workshops, and hackathons to enhance your skills and network with like-minded peers.
+    </p>
+    <Link
+      to="/contact"
+      className="inline-block bg-white text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow hover:scale-105"
+    >
+      Contact Us
+    </Link>
+  </div>
+</section>
+
 
       {/* Footer */}
       

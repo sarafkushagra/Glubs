@@ -10,7 +10,7 @@ import {
 } from "chart.js";
 import { Bar, Doughnut } from "react-chartjs-2";
 import { motion } from "framer-motion";
-import { Button } from "../ui/button";
+import { Button } from "../UI/button";
 import { Download, Filter } from "lucide-react";
 
 ChartJS.register(CategoryScale, LinearScale, BarElement, ArcElement, Tooltip, Legend);

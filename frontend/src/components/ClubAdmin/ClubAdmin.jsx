@@ -1,8 +1,11 @@
 import React from "react";
+import ClubNavbar from "../Clubs/ClubNavbar";
 
 export default function OrganizerSignIn() {
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-r from-blue-100 via-blue-50 to-green-100 px-0 py-0">
+    <>
+    <ClubNavbar/>
+    <div className="min-h-screen mt-30 mb-10 flex items-center justify-center bg-gradient-to-r from-blue-100 via-blue-50 to-green-100 px-0 py-0">
       <div className="w-full h-full min-h-screen flex items-center justify-center">
         <div className="w-full max-w-2xl p-12 rounded-none shadow-xl border border-gray-200 bg-white mx-4 my-8">
           <h2 className="text-3xl font-semibold text-center mb-8 text-gray-800">
@@ -115,5 +118,7 @@ export default function OrganizerSignIn() {
         </div>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 }

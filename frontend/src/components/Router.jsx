@@ -9,21 +9,18 @@ import About from './Pages/About';
 import EventLanding from './Events/EventLanding';
 import EventDetails from './Events/EventDetails';
 import EditEvent from './Events/EditEvent';
-import QRRegistration from './Pages/Features/QRRegistration';
-import EventAnalytics from './Pages/Features/EventAnalytics';
-import Organizers from './Pages/Features/Organizers';
+import QRRegistration from './Features/QRRegistration';
+import EventAnalytics from './Features/EventAnalytics';
+import Organizers from './Features/Organizers';
 import QRCodeGenerator from './QR/QR_Generator';
 import QRScanner from './QR/QR_Scanner';
-import HostBasicDetails from "./Events/HostBasicDetails";
-import MyProfile from './Pages/SideBar/SideBar_Contents/MyProfile';
-import HostOpportunityPage from "./Events/HostOpportunityPage";
-import Hostreg from "./Events/Hostreg";
-import HostForm from "./Events/HostForm";
+import MyProfile from './Pages/MyProfile';
+import HostOpportunityPage from "./Hosts/HostLandingPage";
+import HostForm from "./Hosts/HostForm";
 import AddEvent from './Events/AddEvent';
-import Dashboard from './Events/UserAdminDashboard';
-import DashSwitch from './Events/DashSwitch';
-import ClubAdminDashboard from './ClubAdmin/AdminDashboard';
-import HomePageSkeleton from './Check';
+import Dashboard from './DashBoard/UserAdminDashboard';
+import DashSwitch from './DashBoard/DashSwitch';
+import ClubAdminDashboard from './DashBoard/AdminDashboard';
 import ClubDetails from './Clubs/ClubDetails';
 import ClubMembers from './Clubs/ClubMembers';
 import ClubEvents from './Clubs/ClubEvents';
@@ -35,16 +32,21 @@ export default function Router() {
   return (
     <Routes>
       <Route path='/' element={<LandingPage />} />
+
       <Route path='/auth' element={<AuthCard />} />
       <Route path='/auth/signin' element={<SignInForm />} />
       <Route path='/auth/signup' element={<SignUpForm />} />
+
       <Route path='/events' element={<EventLanding />} />
       <Route path="/events/add" element={<AddEvent />} />
       <Route path="/events/:eventId" element={<EventDetails />} />
       <Route path="/events/edit/:eventId" element={<EditEvent />} />
+
       <Route path="/qr-gen" element={<QRCodeGenerator />} />
       <Route path="/qr-scan" element={<QRScanner />} />
+
       <Route path='/clubadmin/details' element={<OrganizerSignIn />} />
+
       <Route path="/clubs" element={<AllClubs />} />
       <Route path="/clubs/:clubId" element={<ClubDetails />} />
       <Route path="/clubs/edit/:clubId" element={<EditClub />} />
@@ -57,14 +59,15 @@ export default function Router() {
       <Route path="/features/organizers" element={<Organizers />} />
       
       <Route path='/about' element={<About />} />
+
       <Route path="/host" element={<HostOpportunityPage />} />
-      <Route path="/host/basic-details" element={<HostBasicDetails />} />
-      <Route path="/dashboard/profile" element={<MyProfile />} />
-      <Route path="/host/registration" element={<Hostreg />} />
       <Route path="/host/hostform" element={<HostForm />} />
-      <Route path="/host/dash" element={<Dashboard />} />
+{/* DashBoard */}
       <Route path="/clubadmin/dash" element={<ClubAdminDashboard />} />
+      <Route path="/host/dash" element={<Dashboard />} />
       <Route path="/host/dashswitch" element={<DashSwitch/>} />
+
+      <Route path="/dashboard/profile" element={<MyProfile />} />
     </Routes>
   )
 }

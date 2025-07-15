@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ClubNavbar from './ClubNavbar';
+import Footer from '../Pages/Footer';
 
 const ClubDetails = () => {
   const { clubId } = useParams();
@@ -44,7 +46,9 @@ const ClubDetails = () => {
   };
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <>
+    <ClubNavbar />
+    <div className="max-w-5xl mx-auto mt-30 mb-10 bg-purple-50  p-6">
       <h1 className="text-3xl font-bold mb-2 text-green-700">{club.name}</h1>
       <p className="mb-4 text-gray-700 italic">{club.description}</p>
       <div className="flex flex-wrap gap-4 mb-8">
@@ -64,6 +68,8 @@ const ClubDetails = () => {
         )) : <div className="col-span-2 text-center text-gray-500">No events found for this club.</div>}
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 

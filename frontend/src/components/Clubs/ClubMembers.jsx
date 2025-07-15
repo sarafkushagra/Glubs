@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'react-router-dom';
 import axios from 'axios';
+import ClubNavbar from './ClubNavbar';
+import Footer from '../Pages/Footer';
 
 const ClubMembers = () => {
   const { clubId } = useParams();
@@ -26,19 +28,21 @@ const ClubMembers = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="max-w-3xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-10">
-      <h1 className="text-2xl font-bold mb-6 text-green-700">Club Members</h1>
+    <>
+    <ClubNavbar/>
+    <div className="max-w-5xl mt-30 mb-10 h-screen mx-auto p-8 bg-purple-50 rounded-xl shadow-lg mt-10">
+      <h1 className="text-2xl font-bold mb-6 text-purple-700">Club Members</h1>
       <div className="overflow-x-auto">
         <table className="w-full border rounded-xl shadow">
           <thead>
-            <tr className="bg-green-100">
+            <tr className="bg-purple-100">
               <th className="p-3 text-left">Name</th>
               <th className="p-3 text-left">Position</th>
             </tr>
           </thead>
           <tbody>
             {members.length > 0 ? members.map((member) => (
-              <tr key={member._id} className="border-t hover:bg-green-50">
+              <tr key={member._id} className="border-t hover:bg-purple-50">
                 <td className="p-3">{member.name}</td>
                 <td className="p-3">{member.position}</td>
               </tr>
@@ -49,6 +53,8 @@ const ClubMembers = () => {
         </table>
       </div>
     </div>
+    <Footer/>
+    </>
   );
 };
 

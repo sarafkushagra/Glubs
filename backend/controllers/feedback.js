@@ -16,6 +16,3 @@ module.exports.createFeedback = async (req, res) => {
     }
 };
 
-module.exports.showCreateFeedbackForm = (req, res) => {
-    res.render('html/createFeedback.ejs');
-}

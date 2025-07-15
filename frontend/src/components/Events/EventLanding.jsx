@@ -1,6 +1,8 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import dayjs from 'dayjs';
+import EventNavbar from './EventNavbar';
+import Footer from '../Pages/Footer';
 
 export default function EventsPage() {
   const [search, setSearch] = useState('');
@@ -42,20 +44,11 @@ export default function EventsPage() {
   });
 
   return (
-    <div className="bg-gray-100 min-h-screen flex flex-col">
-      {/* Header */}
-      <header className="bg-white shadow p-4 flex justify-between items-center">
-        <a href="/" className="text-2xl font-bold text-purple-700">Glubs</a>
-        <nav className="space-x-4">
-          <a href="/" className="text-gray-700 hover:text-purple-700">Home</a>
-          <a href="/about" className="text-gray-700 hover:text-purple-700">About</a>
-          <a href="/events" className="text-gray-700 hover:text-purple-700">Events</a>
-        </nav>
-        <a href="/events/add" className="bg-purple-700 text-white px-4 py-2 rounded">Add Event</a>
-      </header>
+    <div className="bg-purple-100 min-h-screen flex flex-col">
+      <EventNavbar />
 
       {/* Hero */}
-      <section className="text-center py-12 bg-white">
+      <section className="text-center mt-20 py-10 ">
         <h1 className="text-4xl font-bold mb-2">Glubs University Events</h1>
         <p className="text-gray-500 max-w-2xl mx-auto">
           Discover and join exciting hackathons, workshops, and student-run activities!
@@ -63,7 +56,7 @@ export default function EventsPage() {
       </section>
 
       {/* Filter Bar */}
-      <div className="flex flex-wrap justify-center gap-4 my-4">
+      <div className="flex flex-wrap justify-center gap-4 py-4 my-4">
         {['All', 'Upcoming', 'Past'].map((tab) => (
           <button
             key={tab}
@@ -79,7 +72,7 @@ export default function EventsPage() {
       </div>
 
       {/* Search & Category */}
-      <div className="flex flex-wrap justify-center gap-4 px-4 mb-6">
+      <div className="flex flex-wrap justify-center gap-4 px-4 pb-4 mb-6">
         <input
           type="text"
           placeholder="Search events..."
@@ -101,7 +94,7 @@ export default function EventsPage() {
       </div>
 
       {/* Events Grid */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-6">
+      <div className="pb-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-6">
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event) => (
             <div key={event._id} className="bg-white rounded-lg shadow hover:shadow-lg transition transform hover:-translate-y-1">
@@ -142,11 +135,7 @@ export default function EventsPage() {
       </div>
 
       {/* Footer */}
-      <footer className="bg-gray-900 text-white text-center py-6 mt-auto">
-        <div className="text-lg font-bold mb-2">Glubs</div>
-        <p className="text-gray-400">Connecting students through events & opportunities</p>
-        <p className="text-sm mt-2 text-gray-500">&copy; 2025 Glubs. All rights reserved.</p>
-      </footer>
+      <Footer/>
     </div>
   );
 }

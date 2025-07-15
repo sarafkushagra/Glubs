@@ -71,6 +71,3 @@ module.exports.deleteClubAdmin = async (req, res) => {
     }
 };
 
-module.exports.showCreateClubAdminForm = (req, res) => {
-    res.render("html/clubAdmin.ejs");
-};

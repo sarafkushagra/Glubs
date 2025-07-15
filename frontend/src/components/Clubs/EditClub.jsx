@@ -1,6 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
+import ClubNavbar from './ClubNavbar';
+import Footer from '../Pages/Footer';
 
 const EditClub = () => {
   const { clubId } = useParams();
@@ -50,7 +52,9 @@ const EditClub = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="max-w-xl mx-auto p-8 bg-white rounded-xl shadow-lg mt-10">
+    <>
+  <ClubNavbar/>
+    <div className="max-w-5xl mt-30 mb-10  mx-auto p-8 bg-purple-50 rounded-xl shadow-lg mt-10">
       <h1 className="text-2xl font-bold mb-6 text-blue-700">Edit Club</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
@@ -59,7 +63,7 @@ const EditClub = () => {
             name="name"
             value={form.name}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
             required
           />
         </div>
@@ -69,17 +73,19 @@ const EditClub = () => {
             name="description"
             value={form.description}
             onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-blue-400"
+            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
           />
         </div>
         <button
           type="submit"
-          className="bg-blue-500 text-white px-6 py-2 rounded shadow hover:bg-blue-600 transition"
+          className="bg-purple-500 text-white px-6 py-2 rounded shadow hover:bg-purple-600 transition"
         >
           Update Club
         </button>
       </form>
     </div>
+    <Footer/>
+    </>
   );
 };
 
