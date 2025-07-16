@@ -28,6 +28,8 @@ import AllClubs from './Clubs/AllClubs';
 import EditClub from './Clubs/EditClub';
 import AddClub from './Clubs/AddClub';
 
+import NotFound from './Pages/NotFound';
+
 export default function Router() {
   return (
     <Routes>
@@ -68,6 +70,9 @@ export default function Router() {
       <Route path="/host/dashswitch" element={<DashSwitch/>} />
 
       <Route path="/dashboard/profile" element={<MyProfile />} />
+
+{/* For Wrong URL */}
+      <Route path ="*" element={<NotFound />} />
     </Routes>
   )
 }
