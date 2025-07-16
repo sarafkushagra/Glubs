@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 
 export default function RegistrationDetails() {
-  const [platformOption, setPlatformOption] = useState('No');
   const [participationType, setParticipationType] = useState('Individual');
   const [teamMin, setTeamMin] = useState(1);
   const [teamMax, setTeamMax] = useState('');
@@ -17,23 +16,6 @@ export default function RegistrationDetails() {
       <p className="text-sm bg-yellow-100 text-yellow-900 p-3 mb-5 rounded-md border-l-4 border-yellow-400">
         For students, listing, assessment & download credits will be unlimited and applicable after the opportunity is approved. Do note, it is mandatory to take registrations on Unstop exclusively to enjoy these benefits.
       </p>
-
-      <div className="mb-6">
-        <label className="block font-semibold mb-2 text-gray-800">Take registrations on another platform/website</label>
-        <div className="flex gap-4">
-          {['Yes', 'No'].map(option => (
-            <button
-              key={option}
-              onClick={() => setPlatformOption(option)}
-              className={`px-5 py-2 rounded-lg transition-all border font-medium ${
-                platformOption === option ? 'bg-purple-600 text-white' : 'bg-gray-100 text-gray-800 border-gray-300'
-              }`}
-            >
-              {option}
-            </button>
-          ))}
-        </div>
-      </div>
 
       <div className="mb-6">
         <label className="block font-semibold mb-2 text-gray-800">Participation Type<span className="text-red-500"> *</span></label>
@@ -115,9 +97,6 @@ export default function RegistrationDetails() {
         />
       </div>
 
-      <button className="bg-gradient-to-r from-purple-600 to-blue-600 text-white px-8 py-3 rounded-lg shadow-md hover:from-purple-700 hover:to-blue-700 transition-all font-semibold">
-        Next
-      </button>
     </div>
   );
 }

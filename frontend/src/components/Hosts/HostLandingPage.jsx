@@ -28,7 +28,7 @@ export default function HostOpportunityPage() {
               <Lightbulb className="text-blue-500" size={30} />
             </div>
             <h3 className="font-semibold text-lg text-gray-800">Innovation Challenges</h3>
-            <Link to={'/host/hostform'}><p className="text-purple-600 mt-1 text-sm">Create Challenge →</p></Link>
+            <Link to={'/host/hostform'} state={{ category: 'innovation_challenge' }}><p className="text-purple-600 mt-1 text-sm">Create Challenge →</p></Link>
           </div>
 
           {/* Hackathons */}
@@ -37,12 +37,12 @@ export default function HostOpportunityPage() {
               <Rocket className="text-red-500" size={30} />
             </div>
             <h3 className="font-semibold text-lg text-gray-800">Hackathons & Coding Battles</h3>
-            <Link to={'/host/hostform'}><p className="text-purple-600 mt-1 text-sm">Host Hackathon →</p></Link>
+            <Link to={'/host/hostform'} state={{ category: 'hackathon' }}><p className="text-purple-600 mt-1 text-sm">Host Hackathon →</p></Link>
           </div>
 
           {/* Quiz Competitions (Redirects on click) */}
           <div
-            onClick={() => navigate('/host/hostform')}
+            onClick={() => navigate('/host/hostform', { state: { category: 'quiz' } })}
             className="group w-full max-w-xs p-6 bg-white rounded-xl border border-purple-200 hover:shadow-lg hover:-translate-y-1 transition cursor-pointer flex flex-col items-center text-center"
           >
             <div className="bg-purple-100 p-3 rounded-full mb-4">
@@ -58,7 +58,7 @@ export default function HostOpportunityPage() {
               <Star className="text-yellow-500" size={30} />
             </div>
             <h3 className="font-semibold text-lg text-gray-800">Creative Showcases</h3>
-            <Link to={'/host/hostform'}><p className="text-purple-600 mt-1 text-sm">Launch Showcase →</p></Link>
+            <Link to={'/host/hostform'} state={{ category: 'creative_showcase' }}><p className="text-purple-600 mt-1 text-sm">Launch Showcase →</p></Link>
           </div>
 
           {/* Case Study Competitions */}
@@ -67,7 +67,7 @@ export default function HostOpportunityPage() {
               <ClipboardList className="text-orange-500" size={30} />
             </div>
             <h3 className="font-semibold text-lg text-gray-800">Case Study Competitions</h3>
-            <Link to={'/host/hostform'}><p className="text-purple-600 mt-1 text-sm">Launch Case Study →</p></Link>
+            <Link to={'/host/hostform'} state={{ category: 'case_study' }}><p className="text-purple-600 mt-1 text-sm">Launch Case Study →</p></Link>
           </div>
 
           {/* Conferences & Talks */}
@@ -76,7 +76,7 @@ export default function HostOpportunityPage() {
               <Presentation className="text-teal-500" size={30} />
             </div>
             <h3 className="font-semibold text-lg text-gray-800">Conferences & Talks</h3>
-            <Link to={'/host/hostform'}><p className="text-purple-600 mt-1 text-sm">Create Conference →</p></Link>
+            <Link to={'/host/hostform'} state={{ category: 'conference' }}><p className="text-purple-600 mt-1 text-sm">Create Conference →</p></Link>
           </div>
 
           {/* Workshops & Bootcamps */}
@@ -85,7 +85,7 @@ export default function HostOpportunityPage() {
               <BookOpen className="text-indigo-500" size={30} />
             </div>
             <h3 className="font-semibold text-lg text-gray-800">Workshops & Bootcamps</h3>
-            <Link to={'/host/hostform'}><p className="text-purple-600 mt-1 text-sm">Schedule Workshop →</p></Link>
+            <Link to={'/host/hostform'} state={{ category: 'workshop' }}><p className="text-purple-600 mt-1 text-sm">Schedule Workshop →</p></Link>
           </div>
 
         </div>

@@ -2,10 +2,12 @@ import React, { useState } from "react";
 import HostBasicDetails from "./HostBasicDetails";
 import RegistrationDetails from "./HostRegistration";
 import { HiMiniHome } from "react-icons/hi2";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 
 
 export default function HostForm() {
+  const location = useLocation();
+  const selectedCategory = location.state?.category || null;
   const [step, setStep] = useState(1);
 
   const next = () => setStep((s) => Math.min(s + 1, 2));
@@ -45,7 +47,7 @@ export default function HostForm() {
       </div>
 
       {/* Step Content */}
-      {step === 1 && <HostBasicDetails />}
+      {step === 1 && <HostBasicDetails selectedCategory={selectedCategory} />}
       {step === 2 && <RegistrationDetails />}
 
       {/* Footer Buttons */}

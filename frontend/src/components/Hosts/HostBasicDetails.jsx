@@ -2,20 +2,32 @@ import React, { useState } from "react";
 import { UploadCloud, Globe, Lock, Users, X } from "lucide-react";
 import { Editor } from "@tinymce/tinymce-react";
 
-export default function HostBasicDetails() {
+export default function HostBasicDetails({ selectedCategory }) {
   const [logo, setLogo] = useState(null);
   const [visibility, setVisibility] = useState("public");
   const [mode, setMode] = useState("online");
+  // Map the selectedCategory prop to the opportunityTypes value
+  const opportunityTypes = [
+    "Hackathon", "Innovation Challenge", "Quiz", "Case Study",
+    "Workshop", "Conference", "Creative Showcase"
+  ];
+  // Helper to map category keys to display names
+  const categoryMap = {
+    hackathon: "Hackathon",
+    innovation_challenge: "Innovation Challenge",
+    quiz: "Quiz",
+    case_study: "Case Study",
+    workshop: "Workshop",
+    conference: "Conference",
+    creative_showcase: "Creative Showcase"
+  };
+  const initialType = selectedCategory && categoryMap[selectedCategory] ? categoryMap[selectedCategory] : opportunityTypes[0];
+  const [opportunityType, setOpportunityType] = useState(initialType);
   const [selectedCategories, setSelectedCategories] = useState([]);
 
   const categories = [
     "Coding", "Business", "Design", "Marketing", "Finance",
     "Art", "Robotics", "Public Speaking", "Analytics"
-  ];
-
-  const opportunityTypes = [
-    "Hackathon", "Innovation Challenge", "Quiz", "Case Study",
-    "Workshop", "Conference", "Creative Showcase"
   ];
 
   const handleLogoChange = (e) => {
@@ -57,7 +69,11 @@ export default function HostBasicDetails() {
       {/* Opportunity Type */}
       <div className="bg-white shadow-lg rounded-2xl p-6 space-y-3">
         <label className="block text-sm font-semibold text-gray-700">Opportunity Type</label>
-        <select className="w-full border border-purple-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500">
+        <select
+          className="w-full border border-purple-300 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-purple-500"
+          value={opportunityType}
+          onChange={e => setOpportunityType(e.target.value)}
+        >
           {opportunityTypes.map((type, i) => (
             <option key={i} value={type}>
               {type}
@@ -176,9 +192,6 @@ export default function HostBasicDetails() {
         />
       </div>
 
-      <button className="w-full bg-purple-700 text-white rounded-2xl py-3 font-semibold text-lg hover:bg-purple-800 transition transform hover:scale-[1.02]">
-        Continue
-      </button>
     </div>
   );
 }
