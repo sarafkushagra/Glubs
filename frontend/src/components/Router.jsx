@@ -29,6 +29,7 @@ import EditClub from './Clubs/EditClub';
 import AddClub from './Clubs/AddClub';
 
 import NotFound from './Pages/NotFound';
+import EmailVerificationPage from './AuthCard/EmailVarificationPage';
 
 export default function Router() {
   return (
@@ -38,6 +39,7 @@ export default function Router() {
       <Route path='/auth' element={<AuthCard />} />
       <Route path='/auth/signin' element={<SignInForm />} />
       <Route path='/auth/signup' element={<SignUpForm />} />
+      <Route path='/verify' element={<EmailVerificationPage />} />
 
       <Route path='/events' element={<EventLanding />} />
       <Route path="/events/add" element={<AddEvent />} />

@@ -5,6 +5,10 @@ const path = require("path");
 const cors = require("cors");
 const ejs = require("ejs");
 const methodOverride = require("method-override");
+const cookieParser = require("cookie-parser"); // ✅ Import this
+
+
+app.use(cookieParser());
 
 app.set("view engine", "ejs");
 app.set("views", path.join(__dirname, "views"));
@@ -15,7 +19,7 @@ const mongoose = require("mongoose");
 
 const dburl = process.env.ATLASDB_URL;
 
-app.use(cors())
+app.use(cors({ origin: "http://localhost:5174", credentials: true }));
   
 main().then(() => {
   console.log("Connected to MongoDB");
@@ -23,7 +27,7 @@ main().then(() => {
 .catch(err => console.log(err));
 
 async function main() {
-  await mongoose.connect(dburl);
+  await mongoose.connect(process.env.MONGO_URI);
 }
 app.get("/", (req, res) => {
   // res.send("Welcome to the Glubs Backend API"); 

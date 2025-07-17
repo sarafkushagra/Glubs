@@ -1,6 +1,6 @@
 import { useState } from "react";
-import SignInForm from "./SignIn";
-import SignUpForm from "./SignUp";
+import SignInForm from "./SignInPage";
+import SignUpForm from "./SignUpPage";
 import { motion, AnimatePresence } from "framer-motion";
 
 const AuthCard = () => {

@@ -89,3 +89,4 @@ module.exports.searchByClub = async (req, res) => {
         res.status(500).json({ message: "Error searching users by club", error: error.message });
     }
 };
+
