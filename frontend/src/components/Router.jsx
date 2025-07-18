@@ -33,6 +33,12 @@ import AddFeedback from './Events/AddFeedback';
 // import ProtectedRoute from './ProtectedRoute';
 import UsersDetails from './Users/UsersDetails';
 import EditUser from './Users/EditUser';
+import ProtectedRoute from './ProtectedRoute';
+import UnauthorizedPage from './AuthCard/UnauthorizedPage';
+import ForgotPasswordEmail from './AuthCard/ForgotPasswordEmailPage';
+import VerifyOTPAndReset from './AuthCard/VerifyOtpAndResetPage';
+import ResetSuccess from './AuthCard/ResetSuccess';
+
 
 export default function Router() {
   return (
@@ -43,6 +49,17 @@ export default function Router() {
       <Route path='/auth/signin' element={<SignInForm />} />
       <Route path='/auth/signup' element={<SignUpForm />} />
       <Route path='/verify' element={<EmailVerificationPage />} />
+      <Route path="/forgot-password" element={<ForgotPasswordEmail />} />
+      <Route path="/verify-otp" element={<VerifyOTPAndReset />} />
+      <Route path="/reset-success" element={<ResetSuccess />} />
+      <Route path='/unauthorized' element={<UnauthorizedPage />} />
+
+      <Route element={<ProtectedRoute/>}>
+        <Route path="/events" element={<EventLanding />} />
+      </Route>
+
+
+
       <Route path='/events' element={<EventLanding />} />
       <Route path="/clubs" element={<AllClubs />} />
       <Route path="/features/qr-registration" element={<QRRegistration />} />

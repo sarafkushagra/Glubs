@@ -3,13 +3,15 @@ import { useState, useRef } from "react";
 import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "react-toastify";
-import { useNavigate } from "react-router-dom"; 
+import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Context/userStore";
 
 const EmailVerificationPage = () => {
   const [otp, setOtp] = useState(["", "", "", ""]);
   const [loading, setLoading] = useState(false);
   const inputsRef = useRef([]);
   const navigate = useNavigate();
+  const { updateUser, user } = useAuth();
 
   const handleChange = (e, index) => {
     const value = e.target.value;
@@ -40,9 +42,16 @@ const EmailVerificationPage = () => {
         { withCredentials: true }
       );
       toast.success("Verified successfully!");
-      navigate("/");
+      updateUser({isVerified: true});
+      const redirectPath =
+        localStorage.getItem("redirectAfterVerify") || "/events";
+      localStorage.removeItem("redirectAfterVerify");
+      console.log(redirectPath)
+      navigate(redirectPath);
     } catch (err) {
-      toast.error("Verification failed: " + (err.response?.data?.message || ""));
+      toast.error(
+        "Verification failed: " + (err.response?.data?.message || "")
+      );
     } finally {
       setLoading(false);
     }
@@ -51,8 +60,8 @@ const EmailVerificationPage = () => {
   const resendHandler = async () => {
     try {
       await axios.post(
-        "http://localhost:5000/api/v1/users/resend-otp",
-        {},
+        "http://localhost:3000/users/resend-otp",
+        { email: user.email },
         { withCredentials: true }
       );
       toast.info("OTP sent again to your email!");

@@ -142,7 +142,7 @@ exports.resentOTP = catchAsync(async (req, res, next) => {
   // now if anything is not then we have to send a new otp again
   const newOtp = generateOtp();
   user.otp = newOtp;
-  user.otpExpires = Date.now() + 24 * 60 * 60 * 1000;
+  user.otpExpires = Date.now() + 10* 60 * 1000;
 
   await user.save({ validateBeforeSave: false });
 
@@ -168,7 +168,7 @@ exports.resentOTP = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      message: "A new otp has sent to your email",
+      message: "A new OTP has been sent to your email",
     });
   } catch (error) {
     user.otp = undefined;
@@ -188,10 +188,15 @@ exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next(new AppError("Please provide email and password"));
+    return next(new AppError("Please provide email and password",400));
   }
 
   const user = await User.findOne({ email }).select("+password");
+
+  if (!user) {
+    return next(new AppError("Incorrect Email or Password", 401));
+  }
+
 
   if (!user.isVerified) {
     return next(
@@ -259,7 +264,7 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
 
     res.status(200).json({
       status: "success",
-      message: "Password reset otp is send to your email",
+      message: "Password reset OTP has been sent to your email",
     });
   } catch (error) {
     user.resetPasswordOTP = undefined;
@@ -288,7 +293,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     return next(new AppError("No user found", 400));
   }
 
-  (user.password = password), (user.passwordConfirm = passwordConfirm);
+  user.password = password 
+  user.passwordConfirm = passwordConfirm
   user.resetPasswordOTP = undefined;
   user.resetPasswordOTPExpires = undefined;
 

@@ -119,10 +119,13 @@
 
 
 
-
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
+import { useAuth } from "../Context/userStore";
+import { toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
+
 
 const SignUpForm = () => {
   const [loading, setLoading] = useState(false);
@@ -130,6 +133,7 @@ const SignUpForm = () => {
   const [serverError, setServerError] = useState("");
 
   const navigate = useNavigate();
+  const { setAuth } = useAuth();
 
   const [formData, setFormData] = useState({
     username: "",
@@ -145,12 +149,8 @@ const SignUpForm = () => {
       [name]: value,
     }));
 
-    // Clear field-specific error on typing
-    setErrors((prev) => ({
-      ...prev,
-      [name]: "",
-    }));
-    setServerError(""); // Clear global error
+    setErrors((prev) => ({ ...prev, [name]: "" }));
+    setServerError("");
   };
 
   const validate = () => {
@@ -159,8 +159,8 @@ const SignUpForm = () => {
     if (!formData.email) newErrors.email = "Email is required";
     if (!formData.password) newErrors.password = "Password is required";
     if (!formData.passwordConfirm) newErrors.passwordConfirm = "Please confirm your password";
-    if (formData.password !== formData.passwordConfirm) newErrors.passwordConfirm = "Passwords do not match";
-
+    if (formData.password !== formData.passwordConfirm)
+      newErrors.passwordConfirm = "Passwords do not match";
     return newErrors;
   };
 
@@ -175,24 +175,29 @@ const SignUpForm = () => {
       return;
     }
 
-    try {
-      const response = await axios.post(
-        "http://localhost:3000/users/signup",
-        formData,
-        { withCredentials: true }
-      );
+    console.log(formData);
 
+    try {
+      const response = await axios.post("http://localhost:3000/users/signup", formData, {
+        withCredentials: true,
+      });
+
+      console.log(response.data)
+      const { data, token } = response.data;
+
+      setAuth({ user : data.user, token });
+      toast.success("Signup successful! An OTP is send to your mail. Please verify your email.");
       if (response.data.status === "success") {
         navigate("/verify");
       }
     } catch (error) {
       const errMsg = error?.response?.data?.message || "Something went wrong.";
+      toast.error(errMsg);
       setServerError(errMsg);
     } finally {
       setLoading(false);
     }
   };
-
   return (
     <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold text-center mb-6 text-black dark:text-white">Sign Up</h2>
@@ -275,3 +280,153 @@ const SignUpForm = () => {
 };
 
 export default SignUpForm;
+
+
+
+// import React, { useState } from "react";
+// import axios from "axios";
+// import { useNavigate } from "react-router-dom";
+// import { useAuth } from "../../Context/userStore";
+// import { toast } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
+
+// const SignUpForm = () => {
+//   const [loading, setLoading] = useState(false);
+//   const [errors, setErrors] = useState({});
+//   const [serverError, setServerError] = useState("");
+
+//   const navigate = useNavigate();
+//   const { setAuth } = useAuth();
+
+//   const [formData, setFormData] = useState({
+//     username: "",
+//     email: "",
+//     password: "",
+//     passwordConfirm: "",
+//   });
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({
+//       ...prev,
+//       [name]: value,
+//     }));
+
+//     setErrors((prev) => ({ ...prev, [name]: "" }));
+//     setServerError("");
+//   };
+
+//   const validate = () => {
+//     const newErrors = {};
+//     if (!formData.username) newErrors.username = "Username is required";
+//     if (!formData.email) newErrors.email = "Email is required";
+//     if (!formData.password) newErrors.password = "Password is required";
+//     if (!formData.passwordConfirm) newErrors.passwordConfirm = "Please confirm your password";
+//     if (formData.password !== formData.passwordConfirm)
+//       newErrors.passwordConfirm = "Passwords do not match";
+//     return newErrors;
+//   };
+
+//   const submitHandler = async (e) => {
+//     e.preventDefault();
+//     setLoading(true);
+
+//     const validationErrors = validate();
+//     if (Object.keys(validationErrors).length > 0) {
+//       setErrors(validationErrors);
+//       setLoading(false);
+//       return;
+//     }
+
+//     try {
+//       const response = await axios.post("http://localhost:3000/users/signup", formData, {
+//         withCredentials: true,
+//       });
+
+//       console.log(response.data)
+//       const { user, token } = response.data;
+
+//       setAuth({ user, token });
+//       toast.success("Signup successful! An OTP is send to your mail. Please verify your email.");
+//       if (response.data.status === "success") {
+//         navigate("/verify");
+//       }
+//     } catch (error) {
+//       const errMsg = error?.response?.data?.message || "Something went wrong.";
+//       toast.error(errMsg);
+//       setServerError(errMsg);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+//       <h2 className="text-2xl font-bold text-center mb-6 text-black dark:text-white">Sign Up</h2>
+
+//       {serverError && <div className="text-red-500 text-sm mb-4 text-center">{serverError}</div>}
+
+//       <form onSubmit={submitHandler} className="space-y-4">
+//         <div>
+//           <input
+//             name="username"
+//             type="text"
+//             placeholder="Username"
+//             value={formData.username}
+//             onChange={handleChange}
+//             className="w-full px-4 py-2 border rounded bg-gray-100 dark:bg-gray-700 text-black dark:text-white"
+//           />
+//           {errors.username && <p className="text-sm text-red-500 mt-1">{errors.username}</p>}
+//         </div>
+
+//         <div>
+//           <input
+//             name="email"
+//             type="email"
+//             placeholder="Email"
+//             value={formData.email}
+//             onChange={handleChange}
+//             className="w-full px-4 py-2 border rounded bg-gray-100 dark:bg-gray-700 text-black dark:text-white"
+//           />
+//           {errors.email && <p className="text-sm text-red-500 mt-1">{errors.email}</p>}
+//         </div>
+
+//         <div>
+//           <input
+//             name="password"
+//             type="password"
+//             placeholder="Password"
+//             value={formData.password}
+//             onChange={handleChange}
+//             className="w-full px-4 py-2 border rounded bg-gray-100 dark:bg-gray-700 text-black dark:text-white"
+//           />
+//           {errors.password && <p className="text-sm text-red-500 mt-1">{errors.password}</p>}
+//         </div>
+
+//         <div>
+//           <input
+//             name="passwordConfirm"
+//             type="password"
+//             placeholder="Confirm Password"
+//             value={formData.passwordConfirm}
+//             onChange={handleChange}
+//             className="w-full px-4 py-2 border rounded bg-gray-100 dark:bg-gray-700 text-black dark:text-white"
+//           />
+//           {errors.passwordConfirm && (
+//             <p className="text-sm text-red-500 mt-1">{errors.passwordConfirm}</p>
+//           )}
+//         </div>
+
+//         <button
+//           type="submit"
+//           disabled={loading}
+//           className="w-full py-2 px-4 bg-black text-white rounded hover:bg-gray-800"
+//         >
+//           {loading ? "Loading..." : "Sign Up"}
+//         </button>
+//       </form>
+//     </div>
+//   );
+// };
+
+// export default SignUpForm;
