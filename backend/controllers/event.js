@@ -123,3 +123,39 @@ module.exports.verifyEntry = async (req, res) => {
         res.status(500).json({ success: false, message: 'Server error.' });
     }
 };
+
+module.exports.addFeedback = async (req, res) => {
+    const { eventId } = req.params.id;
+    const { review, rating } = req.body;
+
+    console.log("eventId:", eventId);
+    console.log("review:", review);
+    console.log("rating:", rating);
+
+    console.log("DEBUG: req.params =", req.params.id);
+console.log("DEBUG: req.url =", req.url);
+console.log("DEBUG: req.originalUrl =", req.originalUrl);
+
+
+   
+
+    try {
+        const feedback = new Feedback({
+            event: eventId,
+            user: "666666666666666666666666", // TEMP: replace with a valid User _id from your DB
+            review,
+            rating
+        });
+
+        const savedFeedback = await feedback.save();
+
+        res.status(201).json({
+            message: "Feedback added successfully!",
+            feedback: savedFeedback
+        });
+    } catch (error) {
+        console.error('Error adding feedback:', error);
+        res.status(500).json({ message: "Error adding feedback", error: error.message });
+    }
+};
+

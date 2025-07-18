@@ -30,7 +30,15 @@ const eventSchema = new mongoose.Schema({
       timestamp: { type: Date, default: Date.now }
     }
   ],
-  feedback: String
+  feedback:[
+    {
+      type : mongoose.Schema.Types.ObjectId,
+      ref: 'Feedback'
+    }
+  ],
+  views: { type: Number, default: 0 },
+  registrations: { type: Number, default: 0 },
+  commentsCount: { type: Number, default: 0 }
 }, { timestamps: true });
 
 module.exports = mongoose.model('Event', eventSchema);

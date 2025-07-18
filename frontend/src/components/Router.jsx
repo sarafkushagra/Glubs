@@ -4,7 +4,6 @@ import AuthCard from './AuthCard/AuthCard';
 import SignInForm from './AuthCard/SignIn';
 import SignUpForm from './AuthCard/SignUp';
 import LandingPage from './Pages/Home';
-import OrganizerSignIn from './ClubAdmin/ClubAdmin';
 import About from './Pages/About';
 import EventLanding from './Events/EventLanding';
 import EventDetails from './Events/EventDetails';
@@ -30,6 +29,7 @@ import AddClub from './Clubs/AddClub';
 
 import NotFound from './Pages/NotFound';
 import EmailVerificationPage from './AuthCard/EmailVarificationPage';
+import AddFeedback from './Events/AddFeedback';
 
 export default function Router() {
   return (
@@ -44,12 +44,11 @@ export default function Router() {
       <Route path='/events' element={<EventLanding />} />
       <Route path="/events/add" element={<AddEvent />} />
       <Route path="/events/:eventId" element={<EventDetails />} />
+      <Route path="/events/:eventId/add-feedback" element={<AddFeedback />} />
       <Route path="/events/edit/:eventId" element={<EditEvent />} />
 
       <Route path="/qr-gen" element={<QRCodeGenerator />} />
       <Route path="/qr-scan" element={<QRScanner />} />
-
-      <Route path='/clubadmin/details' element={<OrganizerSignIn />} />
 
       <Route path="/clubs" element={<AllClubs />} />
       <Route path="/clubs/:clubId" element={<ClubDetails />} />

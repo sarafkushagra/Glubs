@@ -4,7 +4,6 @@ const userController = require('../controllers/user');
 const { signup, verifyAccount, resentOTP, login, logout, forgetPassword, resetPassword } = require('../controllers/auth');
 const { isAuthenticated } = require('../middlewares/auth');
 
-router.get('/login', userController.showLoginForm);
 router.get('/', userController.showAllUsers);
 router.get('/:id', userController.showUser);
 router.post('/', userController.createUser);

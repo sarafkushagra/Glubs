@@ -1,65 +1,36 @@
- require("dotenv").config();
+require("dotenv").config();
 const express = require("express");
 const app = express();
-const path = require("path");
 const cors = require("cors");
-const ejs = require("ejs");
-const methodOverride = require("method-override");
-const cookieParser = require("cookie-parser"); // ✅ Import this
-
-
+const cookieParser = require("cookie-parser");
 app.use(cookieParser());
-
-app.set("view engine", "ejs");
-app.set("views", path.join(__dirname, "views"));
-
-app.use(express.static(path.join(__dirname, "public")));
 
 const mongoose = require("mongoose");
 
-const dburl = process.env.ATLASDB_URL;
+const dburl = process.env.MONGO_URL;
 
-app.use(cors({ origin: "http://localhost:5174", credentials: true }));
-  
+app.use(cors({ origin: "http://localhost:5173", credentials: true }));
+
 main().then(() => {
   console.log("Connected to MongoDB");
 })
-.catch(err => console.log(err));
+  .catch(err => console.log(err));
 
 async function main() {
-  await mongoose.connect(process.env.MONGO_URI);
+  await mongoose.connect(dburl);
 }
-app.get("/", (req, res) => {
-  // res.send("Welcome to the Glubs Backend API"); 
-  res.render("html/index.ejs");  
-});
-
-
 
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
-
 const userRouter = require("./routers/user");
 app.use("/users", userRouter);
-
-const clubAdminRouter = require("./routers/clubadmin");
-app.use("/clubadmins", clubAdminRouter);
 
 const eventRouter = require("./routers/event");
 app.use("/event", eventRouter);
 
-const eventRegistrationRouter = require("./routers/eventreg");
-app.use("/eventreg", eventRegistrationRouter);
-
-const eventStatsRouter = require("./routers/eventstats");
-app.use("/eventstat", eventStatsRouter);
-
 const clubRouter = require("./routers/club");
 app.use("/clubs", clubRouter);
-
-const announcementRouter = require("./routers/announcement");
-app.use("/announcement", announcementRouter);
 
 const feedbackRouter = require("./routers/feedback");
 app.use("/feedback", feedbackRouter);

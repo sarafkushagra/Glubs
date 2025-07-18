@@ -8,6 +8,7 @@ router.get('/:id', eventController.showEvent);
 router.put('/:id', eventController.updateEvent);
 router.delete('/:id', eventController.deleteEvent);
 router.post('/verify', eventController.verifyEntry);
+router.post('/:id/add-feedback', eventController.addFeedback);
 
 module.exports = router;
 

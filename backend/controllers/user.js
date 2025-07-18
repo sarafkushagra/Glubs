@@ -1,9 +1,5 @@
 const User = require('../schema/user');
 
-module.exports.showLoginForm = (req, res) => {
-    res.render('html/login.ejs');
-};
-
 module.exports.showAllUsers = async (req, res) => {
     const users = await User.find({});
     res.json(users);
