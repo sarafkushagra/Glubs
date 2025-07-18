@@ -115,17 +115,6 @@ for (let auth of authClubAdmins) {
         events.push(event);
     }
 
-    // Seed Notifications
-    for (let i = 0; i < 100; i++) {
-        const notif = new notification({
-            user: faker.helpers.arrayElement(userDocs)._id,
-            message: faker.lorem.sentence(),
-            type: faker.helpers.arrayElement(['reminder', 'approval', 'announcement']),
-            isRead: faker.datatype.boolean(),
-            event: faker.helpers.arrayElement(events)._id
-        });
-        await notif.save();
-    }
 
     // Seed Feedback
     for (let i = 0; i < 100; i++) {
