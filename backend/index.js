@@ -35,8 +35,12 @@ app.use("/clubs", clubRouter);
 const feedbackRouter = require("./routers/feedback");
 app.use("/feedback", feedbackRouter);
 
-const notificationRouter = require("./routers/notification");
-app.use("/notification", notificationRouter);
+const hostRouter = require("./routers/hostRoutes");
+app.use("/hosts", hostRouter);
+
+
+//const notificationRouter = require("./routers/notification");
+//app.use("/notification", notificationRouter);
 
 app.listen(3000, () => {
   console.log("Server is running on port 3000");

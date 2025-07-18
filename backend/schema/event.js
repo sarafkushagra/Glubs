@@ -41,4 +41,5 @@ const eventSchema = new mongoose.Schema({
   commentsCount: { type: Number, default: 0 }
 }, { timestamps: true });
 
-module.exports = mongoose.model('Event', eventSchema);
+// ...existing code...
+module.exports = mongoose.models.Event || mongoose.model('Event', eventSchema);
