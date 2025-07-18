@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
 import img1 from "../images/Adobe Express - file (1).png"
-
+import { CgProfile } from "react-icons/cg";
 export default function EventNavbar() {
     const [menuOpen, setMenuOpen] = useState(false);
     const location = useLocation();
@@ -46,6 +46,9 @@ export default function EventNavbar() {
                     </li>
                 ))}
             </ul>
+
+            <button className="ml-6 text-gray-200  text-2xl"><Link to={"/profile"}><CgProfile size={24} /></Link> </button>
+                        
         </nav>
     );
 }

@@ -26,6 +26,22 @@ export default function EventsPage() {
   const isUpcoming = (date) => dayjs(date).isAfter(dayjs());
   const isPast = (date) => dayjs(date).isBefore(dayjs());
 
+  // const handleRegister = async (eventId) => {
+  //   try {
+  //     const res = await axios.post(
+  //       `http://localhost:3000/event/${eventId}/register`,
+  //       {},
+  //       { withCredentials: true }
+  //     );
+  //     alert(res.data.message || "Successfully registered!");
+  //   } catch (error) {
+  //     console.error("Error registering for event:", error);
+  //     console.log(eventId);
+  //     alert(error.response?.data?.message || "Failed to register.");
+  //   }
+  // };
+
+
   const filteredEvents = events.filter((event) => {
     const searchMatch =
       event.title.toLowerCase().includes(search.toLowerCase()) ||
@@ -62,8 +78,8 @@ export default function EventsPage() {
             key={tab}
             onClick={() => setFilterTab(tab)}
             className={`px-4 py-2 rounded ${filterTab === tab
-                ? 'bg-purple-700 text-white'
-                : 'bg-white text-purple-700 border border-purple-700'
+              ? 'bg-purple-700 text-white'
+              : 'bg-white text-purple-700 border border-purple-700'
               }`}
           >
             {tab}
@@ -97,35 +113,54 @@ export default function EventsPage() {
       <div className="pb-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-6">
         {filteredEvents.length > 0 ? (
           filteredEvents.map((event) => (
-            <div key={event._id} className="bg-white rounded-lg shadow hover:shadow-lg transition transform hover:-translate-y-1">
-              <div className="relative h-40 bg-gray-200 rounded-t-lg overflow-hidden">
-                {event.media && event.media.length > 0 ? event.media.map((m, i) => (
-                  m.type === 'image' ? (
-                    <img key={i} src={m.url} alt="event media" className="w-full h-full object-contain object-center rounded" />
-                  ) : (
-                    <video key={i} src={m.url} controls className="w-24 h-24 rounded" />
-                  )
-                )) : 'No media'}
-                <span className="absolute top-2 left-2 bg-purple-700 text-white px-3 py-1 text-xs rounded-full">
+            <div
+              key={event._id}
+              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-purple-100"
+            >
+              <div className="relative h-48 bg-gray-100 rounded-t-xl overflow-hidden">
+                {event.media && event.media.length > 0 ? (
+                  <img
+                    src={event.media[0].url}
+                    alt="event media"
+                    className="w-full h-full object-cover object-center"
+                  />
+                ) : (
+                  <div className="flex items-center justify-center h-full text-gray-400">
+                    No Image
+                  </div>
+                )}
+                <span className="absolute top-2 left-2 bg-purple-600 text-white px-3 py-1 text-xs rounded-full">
                   {event.eventType}
                 </span>
-                <span className="absolute top-2 right-2 bg-white px-3 py-1 text-xs rounded">
-                  {dayjs(event.date).format('MMM D')}
+                <span className="absolute top-2 right-2 bg-white px-3 py-1 text-xs rounded-full border">
+                  {dayjs(event.date).format('MMM D, YYYY')}
                 </span>
               </div>
-              <div className="p-4">
-                <h3 className="text-lg font-bold">{event.title}</h3>
-                <p className="text-sm text-gray-500">{event.description.slice(0, 80)}...</p>
-                <div className="text-xs text-gray-600 mt-2">
-                  <p><strong>Location:</strong> {event.venue}</p>
-                  <p><strong>Time:</strong> {event.time}</p>
+              <div className="p-4 flex flex-col justify-between h-56">
+                <div>
+                  <h3 className="text-lg font-bold text-purple-800 mb-1">{event.title}</h3>
+                  <p className="text-sm text-gray-600 mb-2">
+                    {event.description.length > 100 ? event.description.slice(0, 100) + "..." : event.description}
+                  </p>
+                  <div className="text-xs text-gray-500 space-y-1">
+                    <p><strong>Venue:</strong> {event.venue || "TBA"}</p>
+                    <p><strong>Time:</strong> {event.time || "TBA"}</p>
+                  </div>
                 </div>
-                <a
-                  href={`/events/${event._id}`}
-                  className="block text-center bg-purple-700 text-white py-2 mt-4 rounded hover:bg-purple-800"
-                >
-                  View Details
-                </a>
+                <div className="mt-4 flex gap-2">
+                  <a
+                    href={`/events/${event._id}`}
+                    className="flex-1 bg-purple-600 text-white text-center py-2 rounded hover:bg-purple-700 text-sm transition"
+                  >
+                    View Details
+                  </a>
+                  <button
+                    onClick={() => handleRegister(event._id)}
+                    className="flex-1 bg-green-600 text-white text-center py-2 rounded hover:bg-green-700 text-sm transition"
+                  >
+                    Register
+                  </button>
+                </div>
               </div>
             </div>
           ))
@@ -134,8 +169,9 @@ export default function EventsPage() {
         )}
       </div>
 
+
       {/* Footer */}
-      <Footer/>
+      <Footer />
     </div>
   );
 }

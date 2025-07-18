@@ -1,5 +1,6 @@
 const Event = require("../schema/event");
 const Feedback = require('../schema/feedback');
+const mongoose = require('mongoose');
 
 module.exports.showAllEvents = async (req, res) => {
     const events = await Event.find({});
@@ -133,11 +134,11 @@ module.exports.addFeedback = async (req, res) => {
     console.log("rating:", rating);
 
     console.log("DEBUG: req.params =", req.params.id);
-console.log("DEBUG: req.url =", req.url);
-console.log("DEBUG: req.originalUrl =", req.originalUrl);
+    console.log("DEBUG: req.url =", req.url);
+    console.log("DEBUG: req.originalUrl =", req.originalUrl);
 
 
-   
+
 
     try {
         const feedback = new Feedback({
@@ -158,4 +159,79 @@ console.log("DEBUG: req.originalUrl =", req.originalUrl);
         res.status(500).json({ message: "Error adding feedback", error: error.message });
     }
 };
+
+module.exports.getUserParticipatedEvents = async (req, res) => {
+    const { userid } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(userid)) {
+        return res.status(400).json({ message: "Invalid user ID" });
+    }
+    try {
+        const events = await Event.find({ registeredUsers: userid })
+            .select('title date venue eventType')
+            .sort({ date: -1 }); // Latest first
+        res.json(events);
+    } catch (error) {
+        console.error('Error fetching participated events:', error);
+        res.status(500).json({ message: "Error fetching participated events", error: error.message });
+    }
+};
+
+module.exports.getUserCompletedEvents = async (req, res) => {
+    const { userid } = req.params;
+    try {
+        const events = await Event.find({
+            registeredUsers: (userid),
+            date: { $lt: new Date() }
+        }).select('title date venue eventType').sort({ date: -1 });
+        res.json(events);
+    } catch (error) {
+        console.error('Error fetching completed events:', error);
+        res.status(500).json({ message: 'Error fetching completed events', error: error.message });
+    }
+};
+
+module.exports.getUserUpcomingEvents = async (req, res) => {
+    const { userid } = req.params;
+    try {
+        const events = await Event.find({
+            registeredUsers: (userid),
+            date: { $gte: new Date() }
+        }).select('title date venue eventType').sort({ date: 1 });
+        res.json(events);
+    } catch (error) {
+        console.error('Error fetching upcoming events:', error);
+        res.status(500).json({ message: 'Error fetching upcoming events', error: error.message });
+    }
+};
+
+// exports.registerUserToEvent = async (req, res) => {
+//     const eventId = req.params.id;
+//     const userId = req.user._id; // ensure req.user is populated correctly
+
+//     try {
+//         const event = await Event.findById(eventId);
+//         if (!event) {
+//             return res.status(404).json({ message: 'Event not found' });
+//         }
+
+//         // Defensive check
+//         if (!event.registeredUsers) {
+//             event.registeredUsers = [];
+//         }
+
+//         if (!event.registeredUsers.includes(userId)) {
+//             event.registeredUsers.push(userId);
+//             await event.save();
+//         }
+
+//         res.status(200).json({ message: 'Successfully registered for the event.' });
+//     } catch (error) {
+//         console.error('Error registering user to event:', error);
+//         res.status(500).json({
+//             message: 'Error registering user to event',
+//             error: error.message,
+//             stack: error.stack
+//         });
+//     }
+// };
 

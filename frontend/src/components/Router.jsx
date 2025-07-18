@@ -13,7 +13,7 @@ import EventAnalytics from './Features/EventAnalytics';
 import Organizers from './Features/Organizers';
 import QRCodeGenerator from './QR/QR_Generator';
 import QRScanner from './QR/QR_Scanner';
-import MyProfile from './Pages/MyProfile';
+import MyProfile from './Users/MyProfile';
 import HostOpportunityPage from "./Hosts/HostLandingPage";
 import HostForm from "./Hosts/HostForm";
 import AddEvent from './Events/AddEvent';
@@ -26,11 +26,13 @@ import ClubEvents from './Clubs/ClubEvents';
 import AllClubs from './Clubs/AllClubs';
 import EditClub from './Clubs/EditClub';
 import AddClub from './Clubs/AddClub';
-
+import AllUsers from './Users/AllUsers';
 import NotFound from './Pages/NotFound';
 import EmailVerificationPage from './AuthCard/EmailVarificationPage';
 import AddFeedback from './Events/AddFeedback';
-import ProtectedRoute from './ProtectedRoute';
+// import ProtectedRoute from './ProtectedRoute';
+import UsersDetails from './Users/UsersDetails';
+import EditUser from './Users/EditUser';
 
 export default function Router() {
   return (
@@ -48,10 +50,13 @@ export default function Router() {
       <Route path="/features/organizers" element={<Organizers />} />
       <Route path='/about' element={<About />} />
       <Route path="/host" element={<HostOpportunityPage />} />
+      <Route path="/allusers" element={<AllUsers />} />
+      <Route path="/users/details/:id" element={<UsersDetails />} />
+      <Route path="/users/edit/:id" element={<EditUser />} />
       {/* For Wrong URL */}
       <Route path="*" element={<NotFound />} />
 
-      <Route element={<ProtectedRoute />}>
+      {/* <Route element={<ProtectedRoute />}> */}
         <Route path="/clubadmin/dash" element={<ClubAdminDashboard />} />
         <Route path="/events/add" element={<AddEvent />} />
         <Route path="/events/:eventId" element={<EventDetails />} />
@@ -69,7 +74,7 @@ export default function Router() {
         <Route path="/host/dash" element={<Dashboard />} />
         <Route path="/host/dashswitch" element={<DashSwitch />} />
         <Route path="/host/hostform" element={<HostForm />} />
-      </Route>
+      {/* </Route> */}
     </Routes>
   )
 }
