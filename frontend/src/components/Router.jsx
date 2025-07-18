@@ -30,6 +30,7 @@ import AddClub from './Clubs/AddClub';
 import NotFound from './Pages/NotFound';
 import EmailVerificationPage from './AuthCard/EmailVarificationPage';
 import AddFeedback from './Events/AddFeedback';
+import ProtectedRoute from './ProtectedRoute';
 
 export default function Router() {
   return (
@@ -40,40 +41,35 @@ export default function Router() {
       <Route path='/auth/signin' element={<SignInForm />} />
       <Route path='/auth/signup' element={<SignUpForm />} />
       <Route path='/verify' element={<EmailVerificationPage />} />
-
       <Route path='/events' element={<EventLanding />} />
-      <Route path="/events/add" element={<AddEvent />} />
-      <Route path="/events/:eventId" element={<EventDetails />} />
-      <Route path="/events/:eventId/add-feedback" element={<AddFeedback />} />
-      <Route path="/events/edit/:eventId" element={<EditEvent />} />
-
-      <Route path="/qr-gen" element={<QRCodeGenerator />} />
-      <Route path="/qr-scan" element={<QRScanner />} />
-
       <Route path="/clubs" element={<AllClubs />} />
-      <Route path="/clubs/:clubId" element={<ClubDetails />} />
-      <Route path="/clubs/edit/:clubId" element={<EditClub />} />
-      <Route path="/clubs/add" element={<AddClub />} />
-      <Route path="/clubs/:clubId/members" element={<ClubMembers />} />
-      <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
-      
       <Route path="/features/qr-registration" element={<QRRegistration />} />
       <Route path="/features/event-analytics" element={<EventAnalytics />} />
       <Route path="/features/organizers" element={<Organizers />} />
-      
       <Route path='/about' element={<About />} />
-
       <Route path="/host" element={<HostOpportunityPage />} />
-      <Route path="/host/hostform" element={<HostForm />} />
-{/* DashBoard */}
-      <Route path="/clubadmin/dash" element={<ClubAdminDashboard />} />
-      <Route path="/host/dash" element={<Dashboard />} />
-      <Route path="/host/dashswitch" element={<DashSwitch/>} />
+      {/* For Wrong URL */}
+      <Route path="*" element={<NotFound />} />
 
-      <Route path="/dashboard/profile" element={<MyProfile />} />
-
-{/* For Wrong URL */}
-      <Route path ="*" element={<NotFound />} />
+      <Route element={<ProtectedRoute />}>
+        <Route path="/clubadmin/dash" element={<ClubAdminDashboard />} />
+        <Route path="/events/add" element={<AddEvent />} />
+        <Route path="/events/:eventId" element={<EventDetails />} />
+        <Route path="/events/:eventId/add-feedback" element={<AddFeedback />} />
+        <Route path="/events/edit/:eventId" element={<EditEvent />} />
+        <Route path="/qr-gen" element={<QRCodeGenerator />} />
+        <Route path="/qr-scan" element={<QRScanner />} />
+        <Route path="/clubs/:clubId" element={<ClubDetails />} />
+        <Route path="/clubs/edit/:clubId" element={<EditClub />} />
+        <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
+        <Route path="/clubs/add" element={<AddClub />} />
+        <Route path="/clubs/:clubId/members" element={<ClubMembers />} />
+        <Route path="/profile" element={<MyProfile />} />
+        {/* DashBoard */}
+        <Route path="/host/dash" element={<Dashboard />} />
+        <Route path="/host/dashswitch" element={<DashSwitch />} />
+        <Route path="/host/hostform" element={<HostForm />} />
+      </Route>
     </Routes>
   )
 }

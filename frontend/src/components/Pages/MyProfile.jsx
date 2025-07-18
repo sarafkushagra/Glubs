@@ -1,6 +1,7 @@
 import React from "react";
 
 export default function MyProfile() {
+  
   // Dummy data (replace with real API or context later)
   const user = {
     name: "John Doe",

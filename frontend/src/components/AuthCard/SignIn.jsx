@@ -36,11 +36,15 @@ const SignInForm = ({ onSwitch }) => {
 
       const actualUserData = response.data;
 
+      
       if (actualUserData.status === "success") {
+        localStorage.setItem("token", actualUserData.token);
+        localStorage.setItem("username", actualUserData.data.user.username);
         navigate("/");
       }
 
-      
+
+
     } catch (error) {
       console.error("Login failed:", error.response?.data || error.message);
     } finally {

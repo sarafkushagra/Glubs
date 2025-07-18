@@ -1,10 +1,33 @@
-import React, { useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import React, { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { QrCode } from "lucide-react";
-import img1 from "../images/Adobe Express - file (1).png"
+import img1 from "../images/Adobe Express - file (1).png";
+import { CgProfile } from "react-icons/cg";
+
 export default function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
   const location = useLocation();
+  const navigate = useNavigate();
+
+  const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
+  const [username, setUsername] = useState(localStorage.getItem("username"));
+
+  // Sync login state on localStorage change (tab switching)
+  useEffect(() => {
+    const checkAuth = () => {
+      setIsLoggedIn(!!localStorage.getItem("token"));
+      setUsername(localStorage.getItem("username"));
+    };
+    window.addEventListener("storage", checkAuth);
+    return () => window.removeEventListener("storage", checkAuth);
+  }, []);
+
+  const handleLogout = () => {
+    localStorage.removeItem("token");
+    localStorage.removeItem("username");
+    setIsLoggedIn(false);
+    navigate("/auth");
+  };
 
   const navLinks = [
     { title: "Home", to: "/" },
@@ -12,7 +35,6 @@ export default function Navbar() {
     { title: "Events", to: "/events" },
     { title: "Clubs", to: "/clubs" },
     { title: "Hosts", to: "/host" },
-    { title: "Login", to: "/auth", isButton: true }
   ];
 
   return (
@@ -33,20 +55,39 @@ export default function Navbar() {
             <Link
               to={nav.to}
               className={`text-[16px] font-medium transition ${
-                nav.isButton
-                  ? "bg-white text-indigo-700 px-4 py-1.5 rounded-md hover:bg-indigo-100"
-                  : location.pathname === nav.to
+                location.pathname === nav.to
                   ? "text-white"
                   : "text-gray-200 hover:text-white"
               }`}
             >
               {nav.title}
             </Link>
-            {!nav.isButton && (
-              <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300 ease-in-out"></span>
-            )}
+            <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300 ease-in-out"></span>
           </li>
         ))}
+
+        {isLoggedIn ? (
+          <>
+            <li className="text-gray-200  text-2xl"><Link to={"/profile"}><CgProfile  /></Link> </li>
+            <li>
+              <button
+                onClick={handleLogout}
+                className="bg-red-500 text-white px-4 py-1.5 rounded-md hover:bg-red-600 transition"
+              >
+                Logout
+              </button>
+            </li>
+          </>
+        ) : (
+          <li>
+            <Link
+              to="/auth"
+              className="bg-white text-indigo-700 px-4 py-1.5 rounded-md hover:bg-indigo-100 transition"
+            >
+              Get Started
+            </Link>
+          </li>
+        )}
 
         {/* QR Icon */}
         <li>
@@ -80,9 +121,7 @@ export default function Navbar() {
                   to={nav.to}
                   onClick={() => setMenuOpen(false)}
                   className={`text-[16px] font-medium ${
-                    nav.isButton
-                      ? "bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
-                      : location.pathname === nav.to
+                    location.pathname === nav.to
                       ? "text-indigo-700 font-semibold"
                       : "text-gray-700 hover:text-indigo-700"
                   }`}
@@ -91,11 +130,37 @@ export default function Navbar() {
                 </Link>
               </li>
             ))}
+            {isLoggedIn ? (
+              <>
+                <li className="text-gray-700">Hi, {username}!</li>
+                <li>
+                  <button
+                    onClick={() => {
+                      handleLogout();
+                      setMenuOpen(false);
+                    }}
+                    className="bg-red-500 text-white px-4 py-2 rounded-md hover:bg-red-600 w-full text-left"
+                  >
+                    Logout
+                  </button>
+                </li>
+              </>
+            ) : (
+              <li>
+                <Link
+                  to="/auth"
+                  onClick={() => setMenuOpen(false)}
+                  className="bg-indigo-600 text-white px-4 py-2 rounded-md hover:bg-indigo-700"
+                >
+                  Get Started
+                </Link>
+              </li>
+            )}
             <li>
               <Link
                 to="/scan"
-                className="text-indigo-600 hover:text-indigo-800 flex items-center gap-2"
                 onClick={() => setMenuOpen(false)}
+                className="text-indigo-600 hover:text-indigo-800 flex items-center gap-2"
               >
                 <QrCode className="w-5 h-5" />
                 Mark Attendance
