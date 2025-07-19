@@ -66,7 +66,7 @@ const EmailVerificationPage = () => {
       );
       toast.info("OTP sent again to your email!");
     } catch (err) {
-      toast.error("Resend failed.");
+      toast.error("This accound is already verified");
     }
   };
 

@@ -23,10 +23,20 @@ const ProtectedRoute = ({ allowedRoles }) => {
     toast.error("You are not authorized to access this page");
     return <Navigate to="/unauthorized" replace />;
   }
+
+  // check for is user previously signup ot not 
+  if (!userData && !token) {
+    return <Navigate to="/" replace />;
+  }
+
+  // check if there is no token means user comes firsst time here
   if (!token) {
     return <Navigate to="/auth" replace />;
   }
+
   localStorage.setItem("redirectAfterVerify", location.pathname);
+
+  // check is email verification is done for current user
   if (!userData?.isVerified) {
     localStorage.setItem("redirectAfterVerify", location.pathname);
     return <Navigate to="/verify" replace />;

@@ -11,7 +11,6 @@ const SignInForm = ({ onSwitch }) => {
   const { setAuth, updateUser } = useAuth();
   const navigate = useNavigate();
 
-
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -26,13 +25,16 @@ const SignInForm = ({ onSwitch }) => {
         formData,
         { withCredentials: true }
       );
-      console.log(res.data);
+      console.log(res.data)
+      const { data, token } = res.data;
 
-      const { data, token } = response.data;
       setAuth({ user : data.user, token });
-
-      toast.success("Login successful");
-      navigate("/events"); // or wherever you want to go
+      toast.success("SignIn successful!");
+      const redirectPath =
+        localStorage.getItem("redirectAfterVerify") || "/events";
+      localStorage.removeItem("redirectAfterVerify");
+      console.log(redirectPath)
+      navigate(redirectPath);
     } catch (err) {
       const message =
         err.response?.data?.message || "Invalid credentials. Try again.";
