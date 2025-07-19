@@ -70,50 +70,51 @@ const EmailVerificationPage = () => {
     }
   };
 
-  return (
-    <div className="w-full min-h-screen flex justify-center items-center bg-gray-100 dark:bg-black px-4">
-      <motion.div
-        className="bg-white dark:bg-gray-800 p-8 rounded-lg shadow-xl w-full max-w-md"
-        initial={{ opacity: 0, y: 20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
+return (
+  <div className="w-full min-h-screen flex justify-center items-center bg-gray-100 dark:bg-black px-4">
+    <motion.div
+      className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700"
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4 }}
+    >
+      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white tracking-tight">
+        Verify your Email
+      </h2>
+
+      <div className="flex justify-center gap-4 mb-6">
+        {otp.map((digit, index) => (
+          <input
+            key={index}
+            type="text"
+            maxLength={1}
+            value={digit}
+            ref={(el) => (inputsRef.current[index] = el)}
+            onChange={(e) => handleChange(e, index)}
+            onKeyDown={(e) => handleKeyDown(e, index)}
+            className="w-12 h-14 text-center text-xl border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
+          />
+        ))}
+      </div>
+
+      <button
+        onClick={verifyHandler}
+        disabled={loading}
+        className="w-full bg-sky-600 hover:bg-sky-700 disabled:opacity-60 text-white font-medium py-2 rounded-lg transition duration-200"
       >
-        <h2 className="text-2xl font-semibold text-center mb-6 text-gray-800 dark:text-white">
-          Verify your Email
-        </h2>
+        {loading ? "Verifying..." : "Verify"}
+      </button>
 
-        <div className="flex justify-center gap-4 mb-6">
-          {otp.map((digit, index) => (
-            <input
-              key={index}
-              type="text"
-              maxLength={1}
-              value={digit}
-              ref={(el) => (inputsRef.current[index] = el)}
-              onChange={(e) => handleChange(e, index)}
-              onKeyDown={(e) => handleKeyDown(e, index)}
-              className="w-12 h-14 text-center border-2 border-gray-300 rounded-md dark:bg-gray-700 dark:text-white text-xl focus:outline-none focus:ring-2 focus:ring-blue-500 transition"
-            />
-          ))}
-        </div>
+      <button
+        onClick={resendHandler}
+        className="w-full mt-3 text-sm text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300 font-medium transition duration-150"
+      >
+        Resend OTP
+      </button>
+    </motion.div>
+  </div>
+);
+}
 
-        <button
-          onClick={verifyHandler}
-          disabled={loading}
-          className="w-full bg-blue-600 hover:bg-blue-700 text-white py-2 rounded transition duration-200"
-        >
-          {loading ? "Verifying..." : "Verify"}
-        </button>
-
-        <button
-          onClick={resendHandler}
-          className="w-full mt-2 text-sm text-blue-500 hover:underline"
-        >
-          Resend OTP
-        </button>
-      </motion.div>
-    </div>
-  );
-};
 
 export default EmailVerificationPage;

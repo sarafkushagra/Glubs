@@ -19,12 +19,10 @@ const ProtectedRoute = ({ allowedRoles }) => {
     localStorage.removeItem("redirectAfterVerify");
   }
 
-//   if (!allowedRoles.includes(userData?.role)) {
-//     // Optional: redirect unauthorized users to a unauthorized page then to the HomePage
-//     toast.error("You are not authorized to access this page")
-//     return <Navigate to="/unauthorized" replace />;
-//   }
-
+  if (allowedRoles && !allowedRoles.includes(userData?.role)) {
+    toast.error("You are not authorized to access this page");
+    return <Navigate to="/unauthorized" replace />;
+  }
   if (!token) {
     return <Navigate to="/auth" replace />;
   }
