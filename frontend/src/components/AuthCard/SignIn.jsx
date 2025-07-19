@@ -46,10 +46,10 @@ const SignInForm = ({ onSwitch }) => {
 
 
   return (
-    <div className="w-full max-w-md p-8 bg-white dark:bg-gray-900 rounded-xl shadow">
+    <div className="w-full max-w-md p-8 bg-white rounded-xl shadow">
       <div
         onClick={() => navigate("/")}
-        className="cursor-pointer text-2xl text-gray-600 dark:text-white mb-4"
+        className="cursor-pointer text-2xl text-gray-600 mb-4"
       >
         <HiMiniHome />
       </div>

@@ -71,14 +71,14 @@ const EmailVerificationPage = () => {
   };
 
 return (
-  <div className="w-full min-h-screen flex justify-center items-center bg-gray-100 dark:bg-black px-4">
+  <div className="w-full min-h-screen flex justify-center items-center bg-gray-100 px-4">
     <motion.div
-      className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200 dark:border-gray-700"
+      className="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md border border-gray-200"
       initial={{ opacity: 0, y: 20 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.4 }}
     >
-      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 dark:text-white tracking-tight">
+      <h2 className="text-2xl font-bold text-center mb-6 text-gray-800 tracking-tight">
         Verify your Email
       </h2>
 
@@ -92,7 +92,7 @@ return (
             ref={(el) => (inputsRef.current[index] = el)}
             onChange={(e) => handleChange(e, index)}
             onKeyDown={(e) => handleKeyDown(e, index)}
-            className="w-12 h-14 text-center text-xl border-2 border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 dark:text-white focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
+            className="w-12 h-14 text-center text-xl border-2 border-gray-300 rounded-lg bg-white text-black focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
           />
         ))}
       </div>
@@ -107,7 +107,7 @@ return (
 
       <button
         onClick={resendHandler}
-        className="w-full mt-3 text-sm text-sky-600 hover:text-sky-700 dark:text-sky-400 dark:hover:text-sky-300 font-medium transition duration-150"
+        className="w-full mt-3 text-sm text-sky-600 hover:text-sky-700 font-medium transition duration-150"
       >
         Resend OTP
       </button>
