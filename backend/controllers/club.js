@@ -1,5 +1,6 @@
 const Club = require('../schema/club');
 const Event = require('../schema/event'); // Assuming you have an Event schema defined
+const mongoose = require('mongoose');
 
 module.exports.showAllClubs = async (req, res) => {
     const clubs = await Club.find();
@@ -44,13 +45,9 @@ module.exports.showClubMembers = async (req, res) => {
 }
 
 module.exports.showClubEvents = async (req, res) => {
-     try {
+    try {
         const { clubId } = req.params;
-        console.log("Fetching events for clubId:", clubId);
-
-        const events = await Event.find({ createdBy: clubId });
-        console.log("Found events:", events);
-
+        const events = await Event.find({ club: clubId }).populate('createdBy');
         res.json(events);
     } catch (error) {
         console.error("Error in getClubEvents:", error);

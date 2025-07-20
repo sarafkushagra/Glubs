@@ -43,6 +43,7 @@ const userSchema = new mongoose.Schema(
       type: String,
       enum: ["student", "club-admin", "admin"],
       default: "student",
+      required: true,
     },
 
     age: {
@@ -51,6 +52,9 @@ const userSchema = new mongoose.Schema(
 
     yearOfStudy: {
       type : String,
+      enum: ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"],
+      default: "1st Year",  
+      required: true
     },
 
     department: {

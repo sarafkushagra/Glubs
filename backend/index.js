@@ -1,49 +1,56 @@
 require("dotenv").config();
 const express = require("express");
-const app = express();
 const cors = require("cors");
 const cookieParser = require("cookie-parser");
-app.use(cookieParser());
-
 const mongoose = require("mongoose");
 
-const dburl = process.env.MONGO_URL;
+const app = express();
 
+// Middleware
 app.use(cors({ origin: "http://localhost:5173", credentials: true }));
-
-main().then(() => {
-  console.log("Connected to MongoDB");
-})
-  .catch(err => console.log(err));
-
-async function main() {
-  await mongoose.connect(dburl);
-}
-
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
+app.use(cookieParser());
 
-const userRouter = require("./routers/user");
-app.use("/users", userRouter);
+// MongoDB Connection
+const dburl = process.env.MONGO_URL;
+async function connectDB() {
+    try {
+        await mongoose.connect(dburl);
+        console.log("✅ Connected to MongoDB");
+    } catch (err) {
+        console.error("❌ MongoDB connection error:", err);
+        process.exit(1);
+    }
+}
+connectDB();
 
-const eventRouter = require("./routers/event");
-app.use("/event", eventRouter);
-
-const clubRouter = require("./routers/club");
-app.use("/clubs", clubRouter);
-
-const feedbackRouter = require("./routers/feedback");
-app.use("/feedback", feedbackRouter);
-
-const hostRouter = require("./routers/hostRoutes");
-app.use("/hosts", hostRouter);
-
-
-//const notificationRouter = require("./routers/notification");
-//app.use("/notification", notificationRouter);
-
-app.listen(3000, () => {
-  console.log("Server is running on port 3000");
+// Health Check Route
+app.get("/health", (req, res) => {
+    res.status(200).json({ status: "UP", message: "Server is healthy." });
 });
 
+// Routers
+const userRouter = require("./routers/user");
+const eventRouter = require("./routers/event");
+const clubRouter = require("./routers/club");
+const feedbackRouter = require("./routers/feedback");
+const hostRouter = require("./routers/hostRoutes");
 
+app.use("/users", userRouter);
+app.use("/event", eventRouter);
+app.use("/clubs", clubRouter);
+app.use("/feedback", feedbackRouter);
+app.use("/hosts", hostRouter);
+
+// Global Error Handler
+app.use((err, req, res, next) => {
+    console.error(err.stack);
+    res.status(500).json({ error: "Something went wrong on the server." });
+});
+
+// Start Server
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+    console.log(`🚀 Server running on http://localhost:${PORT}`);
+});

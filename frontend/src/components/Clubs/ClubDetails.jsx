@@ -17,6 +17,7 @@ const ClubDetails = () => {
       try {
         const res = await axios.get(`http://localhost:3000/clubs/${clubId}`);
         setClub(res.data);
+        console.log("Fetched club details:", res.data.events);
         setEvents(res.data.events || []);
       } catch (err) {
         setError('Failed to fetch club details');
@@ -26,6 +27,21 @@ const ClubDetails = () => {
     };
     fetchClub();
   }, [clubId]);
+
+   useEffect(() => {
+      const fetchEvents = async () => {
+        try {
+          const res = await axios.get(`http://localhost:3000/clubs/${clubId}/events`);
+          setEvents(res.data || []);
+        } catch (err) {
+          setError('Failed to fetch events');
+        } finally {
+          setLoading(false);
+        }
+      };
+      fetchEvents();
+    }, [clubId]);
+
 
   if (loading) return <div>Loading...</div>;
   if (error) return <div>{error}</div>;
@@ -60,10 +76,8 @@ const ClubDetails = () => {
       <h2 className="text-2xl font-semibold mb-4 text-gray-800">Events Organized by {club.name}</h2>
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {events.length > 0 ? events.map(event => (
-          <Link to={`/event/${event._id}`} key={event._id} className="block bg-white rounded-xl shadow-lg p-5 hover:shadow-2xl transition border border-gray-100 hover:border-green-400 group">
+          <Link to={`/events/${event._id}`} key={event._id} className="block bg-white rounded-xl shadow-lg p-5 hover:shadow-2xl transition border border-gray-100 hover:border-green-400 group">
             <h3 className="text-xl font-semibold mb-1 group-hover:text-green-600 transition">{event.title}</h3>
-            <p className="text-gray-600 line-clamp-2">{event.description}</p>
-            <div className="text-sm text-gray-500 mt-2">{new Date(event.date).toLocaleString()}</div>
           </Link>
         )) : <div className="col-span-2 text-center text-gray-500">No events found for this club.</div>}
       </div>

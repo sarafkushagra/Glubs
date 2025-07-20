@@ -7,8 +7,8 @@ const eventSchema = new mongoose.Schema({
   date: { type: Date, required: true },
   venue: String,
   createdBy: {
-    type: mongoose.Schema.Types.ObjectId,
-    ref: 'ClubAdmin',
+    type: mongoose.Schema.Types.ObjectId, 
+    ref: 'User', 
     required: true
   },
   media: [
@@ -20,7 +20,8 @@ const eventSchema = new mongoose.Schema({
   registeredUsers: [
     {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User'
+      ref: 'User',
+      required: true
     }
   ],
   comments: [
@@ -36,10 +37,15 @@ const eventSchema = new mongoose.Schema({
       ref: 'Feedback'
     }
   ],
+  club: {
+  type: mongoose.Schema.Types.ObjectId,
+  ref: 'Club',
+  required: true
+},
   views: { type: Number, default: 0 },
   registrations: { type: Number, default: 0 },
   commentsCount: { type: Number, default: 0 }
 }, { timestamps: true });
 
-// ...existing code...
-module.exports = mongoose.models.Event || mongoose.model('Event', eventSchema);
+
+module.exports = mongoose.models.Event  || mongoose.model('Event', eventSchema);

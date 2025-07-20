@@ -14,6 +14,7 @@ const ClubMembers = () => {
     const fetchMembers = async () => {
       try {
         const res = await axios.get(`http://localhost:3000/clubs/${clubId}/members`);
+        console.log("Fetched members:", res.data);
         setMembers(res.data || []);
       } catch (err) {
         setError('Failed to fetch club members');
@@ -43,8 +44,8 @@ const ClubMembers = () => {
           <tbody>
             {members.length > 0 ? members.map((member) => (
               <tr key={member._id} className="border-t hover:bg-purple-50">
-                <td className="p-3">{member.name}</td>
-                <td className="p-3">{member.position}</td>
+                <td className="p-3">{member.username}</td>
+                <td className="p-3">{member.role}</td>
               </tr>
             )) : (
               <tr><td colSpan="2" className="p-3 text-center text-gray-500">No members found.</td></tr>

@@ -1,134 +1,87 @@
-const mongoose = require("mongoose");
-const faker = require('@faker-js/faker').faker;
-const bcrypt = require('bcrypt');
- require("dotenv").config();    
-const dburl = process.env.ATLASDB_URL;
 
-const Auth = require("./schema/auth");
+// Final corrected init.js to permanently fix 'passwordConfirm' validation error during seeding
+require("dotenv").config();
+const mongoose = require("mongoose");
+const bcrypt = require("bcryptjs");
+const faker = require("@faker-js/faker").faker;
+
 const User = require("./schema/user");
 const Event = require("./schema/event");
 const Club = require("./schema/club");
-const feedback = require("./schema/feedback");
-const notification = require("./schema/notification");
 
-const seedDB = async () => {
-    await mongoose.connect(dburl);
+const dburl = process.env.MONGO_URL;
 
-    await Auth.deleteMany({});
-    await User.deleteMany({});
-    await Club.deleteMany({});
-    await Event.deleteMany({});
-    await notification.deleteMany({});
-    await feedback.deleteMany({});
+async function seedDB() {
+    try {
+        await mongoose.connect(dburl);
+        console.log("✅ Connected to MongoDB");
 
-    const passwordHash = await bcrypt.hash('Password@123', 10);
+        await User.deleteMany({});
+        await Event.deleteMany({});
+        await Club.deleteMany({});
 
-    let authUsers = [];
-    let authClubAdmins = [];
-    let userDocs = [];
-    let clubAdminDocs = [];
-    let clubs = [];
-
-    // Seed Auth users
-    for (let i = 0; i < 100; i++) {
-        let role = faker.helpers.arrayElement(['user', 'club-admin', 'admin']);
-        let auth = new Auth({
-            email: faker.internet.email(),
-            password: passwordHash,
-            role
-        });
-        await auth.save();
-        if (role === 'user') authUsers.push(auth);
-        if (role === 'club-admin') authClubAdmins.push(auth);
-    }
-
-    // Seed ClubAdmins
-for (let auth of authClubAdmins) {
-    const clubAdmin = new User({
-        auth: auth._id,
-        name: faker.person.fullName(),
-        age: faker.number.int({ min: 22, max: 30 }),
-        yearOfStudy: `Year ${faker.number.int({ min: 1, max: 4 })}`,
-        department: faker.commerce.department(),
-        isClubMember: false // usually admins aren't members
-    });
-    await clubAdmin.save();
-    clubAdminDocs.push(clubAdmin);
-}
-
-
-    // Seed Users
-    for (let auth of authUsers) {
-        const user = new User({
-            auth: auth._id,
-            name: faker.person.fullName(),
-            age: faker.number.int({ min: 18, max: 25 }),
-            yearOfStudy: `Year ${faker.number.int({ min: 1, max: 4 })}`,
-            department: faker.commerce.department(),
-            isClubMember: faker.datatype.boolean()
-        });
-        await user.save();
-        userDocs.push(user);
-    }
-
-    // Seed Clubs
-    for (let i = 0; i < 30; i++) {
-        const club = new Club({
-            name: faker.company.name(),
-            description: faker.lorem.sentence(),
-            createdBy: faker.helpers.arrayElement(clubAdminDocs)._id,
-            members: faker.helpers.arrayElements(userDocs.map(u => u._id), faker.number.int({ min: 3, max: 10 }))
-        });
-        await club.save();
-        clubs.push(club);
-    }
-
-    // Update Users with club reference
-    for (let user of userDocs) {
-        if (user.isClubMember) {
-            user.club = faker.helpers.arrayElement(clubs)._id;
-            await user.save();
+        const plainPassword = "Password@123";
+        const hashedPassword = await bcrypt.hash(plainPassword, 12);
+        const users = [];
+        for (let i = 0; i < 50; i++) {
+            users.push({
+                username: faker.internet.username(),
+                email: faker.internet.email().toLowerCase(),
+                password: plainPassword, // provide plain for validation
+                passwordConfirm: plainPassword, // must match plain password
+                role: "student",
+                yearOfStudy: faker.helpers.arrayElement(["1st Year", "2nd Year", "3rd Year", "4th Year"]),
+                department: faker.commerce.department(),
+                isClubMember: faker.datatype.boolean()
+            });
         }
+        const userDocs = await User.insertMany(users);
+        console.log(`✅ Inserted ${userDocs.length} users`);
+
+        if (userDocs.length === 0) throw new Error("No users inserted, cannot proceed with clubs and events.");
+
+        const clubs = [];
+        for (let i = 0; i < 10; i++) {
+            clubs.push({
+                name: faker.company.name(),
+                description: faker.company.catchPhrase(),
+                members: faker.helpers.arrayElements(userDocs.map(u => u._id), 5),
+                events: []
+            });
+        }
+        const clubDocs = await Club.insertMany(clubs);
+        console.log(`✅ Inserted ${clubDocs.length} clubs`);
+
+        const events = [];
+        for (let i = 0; i < 20; i++) {
+            const event = {
+                title: faker.lorem.words(3),
+                description: faker.lorem.sentences(2),
+                eventType: faker.helpers.arrayElement(["Hackathon", "Workshop", "Seminar", "Other"]),
+                date: faker.date.future(),
+                venue: faker.location.city(),
+                createdBy: faker.helpers.arrayElement(userDocs)._id,
+                club: faker.helpers.arrayElement(clubDocs)._id, // ✅ now assigning a valid club id
+                media: [{ type: "image", url: faker.image.url() }],
+                registeredUsers: faker.helpers.arrayElements(userDocs.map(u => u._id), 10),
+            };
+            events.push(event);
+        }
+        const eventDocs = await Event.insertMany(events);
+        console.log(`✅ Inserted ${eventDocs.length} events`);
+
+        for (let event of eventDocs) {
+            const randomClub = faker.helpers.arrayElement(clubDocs);
+            randomClub.events.push(event._id);
+            await randomClub.save();
+        }
+
+        console.log("🌱 Seeding completed successfully.");
+        process.exit();
+    } catch (err) {
+        console.error(err);
+        process.exit(1);
     }
-
-    // Seed Events
-    let events = [];
-    for (let i = 0; i < 100; i++) {
-        const event = new Event({
-            title: faker.lorem.words(5),
-            description: faker.lorem.sentences(2),
-            eventType: faker.helpers.arrayElement(['Hackathon', 'Workshop', 'Seminar', 'Other']),
-            date: faker.date.future(),
-            venue: faker.location.city(),
-            createdBy: faker.helpers.arrayElement(clubAdminDocs)._id,
-            media: [{
-                type: 'image',
-                url: faker.image.url()
-            }],
-            registeredUsers: faker.helpers.arrayElements(userDocs.map(u => u._id), faker.number.int({ min: 5, max: 20 })),
-            comments: [],
-            views: faker.number.int({ min: 10, max: 1000 }),
-            registrations: faker.number.int({ min: 5, max: 50 }),
-            commentsCount: faker.number.int({ min: 0, max: 20 })
-        });
-        await event.save();
-        events.push(event);
-    }
-
-
-    // Seed Feedback
-    for (let i = 0; i < 100; i++) {
-        const fb = new feedback({
-            event: faker.helpers.arrayElement(events)._id,
-            user: faker.helpers.arrayElement(userDocs)._id,
-            rating: faker.number.int({ min: 1, max: 5 }),
-            review: faker.lorem.sentences(2)
-        });
-        await fb.save();
-    }
-
-    console.log('✅ Seeding completed successfully.');
-    process.exit();
-};
-
+}
 seedDB();
+
