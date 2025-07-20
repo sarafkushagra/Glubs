@@ -1,5 +1,3 @@
-
-// Final corrected init.js to permanently fix 'passwordConfirm' validation error during seeding
 require("dotenv").config();
 const mongoose = require("mongoose");
 const bcrypt = require("bcryptjs");
@@ -8,6 +6,7 @@ const faker = require("@faker-js/faker").faker;
 const User = require("./schema/user");
 const Event = require("./schema/event");
 const Club = require("./schema/club");
+const Feedback = require("./schema/feedback");
 
 const dburl = process.env.MONGO_URL;
 
@@ -19,6 +18,7 @@ async function seedDB() {
         await User.deleteMany({});
         await Event.deleteMany({});
         await Club.deleteMany({});
+        await Feedback.deleteMany({});
 
         const plainPassword = "Password@123";
         const hashedPassword = await bcrypt.hash(plainPassword, 12);
@@ -75,6 +75,21 @@ async function seedDB() {
             randomClub.events.push(event._id);
             await randomClub.save();
         }
+
+        const feedbacks = [];
+        for (let event of eventDocs) {
+            for (let i = 0; i < faker.number.int({ min: 3, max: 5 }); i++) {
+                feedbacks.push({
+                    event: event._id,
+                    user: faker.helpers.arrayElement(userDocs)._id,
+                    rating: faker.number.int({ min: 1, max: 5 }),
+                    review: faker.lorem.sentence(),
+                });
+            }
+        }
+        const feedbackDocs = await Feedback.insertMany(feedbacks);
+        console.log(`✅ Inserted ${feedbackDocs.length} feedbacks linked with events and users`);
+
 
         console.log("🌱 Seeding completed successfully.");
         process.exit();

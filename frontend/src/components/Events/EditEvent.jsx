@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import EventNavbar from './EventNavbar';
 import Footer from '../Pages/Footer';
+import Navbar from '../Pages/Navbar';
 
 const EditEvent = () => {
   const { eventId } = useParams();
@@ -67,77 +67,44 @@ const EditEvent = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <>
-      <EventNavbar />
-    <div className="max-w-4xl mx-auto p-6 mt-30 mb-10 bg-purple-50 rounded shadow mt-8">
-      <h1 className="text-2xl font-bold mb-4">Edit Event</h1>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <div>
-          <label className="block font-semibold mb-1">Title</label>
-          <input
-            name="title"
-            value={form.title}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
+    <div className="bg-gradient-to-b from-indigo-900 via-purple-50 to-white min-h-screen">
+      <Navbar />
+      <div className="max-w-3xl mx-auto pt-30 pb-10 px-4">
+        <div className="bg-white rounded-2xl shadow-xl border border-indigo-100 p-10">
+          <h1 className="text-2xl font-extrabold mb-8 text-indigo-700">Edit Event</h1>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div>
+              <label className="block font-semibold mb-2 text-indigo-700">Title</label>
+              <input name="title" value={form.title} onChange={handleChange} className="w-full p-3 border border-gray-200 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700" required />
+            </div>
+            <div>
+              <label className="block font-semibold mb-2 text-indigo-700">Description</label>
+              <textarea name="description" value={form.description} onChange={handleChange} className="w-full p-3 border border-gray-200 rounded-2xl shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700" />
+            </div>
+            <div>
+              <label className="block font-semibold mb-2 text-indigo-700">Type</label>
+              <select name="eventType" value={form.eventType} onChange={handleChange} className="w-full p-3 border border-gray-200 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700" required>
+                <option value="">Select type</option>
+                <option value="Hackathon">Hackathon</option>
+                <option value="Workshop">Workshop</option>
+                <option value="Seminar">Seminar</option>
+                <option value="Other">Other</option>
+              </select>
+            </div>
+            <div>
+              <label className="block font-semibold mb-2 text-indigo-700">Date & Time</label>
+              <input type="datetime-local" name="date" value={form.date} onChange={handleChange} className="w-full p-3 border border-gray-200 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700" required />
+            </div>
+            <div>
+              <label className="block font-semibold mb-2 text-indigo-700">Venue</label>
+              <input name="venue" value={form.venue} onChange={handleChange} className="w-full p-3 border border-gray-200 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700" />
+            </div>
+            <button type="submit" className="bg-gradient-to-r from-indigo-600 to-purple-500 text-white font-semibold rounded-full px-7 py-3 shadow-lg hover:scale-105 hover:from-indigo-700 hover:to-purple-600 transition-all duration-300 border-none">Update Event</button>
+          </form>
         </div>
-        <div>
-          <label className="block font-semibold mb-1">Description</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-        <div>
-          <label className="block font-semibold mb-1">Type</label>
-          <select
-            name="eventType"
-            value={form.eventType}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          >
-            <option value="">Select type</option>
-            <option value="Hackathon">Hackathon</option>
-            <option value="Workshop">Workshop</option>
-            <option value="Seminar">Seminar</option>
-            <option value="Other">Other</option>
-          </select>
-        </div>
-        <div>
-          <label className="block font-semibold mb-1">Date & Time</label>
-          <input
-            type="datetime-local"
-            name="date"
-            value={form.date}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-            required
-          />
-        </div>
-        <div>
-          <label className="block font-semibold mb-1">Venue</label>
-          <input
-            name="venue"
-            value={form.venue}
-            onChange={handleChange}
-            className="w-full p-2 border rounded"
-          />
-        </div>
-
-        <button
-          type="submit"
-          className="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
-        >
-          Update Event
-        </button>
-      </form>
+      </div>
+      <Footer />
     </div>
-    <Footer />
-    </>
   );
 };
 

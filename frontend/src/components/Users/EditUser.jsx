@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
 import Footer from "../Pages/Footer";
-import EventNavbar from "../Events/EventNavbar";
+import Navbar from "../Pages/Navbar";
 
 export default function EditProfile() {
   const { id } = useParams();
@@ -76,7 +76,7 @@ export default function EditProfile() {
 
   return (
     <>
-    <EventNavbar/>
+    <Navbar/>
     <div className="max-w-xl mt-30 mb-10 mx-auto p-6 bg-purple-50 rounded-xl shadow mt-8">
       <h2 className="text-2xl font-bold mb-4 text-purple-700">Edit Profile</h2>
 

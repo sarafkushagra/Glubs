@@ -3,7 +3,7 @@ import axios from "axios";
 import img1 from "../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp";
 import { Link } from "react-router-dom";
 import Footer from "../Pages/Footer";
-import EventNavbar from "../Events/EventNavbar";
+import Navbar from "../Pages/Navbar";
 
 export default function MyProfile() {
   const [user, setUser] = useState(null);
@@ -67,8 +67,8 @@ useEffect(() => {
 
   return (
     <>
-    <EventNavbar/>
-    <div className="p-8 max-w-6xl mx-auto">
+    <Navbar/>
+    <div className="p-8 max-w-6xl pt-30 pb-10 mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold mb-6 text-indigo-700">My Profile</h1>
         <Link to={`/users/edit/${user._id}`}>
@@ -109,58 +109,71 @@ useEffect(() => {
         </div>
       </div>
 
-      {/* Upcoming Events */}
-      <div className="bg-white p-6 rounded-lg shadow mb-8">
-        <h3 className="text-xl font-semibold mb-4 text-indigo-700">Upcoming Events</h3>
-        {upcomingEvents.length === 0 ? (
-          <p className="text-gray-500">No upcoming events.</p>
-        ) : (
-          <ul className="list-disc list-inside text-gray-700">
-            {upcomingEvents.map((event, idx) => (
-              <li key={idx}>
-                <span className="font-medium">{event.title}</span> — {new Date(event.date).toLocaleDateString()} at {event.venue || "Venue TBA"}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Completed Events */}
-      <div className="bg-white p-6 rounded-lg shadow mb-8">
-        <h3 className="text-xl font-semibold mb-4 text-indigo-700">Completed Events</h3>
-        {completedEvents.length === 0 ? (
-          <p className="text-gray-500">No completed events.</p>
-        ) : (
-          <ul className="list-disc list-inside text-gray-700">
-            {completedEvents.map((event, idx) => (
-              <li key={idx}>
-                <span className="font-medium">{event.title}</span> — {new Date(event.date).toLocaleDateString()} at {event.venue || "Venue TBA"}
-              </li>
-            ))}
-          </ul>
-        )}
-      </div>
-
-      {/* Participated Events in Styled Box */}
-      <div className="bg-white p-6 rounded-lg shadow mb-10">
-        <h3 className="text-xl font-semibold mb-4 text-indigo-700">Events You Participated In</h3>
-        {participatedEvents.length === 0 ? (
-          <p className="text-gray-500">You have not participated in any events yet.</p>
-        ) : (
-          <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-            {participatedEvents.map((event, idx) => (
-              <div
-                key={idx}
-                className="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg p-4 shadow hover:shadow-md transition transform hover:-translate-y-1"
-              >
-                <h4 className="font-bold">{event.title}</h4>
-                <p className="text-sm">{new Date(event.date).toLocaleDateString()}</p>
-                <p className="text-sm">{event.venue || "Venue TBA"}</p>
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
+           {/* Upcoming Events */}
+     <div className="bg-white p-6 rounded-lg shadow mb-8">
+       <h3 className="text-xl font-semibold mb-4 text-indigo-700">Upcoming Events</h3>
+       {upcomingEvents.length === 0 ? (
+         <p className="text-gray-500">No upcoming events.</p>
+       ) : (
+         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+           {upcomingEvents.map((event, idx) => (
+             <Link
+               to={`/events/${event._id}`}
+               key={idx}
+               className="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg p-4 shadow hover:shadow-md transition transform hover:-translate-y-1 cursor-pointer"
+             >
+               <h4 className="font-bold">{event.title}</h4>
+               <p className="text-sm">{new Date(event.date).toLocaleDateString()}</p>
+               <p className="text-sm">{event.venue || "Venue TBA"}</p>
+             </Link>
+           ))}
+         </div>
+       )}
+     </div>
+     
+     {/* Completed Events */}
+     <div className="bg-white p-6 rounded-lg shadow mb-8">
+       <h3 className="text-xl font-semibold mb-4 text-indigo-700">Completed Events</h3>
+       {completedEvents.length === 0 ? (
+         <p className="text-gray-500">No completed events.</p>
+       ) : (
+         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+           {completedEvents.map((event, idx) => (
+             <Link
+               to={`/events/details/${event._id}`}
+               key={idx}
+               className="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg p-4 shadow hover:shadow-md transition transform hover:-translate-y-1 cursor-pointer"
+             >
+               <h4 className="font-bold">{event.title}</h4>
+               <p className="text-sm">{new Date(event.date).toLocaleDateString()}</p>
+               <p className="text-sm">{event.venue || "Venue TBA"}</p>
+             </Link>
+           ))}
+         </div>
+       )}
+     </div>
+     
+     {/* Participated Events */}
+     <div className="bg-white p-6 rounded-lg shadow mb-10">
+       <h3 className="text-xl font-semibold mb-4 text-indigo-700">Events You Participated In</h3>
+       {participatedEvents.length === 0 ? (
+         <p className="text-gray-500">You have not participated in any events yet.</p>
+       ) : (
+         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+           {participatedEvents.map((event, idx) => (
+             <Link
+               to={`/events/${event._id}`}
+               key={idx}
+               className="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg p-4 shadow hover:shadow-md transition transform hover:-translate-y-1 cursor-pointer"
+             >
+               <h4 className="font-bold">{event.title}</h4>
+               <p className="text-sm">{new Date(event.date).toLocaleDateString()}</p>
+               <p className="text-sm">{event.venue || "Venue TBA"}</p>
+             </Link>
+           ))}
+         </div>
+       )}
+     </div>
     </div>
     <Footer/>
     </>

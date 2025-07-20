@@ -1,8 +1,8 @@
 import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import ClubNavbar from './ClubNavbar';
 import Footer from '../Pages/Footer';
+import Navbar from '../Pages/Navbar';
 
 const EditClub = () => {
   const { clubId } = useParams();
@@ -52,40 +52,42 @@ const EditClub = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <>
-  <ClubNavbar/>
-    <div className="max-w-5xl mt-30 mb-10  mx-auto p-8 bg-purple-50 rounded-xl shadow-lg mt-10">
-      <h1 className="text-2xl font-bold mb-6 text-blue-700">Edit Club</h1>
-      <form onSubmit={handleSubmit} className="space-y-6">
-        <div>
-          <label className="block font-semibold mb-2">Name</label>
-          <input
-            name="name"
-            value={form.name}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
-            required
-          />
+    <div className="bg-gradient-to-b from-indigo-900 via-purple-50 to-white min-h-screen">
+      <Navbar />
+      <div className="max-w-5xl pt-30 pb-10 mx-auto p-8">
+        <div className="bg-white rounded-2xl shadow-xl border border-indigo-100 p-10">
+          <h1 className="text-2xl font-extrabold mb-8 text-gray-900">Edit Club</h1>
+          <form onSubmit={handleSubmit} className="space-y-8">
+            <div>
+              <label className="block font-semibold mb-2 text-indigo-700">Name</label>
+              <input
+                name="name"
+                value={form.name}
+                onChange={handleChange}
+                className="w-full p-3 border border-gray-200 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700"
+                required
+              />
+            </div>
+            <div>
+              <label className="block font-semibold mb-2 text-indigo-700">Description</label>
+              <textarea
+                name="description"
+                value={form.description}
+                onChange={handleChange}
+                className="w-full h-40 p-3 border border-gray-200 rounded-2xl shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700"
+              />
+            </div>
+            <button
+              type="submit"
+              className="bg-gradient-to-r from-indigo-600 to-purple-500 text-white font-semibold rounded-full px-7 py-3 shadow-lg hover:scale-105 hover:from-indigo-700 hover:to-purple-600 transition-all duration-300 border-none"
+            >
+              Update Club
+            </button>
+          </form>
         </div>
-        <div>
-          <label className="block font-semibold mb-2">Description</label>
-          <textarea
-            name="description"
-            value={form.description}
-            onChange={handleChange}
-            className="w-full p-3 border border-gray-300 rounded focus:outline-none focus:ring-2 focus:ring-purple-400"
-          />
-        </div>
-        <button
-          type="submit"
-          className="bg-purple-500 text-white px-6 py-2 rounded shadow hover:bg-purple-600 transition"
-        >
-          Update Club
-        </button>
-      </form>
+      </div>
+      <Footer />
     </div>
-    <Footer/>
-    </>
   );
 };
 

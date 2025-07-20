@@ -3,8 +3,8 @@ import axios from "axios";
 import { useParams } from "react-router-dom";
 import { Link } from "react-router-dom";
 import img1 from "../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp";
-import EventNavbar from "../Events/EventNavbar";
 import Footer from "../Pages/Footer";
+import Navbar from "../Pages/Navbar";
 
 export default function UsersDetails() {
   const { id } = useParams();
@@ -68,7 +68,7 @@ export default function UsersDetails() {
 
   return (
     <>
-    <EventNavbar/>
+    <Navbar/>
     <div className="p-8 mt-30 mb-10 max-w-6xl mx-auto">
       <div className="flex justify-between items-center mb-6">
         <h1 className="text-3xl font-bold mb-6 text-indigo-700">My Profile</h1>
@@ -83,7 +83,7 @@ export default function UsersDetails() {
       <div className="bg-white p-6 rounded-lg shadow mb-8 flex items-center gap-6">
         <img src={img1} alt="avatar" className="w-20 h-20 rounded-full border" />
         <div>
-          <h2 className="text-xl font-semibold">{user.name}</h2>
+          <h2 className="text-xl font-semibold">{user.username}</h2>
           <p className="text-gray-500">{user.department || "Department not specified"}</p>
           <p className="text-gray-500 capitalize">{user.role}</p>
         </div>

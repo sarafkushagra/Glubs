@@ -2,14 +2,14 @@ import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { Rocket, Users, Lightbulb, Star, BookOpen, ClipboardList, Presentation } from 'lucide-react';
 import Footer from '../Pages/Footer';
-import ClubNavbar from '../Clubs/ClubNavbar';
+import Navbar from '../Pages/Navbar';
 
 export default function HostOpportunityPage() {
   const navigate = useNavigate();
 
   return (
     <>
-      <ClubNavbar />
+      <Navbar />
       <div className="pt-24 min-h-screen bg-gradient-to-br from-purple-50 via-purple-100 to-purple-50 flex flex-col items-center px-4 pb-16">
         <div className="max-w-2xl text-center space-y-4">
           <h1 className="text-3xl sm:text-4xl font-bold text-gray-800">

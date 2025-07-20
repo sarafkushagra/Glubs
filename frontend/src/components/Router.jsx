@@ -38,6 +38,7 @@ import UnauthorizedPage from "./AuthCard/UnauthorizedPage";
 import ForgotPasswordEmail from "./AuthCard/ForgotPasswordEmailPage";
 import VerifyOTPAndReset from "./AuthCard/VerifyOtpAndResetPage";
 import ResetSuccess from "./AuthCard/ResetSuccess";
+import EditFeedback from "./Events/EditFeedback";
 
 export default function Router() {
   return (
@@ -96,7 +97,7 @@ export default function Router() {
 
       <Route path="/events/:eventId/add-feedback" element={<AddFeedback />} />
       <Route path="/events/edit/:eventId" element={<EditEvent />} />
-
+      <Route path="/events/:eventId/edit-feedback/:feedbackId" element={<EditFeedback />} />
       <Route path="/clubs/edit/:clubId" element={<EditClub />} />
       <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
       <Route path="/clubs/add" element={<AddClub />} />

@@ -2,8 +2,8 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { Link } from "react-router-dom";
 import { ArrowRight, Trash2, Search } from "lucide-react";
-import EventNavbar from "../Events/EventNavbar";
 import Footer from "../Pages/Footer";
+import Navbar from "../Pages/Navbar";
 export default function AllUsers() {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -55,7 +55,7 @@ const filteredUsers = users.filter(user =>
 
   return (
     <>
-    <EventNavbar/>
+    <Navbar/>
     <div className="mt-30 max-w-5xl mb-10 mx-auto p-6">
       <h1 className="text-3xl font-bold text-purple-700 mb-4 text-center">All Users</h1>
 
@@ -81,7 +81,7 @@ const filteredUsers = users.filter(user =>
             >
               <div className="flex justify-between items-center">
                 <div>
-                  <h2 className="text-xl font-semibold text-purple-800">{user.name}</h2>
+                  <h2 className="text-xl font-semibold text-purple-800">{user.username}</h2>
                   <p className="text-purple-600 text-sm">Role: {user.role}</p>
                   <p className="text-purple-600 text-sm">Study: {user.yearOfStudy || "N/A"}</p>
                 </div>

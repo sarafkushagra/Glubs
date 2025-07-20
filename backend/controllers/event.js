@@ -17,7 +17,7 @@ module.exports.showEvent = async (req, res) => {
 
         // fetch feedbacks for this event, populating user info
         const feedbacks = await Feedback.find({ event: event._id })
-            .populate('user', 'name email');
+            .populate('user');
 
         res.json({ event, feedbacks });
     } catch (error) {
@@ -126,37 +126,33 @@ module.exports.verifyEntry = async (req, res) => {
 };
 
 module.exports.addFeedback = async (req, res) => {
-    const { eventId } = req.params.id;
-    const { review, rating } = req.body;
-
-    console.log("eventId:", eventId);
-    console.log("review:", review);
-    console.log("rating:", rating);
-
-    console.log("DEBUG: req.params =", req.params.id);
-    console.log("DEBUG: req.url =", req.url);
-    console.log("DEBUG: req.originalUrl =", req.originalUrl);
-
-
-
-
     try {
+        const { review, rating } = req.body;
+        const { eventId } = req.params;
+
+        // ✅ Validate eventId
+        if (!mongoose.Types.ObjectId.isValid(eventId)) {
+            return res.status(400).json({ message: "Invalid event ID" });
+        }
+
+        // ✅ Ensure user is present in req
+        if (!req.user || !req.user._id) {
+            return res.status(401).json({ message: "User not authenticated" });
+        }
+
         const feedback = new Feedback({
-            event: eventId,
-            user: "666666666666666666666666", // TEMP: replace with a valid User _id from your DB
             review,
-            rating
+            rating,
+            event: eventId,
+            user: req.user._id   // ✅ fetched from auth middleware
         });
 
-        const savedFeedback = await feedback.save();
+        await feedback.save();
 
-        res.status(201).json({
-            message: "Feedback added successfully!",
-            feedback: savedFeedback
-        });
+        res.status(201).json({ message: "Feedback added successfully", feedback });
     } catch (error) {
-        console.error('Error adding feedback:', error);
-        res.status(500).json({ message: "Error adding feedback", error: error.message });
+        console.error("Error adding feedback:", error);
+        res.status(500).json({ message: "Server error", error: error.message });
     }
 };
 
@@ -204,34 +200,21 @@ module.exports.getUserUpcomingEvents = async (req, res) => {
     }
 };
 
-// exports.registerUserToEvent = async (req, res) => {
-//     const eventId = req.params.id;
-//     const userId = req.user._id; // ensure req.user is populated correctly
-
-//     try {
-//         const event = await Event.findById(eventId);
-//         if (!event) {
-//             return res.status(404).json({ message: 'Event not found' });
-//         }
-
-//         // Defensive check
-//         if (!event.registeredUsers) {
-//             event.registeredUsers = [];
-//         }
-
-//         if (!event.registeredUsers.includes(userId)) {
-//             event.registeredUsers.push(userId);
-//             await event.save();
-//         }
-
-//         res.status(200).json({ message: 'Successfully registered for the event.' });
-//     } catch (error) {
-//         console.error('Error registering user to event:', error);
-//         res.status(500).json({
-//             message: 'Error registering user to event',
-//             error: error.message,
-//             stack: error.stack
-//         });
-//     }
-// };
+exports.registerUserToEvent = async (req, res) => {
+   try {
+    const event = await Event.findById(req.params.id);
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" });
+    }
+    if (event.registeredUsers.includes(req.user._id)) {
+      return res.status(400).json({ message: "User already registered" });
+    }
+    event.registeredUsers.push(req.user._id);
+    await event.save();
+    res.json({ message: "User registered successfully", updatedEvent: event });
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Server error" });
+  }
+};
 

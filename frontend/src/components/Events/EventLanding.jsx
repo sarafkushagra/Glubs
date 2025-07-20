@@ -1,177 +1,149 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import axios from 'axios';
-import dayjs from 'dayjs';
-import EventNavbar from './EventNavbar';
 import Footer from '../Pages/Footer';
+import Navbar from '../Pages/Navbar';
 
-export default function EventsPage() {
+const EventLanding = () => {
+  const navigate = useNavigate();
+  const [events, setEvents] = useState([]);
+  const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
-  const [category, setCategory] = useState('All');
-  const [filterTab, setFilterTab] = useState('All'); // New tab state
-  const [events, setEvent] = useState([]);
+  const [error, setError] = useState(null);
+  const [registering, setRegistering] = useState({});
+  const [currentUserId, setCurrentUserId] = useState(null);
 
+  // Fetch current logged-in user
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchUser = async () => {
       try {
-        const res = await axios.get('http://localhost:3000/event');
-        setEvent(Array.isArray(res.data) ? res.data : []);
-      } catch (error) {
-        console.error(error);
+        const res = await axios.get('http://localhost:3000/users/me', { withCredentials: true });
+        setCurrentUserId(res.data.user._id);
+      } catch (err) {
+        console.error('User not logged in');
       }
     };
-    fetchData();
+    fetchUser();
   }, []);
 
-  // Helper functions
-  const isUpcoming = (date) => dayjs(date).isAfter(dayjs());
-  const isPast = (date) => dayjs(date).isBefore(dayjs());
+  useEffect(() => {
+    const fetchEvents = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/event", {
+          withCredentials: true,
+        });
+        setEvents(Array.isArray(res.data) ? res.data : []);
+      } catch (err) {
+        console.error(err);
+        setError("Failed to fetch events.");
+        setEvents([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchEvents();
+  }, []);
 
-  // const handleRegister = async (eventId) => {
-  //   try {
-  //     const res = await axios.post(
-  //       `http://localhost:3000/event/${eventId}/register`,
-  //       {},
-  //       { withCredentials: true }
-  //     );
-  //     alert(res.data.message || "Successfully registered!");
-  //   } catch (error) {
-  //     console.error("Error registering for event:", error);
-  //     console.log(eventId);
-  //     alert(error.response?.data?.message || "Failed to register.");
-  //   }
-  // };
+  const handleRegister = async (eventId) => {
+    try {
+      setRegistering((prev) => ({ ...prev, [eventId]: true }));
+      await axios.post(`http://localhost:3000/event/${eventId}/register`, {}, {
+        withCredentials: true,
+      });
+      setEvents((prevEvents) =>
+        prevEvents.map((event) =>
+          event._id === eventId
+            ? { ...event, registeredUsers: [...(event.registeredUsers || []), currentUserId] }
+            : event
+        )
+      );
+      alert("Successfully registered for the event!");
+    } catch (err) {
+      console.error(err);
+      alert("Failed to register for the event. Please ensure you are logged in.");
+    } finally {
+      setRegistering((prev) => ({ ...prev, [eventId]: false }));
+    }
+  };
+
+  const filteredEvents = events.filter(event =>
+    event.title.toLowerCase().includes(search.toLowerCase())
+  );
 
 
-  const filteredEvents = events.filter((event) => {
-    const searchMatch =
-      event.title.toLowerCase().includes(search.toLowerCase()) ||
-      event.description.toLowerCase().includes(search.toLowerCase());
-
-    const categoryMatch = category === 'All' || event.eventType === category;
-
-    const dateMatch =
-      filterTab === 'Upcoming'
-        ? isUpcoming(event.date)
-        : filterTab === 'Past'
-          ? isPast(event.date)
-          : true;
-
-    return searchMatch && categoryMatch && dateMatch;
-  });
+  const isUserRegistered = (event) =>
+    currentUserId && Array.isArray(event.registeredUsers) && event.registeredUsers.includes(currentUserId);
 
   return (
-    <div className="bg-purple-100 min-h-screen flex flex-col">
-      <EventNavbar />
+    <div className="bg-gradient-to-b from-indigo-900 via-purple-50 to-white min-h-screen">
+      <Navbar />
 
-      {/* Hero */}
-      <section className="text-center mt-20 py-10 ">
-        <h1 className="text-4xl font-bold mb-2">Glubs University Events</h1>
-        <p className="text-gray-500 max-w-2xl mx-auto">
-          Discover and join exciting hackathons, workshops, and student-run activities!
-        </p>
-      </section>
-
-      {/* Filter Bar */}
-      <div className="flex flex-wrap justify-center gap-4 py-4 my-4">
-        {['All', 'Upcoming', 'Past'].map((tab) => (
+      <div className="max-w-6xl mx-auto pt-30 pb-10 px-4">
+        <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-4 gap-4">
+          <h1 className="text-4xl font-extrabold text-gray-900 tracking-tight">All Events</h1>
           <button
-            key={tab}
-            onClick={() => setFilterTab(tab)}
-            className={`px-4 py-2 rounded ${filterTab === tab
-              ? 'bg-purple-700 text-white'
-              : 'bg-white text-purple-700 border border-purple-700'
-              }`}
+            onClick={() => navigate('/events/add')}
+            className="bg-gradient-to-r from-indigo-600 to-purple-500 text-white font-semibold rounded-full px-7 py-3 shadow-lg hover:scale-105 hover:from-indigo-700 hover:to-purple-600 transition-all duration-300 border-none"
           >
-            {tab}
+            + Add Event
           </button>
-        ))}
-      </div>
-
-      {/* Search & Category */}
-      <div className="flex flex-wrap justify-center gap-4 px-4 pb-4 mb-6">
-        <input
-          type="text"
-          placeholder="Search events..."
-          value={search}
-          onChange={(e) => setSearch(e.target.value)}
-          className="border p-2 rounded w-64"
-        />
-        <select
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-          className="border p-2 rounded w-64"
-        >
-          <option value="All">All Categories</option>
-          <option value="Hackathon">Hackathon</option>
-          <option value="Workshop">Workshop</option>
-          <option value="Conference">Conference</option>
-          <option value="Other">Other</option>
-        </select>
-      </div>
-
-      {/* Events Grid */}
-      <div className="pb-12 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-6 px-6">
-        {filteredEvents.length > 0 ? (
-          filteredEvents.map((event) => (
+        </div>
+        <div className="mb-4 flex justify-center">
+          <input
+            type="text"
+            placeholder="Search events..."
+            value={search}
+            onChange={e => setSearch(e.target.value)}
+            className="w-full md:w-1/2 p-3 border border-gray-200 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700 placeholder-gray-400"
+          />
+        </div>
+        <h1 className="text-4xl font-extrabold text-center mb-10 text-gray-900 tracking-tight">Upcoming Events</h1>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-10">
+          {filteredEvents.map((event) => (
             <div
               key={event._id}
-              className="bg-white rounded-xl shadow-lg hover:shadow-xl transition transform hover:-translate-y-1 border border-purple-100"
+              className="bg-white rounded-2xl shadow-xl border border-indigo-100 hover:border-indigo-400 p-7 hover:shadow-2xl transition-all duration-300 group transform hover:-translate-y-2 flex flex-col justify-between"
             >
-              <div className="relative h-48 bg-gray-100 rounded-t-xl overflow-hidden">
-                {event.media && event.media.length > 0 ? (
-                  <img
-                    src={event.media[0].url}
-                    alt="event media"
-                    className="w-full h-full object-cover object-center"
-                  />
-                ) : (
-                  <div className="flex items-center justify-center h-full text-gray-400">
-                    No Image
-                  </div>
-                )}
-                <span className="absolute top-2 left-2 bg-purple-600 text-white px-3 py-1 text-xs rounded-full">
-                  {event.eventType}
-                </span>
-                <span className="absolute top-2 right-2 bg-white px-3 py-1 text-xs rounded-full border">
-                  {dayjs(event.date).format('MMM D, YYYY')}
-                </span>
-              </div>
-              <div className="p-4 flex flex-col justify-between h-56">
-                <div>
-                  <h3 className="text-lg font-bold text-purple-800 mb-1">{event.title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">
-                    {event.description.length > 100 ? event.description.slice(0, 100) + "..." : event.description}
-                  </p>
-                  <div className="text-xs text-gray-500 space-y-1">
-                    <p><strong>Venue:</strong> {event.venue || "TBA"}</p>
-                    <p><strong>Time:</strong> {event.time || "TBA"}</p>
-                  </div>
+              {event.media && event.media.length > 0 && event.media[0].type === "image" ? (
+                <img
+                  src={event.media[0].url}
+                  alt={event.title}
+                  className="w-full h-48 object-cover rounded-t-2xl"
+                />
+              ) : (
+                <div className="w-full h-48 bg-gray-200 rounded-t-2xl flex items-center justify-center text-gray-500">
+                  No Image
                 </div>
-                <div className="mt-4 flex gap-2">
-                  <a
-                    href={`/events/${event._id}`}
-                    className="flex-1 bg-purple-600 text-white text-center py-2 rounded hover:bg-purple-700 text-sm transition"
-                  >
-                    View Details
-                  </a>
-                  <button
-                    onClick={() => handleRegister(event._id)}
-                    className="flex-1 bg-green-600 text-white text-center py-2 rounded hover:bg-green-700 text-sm transition"
-                  >
-                    Register
-                  </button>
-                </div>
+              )}
+              <h2 className="text-2xl font-bold mt-4 mb-2 group-hover:text-indigo-700 transition">{event.title.toUpperCase()}</h2>
+              <p className="text-gray-600 line-clamp-3 mb-2">{event.description}</p>
+              <div className="text-sm text-gray-500 mb-2">{new Date(event.date).toLocaleString()}</div>
+              <div className="flex flex-col gap-2 mt-2">
+                <button
+                  onClick={() => navigate(`/events/${event._id}`)}
+                  className="bg-gradient-to-r from-indigo-600 to-purple-500 text-white font-semibold rounded-full px-6 py-2 shadow-lg hover:scale-105 hover:from-indigo-700 hover:to-purple-600 transition-all duration-300 border-none"
+                >
+                  View Details
+                </button>
+                <button
+                  onClick={() => handleRegister(event._id)}
+                  disabled={isUserRegistered(event) || registering[event._id]}
+                  className={`${isUserRegistered(event) ? 'bg-gray-400 cursor-not-allowed' : registering[event._id] ? 'bg-green-300' : 'bg-green-500 hover:bg-green-600'} text-white px-6 py-2 rounded-full shadow transition w-full text-center font-semibold`}
+                >
+                  {isUserRegistered(event)
+                    ? 'Registered'
+                    : registering[event._id]
+                      ? 'Registering...'
+                      : 'Register'}
+                </button>
               </div>
             </div>
-          ))
-        ) : (
-          <p className="col-span-full text-center text-gray-600">No events found.</p>
-        )}
+          ))}
+        </div>
       </div>
-
-
-      {/* Footer */}
       <Footer />
     </div>
   );
-}
+};
+
+export default EventLanding;

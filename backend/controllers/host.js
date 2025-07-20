@@ -1,6 +1,6 @@
-const Host = require("../schema/host");
-const Event = require("../schema/Event");
-const User = require("../schema/User");
+const Host = require("../schema/Host");
+const Event = require("../schema/event");
+const User = require("../schema/user");
 
 exports.getHostProfile = async (req, res) => {
   const host = await Host.findById(req.host.id);
