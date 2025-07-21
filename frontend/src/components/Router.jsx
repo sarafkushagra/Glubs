@@ -39,7 +39,7 @@ import EditFeedback from "./Events/EditFeedback";
 export default function Router() {
   return (
     <Routes>
-      Route path="/" element={<LandingPage />} /
+      <Route path="/" element={<LandingPage />} />
       <Route path="/about" element={<About />} />
 
       <Route path="/auth" element={<AuthCard />} />
