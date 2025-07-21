@@ -35,14 +35,12 @@ const userRouter = require("./routers/user");
 const eventRouter = require("./routers/event");
 const clubRouter = require("./routers/club");
 const feedbackRouter = require("./routers/feedback");
-const hostRouter = require("./routers/hostRoutes");
 const adminRouter = require("./routers/admin")
 
 app.use("/users", userRouter);
 app.use("/event", eventRouter);
 app.use("/clubs", clubRouter);
 app.use("/feedback", feedbackRouter);
-app.use("/hosts", hostRouter);
 app.use("/admin", adminRouter);
 
 // Global Error Handler

@@ -14,7 +14,7 @@ export default function RegistrationDetails() {
       <h2 className="text-2xl font-bold mb-6 text-purple-700">Registration Details</h2>
 
       <p className="text-sm bg-yellow-100 text-yellow-900 p-3 mb-5 rounded-md border-l-4 border-yellow-400">
-        For students, listing, assessment & download credits will be unlimited and applicable after the opportunity is approved. Do note, it is mandatory to take registrations on Unstop exclusively to enjoy these benefits.
+        For students, listing, assessment & download credits will be unlimited and applicable after the opportunity is approved. Do note, it is mandatory to take registrations on Glubs exclusively to enjoy these benefits.
       </p>
 
       <div className="mb-6">

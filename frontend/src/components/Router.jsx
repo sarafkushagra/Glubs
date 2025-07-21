@@ -15,7 +15,7 @@ import QRScanner from "./QR/QR_Scanner";
 import MyProfile from "./Users/MyProfile";
 import HostOpportunityPage from "./Hosts/HostLandingPage";
 import HostForm from "./Hosts/HostForm";
-import AddEvent from "./Events/AddEvent";
+// import AddEvent from "./Events/AddEvent";
 import ClubAdminDashboard from "./DashBoard/ClubAdminDashboard";
 import ClubDetails from "./Clubs/ClubDetails";
 import ClubMembers from "./Clubs/ClubMembers";
@@ -79,8 +79,8 @@ export default function Router() {
         element={<ProtectedRoute allowedRoles={["admin", "club-admin"]} />}
       >
         <Route path="/host" element={<HostOpportunityPage />} />
-        <Route path="/host/hostform" element={<HostForm />} />
-        <Route path="/events/add" element={<AddEvent />} />
+        {/* <Route path="/host/hostform" element={<HostForm />} /> */}
+        <Route path="/events/add" element={<HostForm />} />
         <Route path="/events/edit/:eventId" element={<EditEvent />} />
         <Route path="/clubs/edit/:clubId" element={<EditClub />} />
         <Route path="/clubs/add" element={<AddClub />} />
