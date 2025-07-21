@@ -6,7 +6,7 @@ import img2 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon
 import event1 from '../images/EventA.jpg';
 import event2 from '../images/EventB.jpg';
 import event3 from '../images/EventC.jpg';
-
+import backgroundhero from '../images/backgroundhero.avif'; // Add your .avif image here
 
 
 import Footer from './Footer';
@@ -31,72 +31,118 @@ export default function LandingPage() {
       <Sidebar isOpen={isSidebarOpen} toggleSidebar={toggleSidebar} /> */}
 
       {/* Hero Section */}
-      <section className="relative min-h-screen flex flex-col justify-center items-center text-center px-4 bg-gradient-to-b from-black via-indigo-900 to-purple-50 text-white transition-all duration-700 ease-in-out">
-        <h1 className="text-4xl md:text-6xl font-extrabold mb-4 animate-fade-in-down">
-          Gateway to Campus Opportunities
-        </h1>
-        <p className="text-lg md:text-xl text-gray-300 mb-8 max-w-xl animate-fade-in-up">
-          Discover, register, and attend university events, hackathons, and workshops to level up your campus journey.
-        </p>
-        <div className="flex gap-4 flex-wrap justify-center animate-fade-in-up">
-          <Link
-            to="/events"
-            className="bg-white text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-700 hover:text-white transition-all duration-300 shadow hover:scale-105"
-          >
-            Explore Events
-          </Link>
-          <Link
-            to="/features/Organizers"
-            className="border border-white text-white font-semibold rounded-full px-6 py-3 hover:bg-white hover:text-indigo-700 transition-all duration-300 shadow hover:scale-105"
-          >
-            For Organizers
-          </Link>
+      <section className="relative min-h-screen flex flex-col md:flex-row items-center md:items-center justify-start text-left px-4 md:pl-20 pl-4 bg-gradient-to-b from-black via-indigo-900 to-black text-white transition-all duration-700 ease-in-out">
+        <div className="flex-1 flex flex-col justify-center items-start h-full md:min-h-screen md:py-0 py-12">
+          <h1 className="text-4xl md:text-6xl font-extrabold mb-4 animate-fade-in-down pl-2 md:pl-4">
+            Gateway to Campus Opportunities
+          </h1>
+          <p className="text-lg md:text-2xl text-gray-300 mb-8 max-w-xl animate-fade-in-up pl-2 md:pl-4">
+            Discover, register, and attend university events, hackathons, and workshops to level up your campus journey.
+          </p>
+          <div className="flex gap-4 flex-wrap justify-start animate-fade-in-up pl-2 md:pl-4">
+            <Link
+              to="/events"
+              className="bg-white text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-700 hover:text-white transition-all duration-300 shadow hover:scale-105"
+            >
+              Explore Events
+            </Link>
+            <Link
+              to="/features/Organizers"
+              className="border border-white text-white font-semibold rounded-full px-6 py-3 hover:bg-white hover:text-indigo-700 transition-all duration-300 shadow hover:scale-105"
+            >
+              For Organizers
+            </Link>
+          </div>
+        </div>
+        <div className="flex-1 flex justify-center items-center mt-8 md:mt-0">
+          <img src={backgroundhero} alt="Hero" className="w-full max-w-xl rounded-xl object-cover" />
         </div>
       </section>
 
       {/* How It Works Section */}
-      <section className="max-w-6xl mx-auto text-center py-20 px-4">
-        <h2 className="text-4xl font-bold mb-4 text-indigo-700">How it Works</h2>
-        <p className="text-gray-500 mb-12">Get started in 4 simple steps</p>
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <section className="w-full bg-black text-white py-20 px-4 flex flex-col md:flex-row items-center md:items-stretch">
+        {/* Left: Steps List */}
+        <div className="flex-1 flex flex-col gap-10 pl-10 md:pl-32">
           {[
-            { title: 'Discover', desc: 'Browse campus events, hackathons, and workshops' },
-            { title: 'Register', desc: 'Quick registration and instant confirmation' },
-            { title: 'Attend', desc: 'QR check-in for seamless attendance' },
-            { title: 'Get Recognized', desc: 'Receive certificates and build your profile' }
+            {
+              icon: (
+                <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-indigo-900 text-cyan-300 text-3xl mr-6">
+                  ★
+                </span>
+              ),
+              title: 'Discover',
+              desc: 'Browse campus events, hackathons, and workshops'
+            },
+            {
+              icon: (
+                <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-indigo-900 text-cyan-300 text-3xl mr-6">
+                  ✔
+                </span>
+              ),
+              title: 'Register',
+              desc: 'Quick registration and instant confirmation'
+            },
+            {
+              icon: (
+                <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-indigo-900 text-cyan-300 text-3xl mr-6">
+                  🕒
+                </span>
+              ),
+              title: 'Attend',
+              desc: 'QR check-in for seamless attendance'
+            },
+            {
+              icon: (
+                <span className="inline-flex items-center justify-center w-14 h-14 rounded-full bg-indigo-900 text-cyan-300 text-3xl mr-6">
+                  🏆
+                </span>
+              ),
+              title: 'Get Recognized',
+              desc: 'Receive certificates and build your profile'
+            }
           ].map((item, idx) => (
-            <div
-              key={idx}
-              className="bg-white rounded-xl p-6 shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 duration-300"
-            >
-              <h3 className="text-2xl font-semibold mb-2 text-indigo-700">{item.title}</h3>
-              <p className="text-gray-600">{item.desc}</p>
+            <div key={idx} className="flex items-start">
+              {item.icon}
+              <div>
+                <h3 className="text-2xl font-semibold mb-1 text-white">{item.title}</h3>
+                <p className="text-gray-300 text-lg">{item.desc}</p>
+              </div>
             </div>
           ))}
+        </div>
+        {/* Right: Heading */}
+        <div className="flex-1 flex items-center justify-center mb-10 md:mb-0">
+          <h2 className="text-4xl md:text-6xl font-bold text-left md:text-center w-full">How it Works</h2>
         </div>
       </section>
 
       {/* Event Gallery */}
-      <section className="bg-gradient-to-r from-purple-50 via-indigo-100 to-white py-20 text-center">
-        <h2 className="text-4xl font-bold mb-4 text-indigo-700">Event Gallery</h2>
-        <p className="text-gray-600 mb-8">A sneak peek into our vibrant campus events</p>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-5xl mx-auto px-4">
-    {[event1, event2, event3].map((image, idx) => (
-    <img
-      key={idx}
-      src={image}
-      alt={`Event Preview ${idx + 1}`}
-      className="rounded-lg shadow-md hover:scale-105 transition-transform duration-300 object-cover w-full h-64"
-    />
-    ))}
-    </div>
+      <section className="w-full bg-gradient-to-b from-black via-indigo-900 to-black py-20 text-white">
+        <div className="max-w-6xl mx-auto">
+          <h2 className="text-3xl md:text-6xl font-bold mb-8 text-white text-left">Event Gallery</h2>
+          <div className="flex gap-6 flex-wrap justify-start">
+            {[event1, event2, event3, event1].map((img, idx) => (
+              <div key={idx} className="bg-[#181c23] rounded-xl p-4 w-56">
+                <img src={img} alt={`Event ${idx + 1}`} className="rounded-lg w-full h-56 object-cover mb-2" />
+                <div>
+                  <h3 className="font-bold text-white text-base mb-1">Event Title</h3>
+                  <p className="text-gray-400 text-xs">Subtitle or attendees</p>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       </section>
 
       {/* Testimonials */}
-      <section className="max-w-5xl mx-auto py-20 px-4 text-center">
-        <h2 className="text-4xl font-bold mb-4 text-indigo-700">What Students Say</h2>
-        <p className="text-gray-500 mb-12">Voices from our happy users</p>
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <section className="w-full py-20 px-4 bg-black text-white">
+        {/* Heading Row */}
+        <div className="max-w-6xl mx-auto flex flex-col md:flex-row justify-between items-center mb-16">
+          <h2 className="text-4xl md:text-6xl font-bold text-left mb-6 md:mb-0 whitespace-pre-line">What people are saying about us.</h2>
+          
+        </div>
+        {/* Testimonials Grid */}
+        <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-3 gap-8">
           {[
             {
               img: img2,
@@ -107,16 +153,21 @@ export default function LandingPage() {
               img: img2,
               text: '"Finally, I never miss events. The dashboard keeps me updated on everything happening on campus."',
               name: 'Katrina Kaif'
+            },
+            {
+              img: img2,
+              text: '"This platform made it so easy to find and join events. Highly recommended!"',
+              name: 'Johny Bhai'
             }
           ].map((item, idx) => (
-            <div
-              key={idx}
-              className="bg-white p-6 rounded-xl flex items-center shadow-lg hover:shadow-2xl transition transform hover:-translate-y-2 duration-300"
-            >
-              <img src={item.img} alt={item.name} className="w-16 h-16 rounded-full border mr-6" />
-              <div className="text-left">
-                <p className="text-gray-700 mb-2 italic">{item.text}</p>
-                <h3 className="font-semibold text-indigo-700">{item.name}</h3>
+            <div key={idx} className="bg-[#111827] rounded-2xl p-8 flex flex-col h-full shadow-lg">
+              <span className="text-cyan-400 text-5xl mb-4">&ldquo;</span>
+              <p className="text-white text-lg mb-8">{item.text}</p>
+              <div className="flex items-center mt-auto">
+                <img src={item.img} alt={item.name} className="w-12 h-12 rounded-full border-2 border-cyan-400 mr-4" />
+                <div>
+                  <h3 className="font-semibold text-white">{item.name}</h3>
+                </div>
               </div>
             </div>
           ))}
@@ -124,24 +175,20 @@ export default function LandingPage() {
       </section>
 
       {/* Call To Action */}
-      {/* Call To Action */}
-<section className="bg-gradient-to-r from-indigo-700 via-purple-700 to-indigo-800 text-white text-center py-16 px-6 rounded-xl mb-12 max-w-5xl mx-auto  shadow-lg">
-  <div className="max-w-4xl mx-auto space-y-6">
-    <img
-      src={img1}
-      alt="Join Opportunities"
-      className="mx-auto rounded-lg shadow-lg max-h-64 w-full object-cover border-4 border-white"
-    />
-    <h2 className="text-3xl sm:text-4xl font-bold">Enroll in Opportunities Today</h2>
-    <p className="text-purple-100 max-w-xl mx-auto">
-      Start your journey by participating in campus events, workshops, and hackathons to enhance your skills and network with like-minded peers.
-    </p>
-    <Link
-      to="/contact"
-      className="inline-block bg-white text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow hover:scale-105"
-    >
-      Contact Us
-    </Link>
+<section className="w-full bg-gradient-to-b from-black via-indigo-900 to-indigo-900 text-white text-center py-16 px-6">
+  <div className="w-4/5 mx-auto">
+    <div className="backdrop-blur-md bg-white/10 border border-white/20 rounded-2xl p-10 shadow-lg flex flex-col items-center space-y-6">
+      <h2 className="text-3xl sm:text-4xl font-bold">Enroll in Opportunities Today</h2>
+      <p className="text-purple-100 max-w-xl mx-auto">
+        Start your journey by participating in campus events, workshops, and hackathons to enhance your skills and network with like-minded peers.
+      </p>
+      <Link
+        to="/contact"
+        className="inline-block bg-white text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-600 hover:text-white transition-all duration-300 shadow hover:scale-105"
+      >
+        Contact Us
+      </Link>
+    </div>
   </div>
 </section>
 
