@@ -43,108 +43,53 @@ export default function Navbar() {
     }
   };
 
-
+  const linkStyle = "relative text-gray-300 hover:text-white transition-colors duration-300";
+  const activeLinkStyle = "text-cyan-400";
 
   return (
     <nav className="w-full flex py-6 px-6 justify-between items-center bg-black/40 backdrop-blur-md fixed top-0 z-50 font-poppins">
-      {/* Logo */}
       <Link to="/">
-        <img src={img1} alt="logo" className="w-[124px] h-[36px] object-contain" />
+        <img src={img1} alt="logo" className="w-[124px] h-[36px] object-contain hover:opacity-80 transition-opacity" />
       </Link>
 
-      {/* Desktop Menu */}
+      {/* Desktop Menu - Refreshed with new styles */}
       <ul className="hidden sm:flex justify-end items-center flex-1 space-x-8">
-        {/* Home */}
-        <li className="relative group">
-          <Link
-            to="/"
-            className={`text-[16px] font-medium transition ${location.pathname === "/" ? "text-white" : "text-gray-200 hover:text-white"
-              }`}
-          >
-            Home
-          </Link>
-          <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300 ease-in-out"></span>
-        </li>
-
-        {/* About */}
-        <li className="relative group">
-          <Link
-            to="/about"
-            className={`text-[16px] font-medium transition ${location.pathname === "/about" ? "text-white" : "text-gray-200 hover:text-white"
-              }`}
-          >
-            About
-          </Link>
-          <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300 ease-in-out"></span>
-        </li>
-
-        {/* Events */}
-        <li className="relative group">
-          <Link
-            to="/events"
-            className={`text-[16px] font-medium transition ${location.pathname === "/events" ? "text-white" : "text-gray-200 hover:text-white"
-              }`}
-          >
-            Events
-          </Link>
-          <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300 ease-in-out"></span>
-        </li>
-
-        {/* Clubs */}
-        <li className="relative group">
-          <Link
-            to="/clubs"
-            className={`text-[16px] font-medium transition ${location.pathname === "/clubs" ? "text-white" : "text-gray-200 hover:text-white"
-              }`}
-          >
-            Clubs
-          </Link>
-          <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300 ease-in-out"></span>
-        </li>
-
-        {/* Hosts - only show if logged in */}
-          <li className="relative group">
+        {['Home', 'About', 'Events', 'Clubs', 'Hosts'].map((item) => (
+          <li key={item} className={`${linkStyle} group`}>
             <Link
-              to="/host"
-              className={`text-[16px] font-medium transition ${location.pathname === "/host" ? "text-white" : "text-gray-200 hover:text-white"
-                }`}
+              to={`/${item.toLowerCase() === 'home' ? '' : item.toLowerCase()}`}
+              className={location.pathname === `/${item.toLowerCase()}` || (location.pathname === '/' && item === 'Home') ? activeLinkStyle : ''}
             >
-              Hosts
+              {item}
             </Link>
-            <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-white group-hover:w-full transition-all duration-300 ease-in-out"></span>
+            {/* Animated underline effect */}
+            <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-cyan-400 group-hover:w-full transition-all duration-300 ease-in-out"></span>
           </li>
-        
-
-        {isLoggedIn && (
-          <>
-            <li className="text-gray-200 text-2xl"><Link to={"/profile"}><CgProfile size={24} /></Link></li>
-            <li>
-              <Link
-                to="/qr-scan"
-                title="Mark Attendance"
-                className="text-indigo-400 hover:text-indigo-600 transition"
-              >
-                <QrCode className="w-6 h-6" />
-              </Link>
-            </li>
-          </>)}
-
-
+        ))}
 
         {isLoggedIn ? (
           <>
-            <li>
+            {/* Profile and QR Icons */}
+            <li title="Profile">
+              <Link to="/profile" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300"><CgProfile size={24} /></Link>
+            </li>
+            <li title="Mark Attendance">
+              <Link to="/qr-scan" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300"><QrCode className="w-6 h-6" /></Link>
+            </li>
+            {/* Logout Button */}
+            <li title="Logout">
               <button
                 onClick={handleLogout}
-                className="bg-red-500 text-white px-1 py-1.5 rounded-md hover:bg-red-600 transition"
+                className="text-gray-300 hover:text-red-500 transition-colors duration-300"
               >
                 <RiLogoutCircleLine className="w-6 h-6" />
               </button>
             </li>
           </>
         ) : (
-          <li>
-            <Link to="/auth" className="text-indigo-400 hover:text-indigo-600 transition">
+          // Login Button
+          <li title="Login">
+            <Link to="/auth" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300">
               <BiLogIn className="w-6 h-6" />
             </Link>
           </li>
