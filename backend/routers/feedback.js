@@ -2,8 +2,10 @@ const express = require('express');
 const router = express.Router();
 const feedbackController = require('../controllers/feedback');
 
-router.get('/:id', feedbackController.showFeedback);
-router.put('/:id', feedbackController.editFeedback);
-router.delete('/:id', feedbackController.deleteFeedback);
+const { isAuthenticated } = require("../middlewares/auth");
+
+router.get('/:id',isAuthenticated, feedbackController.showFeedback);
+router.put('/:id',isAuthenticated, feedbackController.editFeedback);
+router.delete('/:id',isAuthenticated, feedbackController.deleteFeedback);
 
 module.exports = router;

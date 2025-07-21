@@ -1,4 +1,3 @@
-import React from "react";
 import { Route, Routes } from "react-router-dom";
 import AuthCard from "./AuthCard/AuthCard";
 import SignInForm from "./AuthCard/SignIn";
@@ -28,7 +27,6 @@ import AllUsers from "./Users/AllUsers";
 import NotFound from "./Pages/NotFound";
 import EmailVerificationPage from "./AuthCard/EmailVarificationPage";
 import AddFeedback from "./Events/AddFeedback";
-// import ProtectedRoute from './ProtectedRoute';
 import UsersDetails from "./Users/UsersDetails";
 import EditUser from "./Users/EditUser";
 import ProtectedRoute from "./ProtectedRoute";
@@ -41,7 +39,7 @@ import EditFeedback from "./Events/EditFeedback";
 export default function Router() {
   return (
     <Routes>
-      <Route path="/" element={<LandingPage />} />
+      Route path="/" element={<LandingPage />} /
       <Route path="/about" element={<About />} />
 
       <Route path="/auth" element={<AuthCard />} />
@@ -54,54 +52,48 @@ export default function Router() {
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
       {/* For Wrong URL */}
       <Route path="*" element={<NotFound />} />
+      <Route path="/events" element={<EventLanding />} />
+      <Route path="/clubs" element={<AllClubs />} />
+      <Route path="/features/qr-registration" element={<QRRegistration />} />
+      <Route path="/features/event-analytics" element={<EventAnalytics />} />
+      <Route path="/features/organizers" element={<Organizers />} />
 
       {/* All users allowed but after verification  */}
       <Route element={<ProtectedRoute />}>
-        <Route path="/events" element={<EventLanding />} />
-        <Route path="/clubs" element={<AllClubs />} />
-        <Route path="/features/qr-registration" element={<QRRegistration />} />
         <Route path="/qr-gen" element={<QRCodeGenerator />} />
         <Route path="/qr-scan" element={<QRScanner />} />
         <Route path="/events/:eventId" element={<EventDetails />} />
         <Route path="/clubs/:clubId" element={<ClubDetails />} />
+        <Route path="/users/edit/:id" element={<EditUser />} />
+        <Route path="/events/:eventId/add-feedback" element={<AddFeedback />} />
+        <Route path="/events/:eventId/edit-feedback/:feedbackId" element={<EditFeedback />} />
+        <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
+        <Route path="/profile" element={<MyProfile />} />
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={["admin", "student"]} />}>
-          
+
       </Route>
 
       <Route
         element={<ProtectedRoute allowedRoles={["admin", "club-admin"]} />}
       >
-        <Route path="/clubadmin/dash" element={<ClubAdminDashboard />} />
-        <Route path="/features/event-analytics" element={<EventAnalytics />} />
-        <Route path="/features/organizers" element={<Organizers />} />
         <Route path="/host" element={<HostOpportunityPage />} />
         <Route path="/host/hostform" element={<HostForm />} />
+        <Route path="/events/add" element={<AddEvent />} />
+        <Route path="/events/edit/:eventId" element={<EditEvent />} />
+        <Route path="/clubs/edit/:clubId" element={<EditClub />} />
+        <Route path="/clubs/add" element={<AddClub />} />
+
+        <Route path="/clubs/:clubId/members" element={<ClubMembers />} />
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={"admin"} />}>
         <Route path="/allusers" element={<AllUsers />} />
+        <Route path="/clubadmin/dash" element={<ClubAdminDashboard />} />
+        <Route path="/users/details/:id" element={<UsersDetails />} />
       </Route>
 
-      <Route path="/users/details/:id" element={<UsersDetails />} />
-      <Route path="/users/edit/:id" element={<EditUser />} />
-
-      {/* <Route element={<ProtectedRoute />}> */}
-
-      <Route path="/events/add" element={<AddEvent />} />
-
-      <Route path="/events/:eventId/add-feedback" element={<AddFeedback />} />
-      <Route path="/events/edit/:eventId" element={<EditEvent />} />
-      <Route path="/events/:eventId/edit-feedback/:feedbackId" element={<EditFeedback />} />
-      <Route path="/clubs/edit/:clubId" element={<EditClub />} />
-      <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
-      <Route path="/clubs/add" element={<AddClub />} />
-      <Route path="/clubs/:clubId/members" element={<ClubMembers />} />
-      <Route path="/profile" element={<MyProfile />} />
-      {/* DashBoard */}
-
-      {/* </Route> */}
     </Routes>
   );
 }
