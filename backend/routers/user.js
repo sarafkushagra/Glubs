@@ -9,7 +9,7 @@ router.get('/',isAuthenticated, restrictTo("admin"), userController.showAllUsers
 router.get('/details/:id',isAuthenticated, restrictTo(["club-admin", "admin"]), userController.showUser);
 router.get('/me', isAuthenticated, getMe);
 router.put('/:id', isAuthenticated,userController.updateUser);
-router.delete('/:id', isAuthenticated, restrictTo(["club-admin", "admin"]),userController.deleteUser);
+router.delete('/:id', isAuthenticated, restrictTo("admin"),userController.deleteUser);
 router.post("/request-club-admin",isAuthenticated, restrictTo("student"), userController.requestClubAdmin);
 
 // auths routes

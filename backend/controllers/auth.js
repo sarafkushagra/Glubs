@@ -221,7 +221,7 @@ exports.login = catchAsync(async (req, res, next) => {
 
 exports.logout = catchAsync(async (req, res, next) => {
   res.cookie("token", "loggedout", {
-    expires: new Date(Date.now() + 10 * 1000),
+    expires: new Date(Date.now() + 1000),
     httpOnly: true,
     secure: process.env.NODE_ENV === "production",
   });
