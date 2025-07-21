@@ -36,7 +36,10 @@ export default function Navbar() {
         withCredentials: true,
       });
       setIsLoggedIn(false);
+      localStorage.removeItem("glubsUser"); // example
+      localStorage.removeItem("glubsToken"); // if you stored any
       navigate("/");
+
       window.location.reload(); // force UI refresh after logout
     } catch (err) {
       console.error("Logout failed", err);

@@ -202,8 +202,14 @@ const About = () => {
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {[
                 {
-                  name: "Kushagra Saraf",
+                  name: "Mohan Gupta",
                   role: "Lead Backend Architect",
+                  description: "Manages stringent data security protocols, optimizes large-scale dataset handling, and rigorously ensures data integrity and consistency across the entire platform.",
+                  img: img1,
+                },
+                {
+                  name: "Kushagra Saraf",
+                  role: "Platform Engineering Lead",
                   description: "Spearheads the robust backend infrastructure, guaranteeing API reliability, and implementing scalable architectural solutions for sustained, high-performance operations.",
                   img: img1,
                 },
@@ -231,12 +237,6 @@ const About = () => {
                   description: "Designs high-impact event campaigns, conducts thorough trend analyses, and provides strategic guidance to organizations for optimizing participation and achieving objectives.",
                   img: img1,
                 },
-                {
-                  name: "Mohan Gupta",
-                  role: "Chief Database Administrator",
-                  description: "Manages stringent data security protocols, optimizes large-scale dataset handling, and rigorously ensures data integrity and consistency across the entire platform.",
-                  img: img1,
-                }
               ].map((member, idx) => (
                 <div
                   key={idx}

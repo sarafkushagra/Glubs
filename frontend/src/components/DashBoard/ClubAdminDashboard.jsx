@@ -1,752 +1,1852 @@
-import React, { useState, useEffect } from "react";
-import {
-  ResponsiveContainer,
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-} from "recharts";
+
+import { useState, useEffect } from "react"
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, AreaChart, Area } from "recharts"
 import {
   Users,
   BarChart2,
   CheckCircle,
-  AlertCircle,
   Calendar,
-  MapPin,
-  Clock,
-  Undo2,
-  Redo2,
+  Search,
+  Filter,
+  Download,
+  Edit,
   Trash2,
-  LayoutDashboard,
+  Eye,
+  UserCheck,
+  TrendingUp,
+  TrendingDown,
+  Activity,
+  Globe,
   Settings,
-  User,
+  Bell,
   Menu,
   X,
-  ChevronLeft,
   ChevronRight,
+  MoreHorizontal,
+  RefreshCw,
+  AlertCircle,
+  Loader,
   Plus,
-  FileText,
-  Bell,
-} from "lucide-react";
-import "../../splash.css"
-// For custom keyframes if needed
+  Star,
+  Clock,
+  MapPin,
+  Mail,
+  Shield,
+  UserPlus,
+} from "lucide-react"
 
-// Helper to get initials from a name
-function getInitials(name) {
-  return name
-    .split(' ')
-    .map((n) => n[0])
-    .join('')
-    .toUpperCase();
-}
+// If you deploy the backend elsewhere (e.g. Render, Railway) set NEXT_PUBLIC_API_BASE_URL.
+const API_BASE_URL = "http://localhost:3000"
 
-export default function ClubAdminDashboard() {
-  const [registrations, setRegistrations] = useState([
-    { name: "Alex Johnson", status: "pending" },
-    { name: "Sarah Chen", status: "pending" },
-    { name: "Mike Davis", status: "pending" },
-    { name: "Emma Wilson", status: "pending" },
-    { name: "James Brown", status: "pending" },
-  ]);
-  const [undoStack, setUndoStack] = useState([]);
-  const [redoStack, setRedoStack] = useState([]);
+const ClubAdminDashboard = () => {
+  // State management
+  const [activeTab, setActiveTab] = useState("dashboard")
+  const [sidebarOpen, setSidebarOpen] = useState(true)
+  const [searchQuery, setSearchQuery] = useState("")
+  const [selectedTimeRange, setSelectedTimeRange] = useState("7d")
 
-  const [upcomingEvents, setUpcomingEvents] = useState([
-    { name: "AI Workshop", date: "20th July", location: "Auditorium A", eventType: "Workshop" },
-    { name: "Hackathon 2025", date: "25th July", location: "Block B", eventType: "Hackathon" },
-    { name: "Webinar on React", date: "29th July", location: "Online", eventType: "Webinar" },
-  ]);
+  // Data states
+  const [users, setUsers] = useState([])
+  const [events, setEvents] = useState([])
+  const [clubs, setClubs] = useState([])
+  const [pendingRequests, setPendingRequests] = useState([])
 
-  // Sidebar state
-  const [sidebarOpen, setSidebarOpen] = useState(true);
-  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
-  const [activeSection, setActiveSection] = useState('dashboard');
+  // Loading states
+  const [loading, setLoading] = useState({
+    users: false,
+    events: false,
+    clubs: false,
+    requests: false,
+    action: false,
+  })
 
-  const pushToUndo = (prev) => {
-    setUndoStack((stack) => [...stack, prev]);
-    setRedoStack([]);
-  };
+  // Error states
+  const [errors, setErrors] = useState({
+    users: null,
+    events: null,
+    clubs: null,
+    requests: null,
+    action: null,
+  })
 
-  const handleAccept = (name) => {
-    pushToUndo(registrations);
-    setRegistrations((prev) =>
-      prev.map((reg) =>
-        reg.name === name ? { ...reg, status: "accepted" } : reg
-      )
-    );
-  };
+  // Form states for editing
+  const [editingUser, setEditingUser] = useState(null)
+  const [editingEvent, setEditingEvent] = useState(null)
+  const [editingClub, setEditingClub] = useState(null)
+  const [showCreateForm, setShowCreateForm] = useState({ user: false, event: false, club: false })
 
-  const handleRemove = (name) => {
-    pushToUndo(registrations);
-    setRegistrations((prev) => prev.filter((reg) => reg.name !== name));
-  };
+  // API Functions
+  const apiRequest = async (endpoint, options = {}) => {
+    try {
+      const url = API_BASE_URL ? `${API_BASE_URL}${endpoint}` : endpoint // endpoint is already relative (e.g. "/users")
+      const response = await fetch(url, {
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          ...options.headers,
+        },
+        ...options,
+      })
 
-  const handleAcceptAll = () => {
-    pushToUndo(registrations);
-    setRegistrations((prev) =>
-      prev.map((reg) => ({ ...reg, status: "accepted" }))
-    );
-  };
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}: ${response.statusText}`)
+      }
 
-  const handleUndo = () => {
-    setUndoStack((stack) => {
-      if (stack.length === 0) return stack;
-      setRedoStack((redo) => [...redo, registrations]);
-      const prev = stack[stack.length - 1];
-      setRegistrations(prev);
-      return stack.slice(0, -1);
-    });
-  };
-
-  const handleRedo = () => {
-    setRedoStack((stack) => {
-      if (stack.length === 0) return stack;
-      setUndoStack((undo) => [...undo, registrations]);
-      const next = stack[stack.length - 1];
-      setRegistrations(next);
-      return stack.slice(0, -1);
-    });
-  };
-
-  const handleDeleteEvent = (name) => {
-    if (window.confirm(`Are you sure you want to delete the event "${name}"?`)) {
-      setUpcomingEvents((prev) => prev.filter((event) => event.name !== name));
+      const data = await response.json()
+      return data
+    } catch (error) {
+      console.error(`API request failed for ${endpoint}:`, error.message)
+      throw new Error(`Server unreachable: ${error.message}`)
     }
-  };
+  }
 
-  const regTrend = [
-    { date: "Mon", registrations: 45 },
-    { date: "Tue", registrations: 78 },
-    { date: "Wed", registrations: 123 },
-    { date: "Thu", registrations: 89 },
-    { date: "Fri", registrations: 156 },
-    { date: "Sat", registrations: 234 },
-    { date: "Sun", registrations: 189 },
-  ];
+  // Fetch functions
+  const fetchUsers = async () => {
+    setLoading((prev) => ({ ...prev, users: true }))
+    setErrors((prev) => ({ ...prev, users: null }))
+    try {
+      const data = await apiRequest("/users")
+      setUsers(Array.isArray(data) ? data : [])
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, users: error.message }))
+      setUsers([])
+    } finally {
+      setLoading((prev) => ({ ...prev, users: false }))
+    }
+  }
 
-  // Modal state for detailed view
-  const [modalOpen, setModalOpen] = useState(false);
-  const [modalType, setModalType] = useState(null); // 'event' or 'registration'
-  const [modalData, setModalData] = useState(null);
+  const fetchEvents = async () => {
+    setLoading((prev) => ({ ...prev, events: true }))
+    setErrors((prev) => ({ ...prev, events: null }))
+    try {
+      const data = await apiRequest("/event")
+      setEvents(Array.isArray(data) ? data : [])
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, events: error.message }))
+      setEvents([])
+    } finally {
+      setLoading((prev) => ({ ...prev, events: false }))
+    }
+  }
 
-  // Open modal for event or registration
-  const openModal = (type, data) => {
-    setModalType(type);
-    setModalData(data);
-    setModalOpen(true);
-  };
-  const closeModal = () => {
-    setModalOpen(false);
-    setModalType(null);
-    setModalData(null);
-  };
+  const fetchClubs = async () => {
+    setLoading((prev) => ({ ...prev, clubs: true }))
+    setErrors((prev) => ({ ...prev, clubs: null }))
+    try {
+      const data = await apiRequest("/clubs")
+      setClubs(Array.isArray(data) ? data : [])
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, clubs: error.message }))
+      setClubs([])
+    } finally {
+      setLoading((prev) => ({ ...prev, clubs: false }))
+    }
+  }
+const fetchPendingRequests = async () => {
+  setLoading((prev) => ({ ...prev, requests: true }));
+  setErrors((prev) => ({ ...prev, requests: null }));
+  try {
+    const data = await apiRequest("/admin/club-admin-requests");
+   setPendingRequests(Array.isArray(data.users) ? data.users : []);
+  } catch (error) {
+    setErrors((prev) => ({ ...prev, requests: error.message }));
+    setPendingRequests([]);
+  } finally {
+    setLoading((prev) => ({ ...prev, requests: false }));
+  }
+};
 
-  // Dashboard customization state
-  const defaultCards = [
-    { key: "totalEvents", title: "Total Events", value: "8", Icon: Users },
-    { key: "upcomingEvents", title: "Upcoming Events", value: "5", Icon: BarChart2 },
-    { key: "totalRegistrations", title: "Total Registrations", value: "1,247", Icon: CheckCircle },
-    { key: "attendanceRate", title: "Attendance Rate", value: "78%", Icon: AlertCircle },
-  ];
-  const [visibleCards, setVisibleCards] = useState(defaultCards.map(card => card.key));
-  const [customizeOpen, setCustomizeOpen] = useState(false);
-  // New: section toggles
-  const [showTrend, setShowTrend] = useState(true);
-  const [showEvents, setShowEvents] = useState(true);
-  const [showRegistrations, setShowRegistrations] = useState(true);
+  // Action functions
+  const approveClubAdmin = async (requestId) => {
+    setLoading((prev) => ({ ...prev, action: true }))
+    setErrors((prev) => ({ ...prev, action: null }))
+    console.log(requestId);
+    try {
+      await apiRequest(`/admin/approve-club-admin/${requestId}`, { method: "POST" })
+      setPendingRequests((prev) => prev.filter((req) => req._id !== requestId))
+      alert("Request approved successfully!")
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, action: error.message }))
+      alert("Failed to approve request: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
 
-  const handleCardToggle = (key) => {
-    setVisibleCards((prev) =>
-      prev.includes(key) ? prev.filter((k) => k !== key) : [...prev, key]
-    );
-  };
+  const rejectClubAdmin = async (requestId) => {
+    setLoading((prev) => ({ ...prev, action: true }))
+    setErrors((prev) => ({ ...prev, action: null }))
+    try {
+      // Assuming you have a reject endpoint
+      await apiRequest(`/admin/reject-club-admin/${requestId}`, { method: "POST" })
+      setPendingRequests((prev) => prev.filter((req) => req._id !== requestId))
+      alert("Request rejected successfully!")
+    } catch (error) {
+      // If no reject endpoint, just remove from local state
+      setPendingRequests((prev) => prev.filter((req) => req._id !== requestId))
+      alert("Request rejected!")
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
 
-  // Navigation items
-  const navigationItems = [
-    { id: 'dashboard', label: 'Dashboard', icon: LayoutDashboard },
-    { id: 'events', label: 'Events', icon: Calendar },
-    { id: 'registrations', label: 'Registrations', icon: Users },
-    { id: 'analytics', label: 'Analytics', icon: BarChart2 },
-    { id: 'notifications', label: 'Notifications', icon: Bell },
-    { id: 'settings', label: 'Settings', icon: Settings },
-  ];
+  const deleteUser = async (userId) => {
+    if (!confirm("Are you sure you want to delete this user?")) return
+    setLoading((prev) => ({ ...prev, action: true }))
+    try {
+      await apiRequest(`/users/${userId}`, { method: "DELETE" })
+      setUsers((prev) => prev.filter((user) => user._id !== userId))
+      alert("User deleted successfully!")
+    } catch (error) {
+      alert("Failed to delete user: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
 
-  // Render content based on active section
-  const renderContent = () => {
-    switch (activeSection) {
-      case 'dashboard':
-        return (
-          <>
-            <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-4 sm:mb-6">
-              <h1 className="text-3xl sm:text-4xl font-bold text-slate-800 mb-2 sm:mb-0">Dashboard Overview</h1>
-              <div className="flex gap-2 items-center">
-                <button
-                  onClick={() => setCustomizeOpen(true)}
-                  className="px-3 py-2 rounded-lg bg-blue-100 text-blue-700 font-semibold shadow hover:bg-blue-200 transition"
-                >
-                  Customize Dashboard
-                </button>
+  const updateUser = async (userId, userData) => {
+    setLoading((prev) => ({ ...prev, action: true }))
+    try {
+      const updatedUser = await apiRequest(`/users/${userId}`, {
+        method: "PUT",
+        body: JSON.stringify(userData),
+      })
+      setUsers((prev) => prev.map((user) => (user._id === userId ? updatedUser : user)))
+      setEditingUser(null)
+      alert("User updated successfully!")
+    } catch (error) {
+      alert("Failed to update user: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
+
+  const createUser = async (userData) => {
+    setLoading((prev) => ({ ...prev, action: true }))
+    try {
+      const newUser = await apiRequest("/users", {
+        method: "POST",
+        body: JSON.stringify(userData),
+      })
+      setUsers((prev) => [...prev, newUser])
+      setShowCreateForm((prev) => ({ ...prev, user: false }))
+      alert("User created successfully!")
+    } catch (error) {
+      alert("Failed to create user: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
+
+  const deleteEvent = async (eventId) => {
+    if (!confirm("Are you sure you want to delete this event?")) return
+    setLoading((prev) => ({ ...prev, action: true }))
+    try {
+      await apiRequest(`/event/${eventId}`, { method: "DELETE" })
+      setEvents((prev) => prev.filter((event) => event._id !== eventId))
+      alert("Event deleted successfully!")
+    } catch (error) {
+      alert("Failed to delete event: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
+
+  const updateEvent = async (eventId, eventData) => {
+    setLoading((prev) => ({ ...prev, action: true }))
+    try {
+      const updatedEvent = await apiRequest(`/event/${eventId}`, {
+        method: "PUT",
+        body: JSON.stringify(eventData),
+      })
+      setEvents((prev) => prev.map((event) => (event._id === eventId ? updatedEvent : event)))
+      setEditingEvent(null)
+      alert("Event updated successfully!")
+    } catch (error) {
+      alert("Failed to update event: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
+
+  const createEvent = async (eventData) => {
+    setLoading((prev) => ({ ...prev, action: true }))
+    try {
+      const newEvent = await apiRequest("/event", {
+        method: "POST",
+        body: JSON.stringify(eventData),
+      })
+      setEvents((prev) => [...prev, newEvent])
+      setShowCreateForm((prev) => ({ ...prev, event: false }))
+      alert("Event created successfully!")
+    } catch (error) {
+      alert("Failed to create event: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
+
+  const deleteClub = async (clubId) => {
+    if (!confirm("Are you sure you want to delete this club?")) return
+    setLoading((prev) => ({ ...prev, action: true }))
+    try {
+      await apiRequest(`/clubs/${clubId}`, { method: "DELETE" })
+      setClubs((prev) => prev.filter((club) => club._id !== clubId))
+      alert("Club deleted successfully!")
+    } catch (error) {
+      alert("Failed to delete club: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
+
+  const updateClub = async (clubId, clubData) => {
+    setLoading((prev) => ({ ...prev, action: true }))
+    try {
+      const updatedClub = await apiRequest(`/clubs/${clubId}`, {
+        method: "PUT",
+        body: JSON.stringify(clubData),
+      })
+      setClubs((prev) => prev.map((club) => (club._id === clubId ? updatedClub : club)))
+      setEditingClub(null)
+      alert("Club updated successfully!")
+    } catch (error) {
+      alert("Failed to update club: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
+
+  const createClub = async (clubData) => {
+    setLoading((prev) => ({ ...prev, action: true }))
+    try {
+      const newClub = await apiRequest("/clubs", {
+        method: "POST",
+        body: JSON.stringify(clubData),
+      })
+      setClubs((prev) => [...prev, newClub])
+      setShowCreateForm((prev) => ({ ...prev, club: false }))
+      alert("Club created successfully!")
+    } catch (error) {
+      alert("Failed to create club: " + error.message)
+    } finally {
+      setLoading((prev) => ({ ...prev, action: false }))
+    }
+  }
+
+  const exportData = (type) => {
+    let data = []
+    let filename = ""
+
+    switch (type) {
+      case "users":
+        data = users
+        filename = "users.json"
+        break
+      case "events":
+        data = events
+        filename = "events.json"
+        break
+      case "clubs":
+        data = clubs
+        filename = "clubs.json"
+        break
+      default:
+        return
+    }
+
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: "application/json" })
+    const url = URL.createObjectURL(blob)
+    const a = document.createElement("a")
+    a.href = url
+    a.download = filename
+    document.body.appendChild(a)
+    a.click()
+    document.body.removeChild(a)
+    URL.revokeObjectURL(url)
+  }
+
+  // Data processing functions
+  const processStats = () => {
+    const totalUsers = users.length
+    const activeUsers = users.filter((user) => user.isActive !== false).length
+    const totalEvents = events.length
+    const upcomingEvents = events.filter((event) => new Date(event.date || event.eventDate) > new Date()).length
+    const totalClubs = clubs.length
+    const activeClubs = clubs.filter((club) => club.isActive !== false).length
+
+    // Calculate attendance rate
+    const eventsWithAttendance = events.filter((event) => event.registeredUsers && event.attendedUsers)
+    const totalRegistered = eventsWithAttendance.reduce((sum, event) => sum + (event.registeredUsers?.length || 0), 0)
+    const totalAttended = eventsWithAttendance.reduce((sum, event) => sum + (event.attendedUsers?.length || 0), 0)
+    const attendanceRate = totalRegistered > 0 ? Math.round((totalAttended / totalRegistered) * 100) : 0
+
+    return {
+      totalUsers,
+      activeUsers,
+      totalEvents,
+      upcomingEvents,
+      totalClubs,
+      activeClubs,
+      attendanceRate,
+    }
+  }
+
+  const processRegistrationTrend = () => {
+    const last7Days = []
+    const now = new Date()
+
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date(now)
+      date.setDate(date.getDate() - i)
+      const dayName = date.toLocaleDateString("en-US", { weekday: "short" })
+
+      const dayRegistrations = users.filter((user) => {
+        const userDate = new Date(user.createdAt || user.registrationDate)
+        return userDate.toDateString() === date.toDateString()
+      }).length
+
+      const dayEvents = events.filter((event) => {
+        const eventDate = new Date(event.createdAt || event.date)
+        return eventDate.toDateString() === date.toDateString()
+      }).length
+
+      last7Days.push({
+        date: dayName,
+        registrations: dayRegistrations,
+        events: dayEvents,
+      })
+    }
+
+    return last7Days
+  }
+
+  const processEventTypes = () => {
+    const typeCount = {}
+    const colors = ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"]
+
+    events.forEach((event) => {
+      const type = event.eventType || event.type || "Other"
+      typeCount[type] = (typeCount[type] || 0) + 1
+    })
+
+    const totalEvents = events.length
+    return Object.entries(typeCount).map(([name, count], index) => ({
+      name,
+      value: totalEvents > 0 ? Math.round((count / totalEvents) * 100) : 0,
+      count,
+      color: colors[index % colors.length],
+    }))
+  }
+
+  const processRecentActivity = () => {
+    const activities = []
+
+    // Recent user registrations
+    users
+      .sort((a, b) => new Date(b.createdAt || b.registrationDate) - new Date(a.createdAt || a.registrationDate))
+      .slice(0, 3)
+      .forEach((user) => {
+        activities.push({
+          id: `user-${user._id}`,
+          type: "registration",
+          user: user.name || user.username,
+          event: "Platform",
+          time: getTimeAgo(user.createdAt || user.registrationDate),
+        })
+      })
+
+    // Recent events
+    events
+      .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt))
+      .slice(0, 2)
+      .forEach((event) => {
+        activities.push({
+          id: `event-${event._id}`,
+          type: "event_created",
+          user: event.createdBy || "Admin",
+          event: event.name || event.title,
+          time: getTimeAgo(event.createdAt),
+        })
+      })
+
+    return activities.slice(0, 5)
+  }
+
+  const getTimeAgo = (dateString) => {
+    if (!dateString) return "Unknown time"
+    const now = new Date()
+    const date = new Date(dateString)
+    const diffInMinutes = Math.floor((now - date) / (1000 * 60))
+
+    if (diffInMinutes < 1) return "Just now"
+    if (diffInMinutes < 60) return `${diffInMinutes} minutes ago`
+
+    const diffInHours = Math.floor(diffInMinutes / 60)
+    if (diffInHours < 24) return `${diffInHours} hours ago`
+
+    const diffInDays = Math.floor(diffInHours / 24)
+    if (diffInDays < 7) return `${diffInDays} days ago`
+
+    return date.toLocaleDateString()
+  }
+
+  // Initial data fetch
+  useEffect(() => {
+    fetchUsers()
+    fetchEvents()
+    fetchClubs()
+    fetchPendingRequests()
+  }, [])
+
+  // Computed values
+  const stats = processStats()
+  const registrationTrend = processRegistrationTrend()
+  const eventTypes = processEventTypes()
+  const recentActivity = processRecentActivity()
+
+  // Components
+  const LoadingSpinner = () => (
+    <div className="flex items-center justify-center p-8">
+      <Loader className="w-8 h-8 animate-spin text-blue-600" />
+      <span className="ml-2 text-gray-600">Loading...</span>
+    </div>
+  )
+
+  const ErrorMessage = ({ message, onRetry }) => (
+    <div className="flex items-center justify-center p-8 bg-red-50 rounded-lg border border-red-200">
+      <AlertCircle className="w-6 h-6 text-red-600 mr-2" />
+      <span className="text-red-700 mr-4">{message}</span>
+      {onRetry && (
+        <button
+          onClick={onRetry}
+          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
+        >
+          Retry
+        </button>
+      )}
+    </div>
+  )
+
+  const StatCard = ({ title, value, change, icon: Icon, color = "blue", loading = false }) => (
+    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 transform hover:-translate-y-1">
+      <div className="flex items-center justify-between">
+        <div className="flex-1">
+          <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
+          {loading ? (
+            <div className="w-16 h-8 bg-gray-200 rounded animate-pulse"></div>
+          ) : (
+            <p className="text-3xl font-bold text-gray-900">{value}</p>
+          )}
+          {change && !loading && (
+            <div className="flex items-center mt-2">
+              {change > 0 ? (
+                <TrendingUp className="w-4 h-4 text-green-500 mr-1" />
+              ) : (
+                <TrendingDown className="w-4 h-4 text-red-500 mr-1" />
+              )}
+              <span className={`text-sm font-medium ${change > 0 ? "text-green-600" : "text-red-600"}`}>
+                {Math.abs(change)}%
+              </span>
+            </div>
+          )}
+        </div>
+        <div className={`p-4 rounded-xl bg-gradient-to-br from-${color}-400 to-${color}-600 shadow-lg`}>
+          <Icon className="w-8 h-8 text-white" />
+        </div>
+      </div>
+    </div>
+  )
+
+  // Form Components
+  const UserForm = ({ user, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+      name: user?.name || "",
+      email: user?.email || "",
+      role: user?.role || "student",
+      isActive: user?.isActive !== false,
+    })
+
+    const handleSubmit = (e) => {
+      e.preventDefault()
+      onSave(formData)
+    }
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <h3 className="text-lg font-semibold mb-4">{user ? "Edit User" : "Create User"}</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <input
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <select
+                value={formData.role}
+                onChange={(e) => setFormData({ ...formData, role: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="student">Student</option>
+                <option value="club_admin">Club Admin</option>
+                <option value="host">Host</option>
+                <option value="admin">Admin</option>
+              </select>
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="isActive"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="mr-2"
+              />
+              <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
+                Active
+              </label>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <button
+                type="submit"
+                disabled={loading.action}
+                className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading.action ? "Saving..." : "Save"}
+              </button>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  const EventForm = ({ event, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+      name: event?.name || "",
+      eventType: event?.eventType || "Workshop",
+      date: event?.date ? event.date.split("T")[0] : "",
+      location: event?.location || "",
+      description: event?.description || "",
+    })
+
+    const handleSubmit = (e) => {
+      e.preventDefault()
+      onSave(formData)
+    }
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <h3 className="text-lg font-semibold mb-4">{event ? "Edit Event" : "Create Event"}</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <select
+                value={formData.eventType}
+                onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              >
+                <option value="Workshop">Workshop</option>
+                <option value="Seminar">Seminar</option>
+                <option value="Hackathon">Hackathon</option>
+                <option value="Webinar">Webinar</option>
+                <option value="Bootcamp">Bootcamp</option>
+              </select>
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <input
+                type="date"
+                value={formData.date}
+                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
+              <input
+                type="text"
+                value={formData.location}
+                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div className="flex gap-3 pt-4">
+              <button
+                type="submit"
+                disabled={loading.action}
+                className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading.action ? "Saving..." : "Save"}
+              </button>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  const ClubForm = ({ club, onSave, onCancel }) => {
+    const [formData, setFormData] = useState({
+      name: club?.name || "",
+      description: club?.description || "",
+      isActive: club?.isActive !== false,
+    })
+
+    const handleSubmit = (e) => {
+      e.preventDefault()
+      onSave(formData)
+    }
+
+    return (
+      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div className="bg-white rounded-lg p-6 w-full max-w-md">
+          <h3 className="text-lg font-semibold mb-4">{club ? "Edit Club" : "Create Club"}</h3>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <input
+                type="text"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                required
+              />
+            </div>
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                rows="3"
+              />
+            </div>
+            <div className="flex items-center">
+              <input
+                type="checkbox"
+                id="clubActive"
+                checked={formData.isActive}
+                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
+                className="mr-2"
+              />
+              <label htmlFor="clubActive" className="text-sm font-medium text-gray-700">
+                Active
+              </label>
+            </div>
+            <div className="flex gap-3 pt-4">
+              <button
+                type="submit"
+                disabled={loading.action}
+                className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
+              >
+                {loading.action ? "Saving..." : "Save"}
+              </button>
+              <button
+                type="button"
+                onClick={onCancel}
+                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+              >
+                Cancel
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    )
+  }
+
+  // Render functions
+  const renderDashboard = () => (
+    <div className="space-y-8">
+      {/* Header */}
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h1 className="text-4xl font-bold text-gray-900 mb-2">Dashboard Overview</h1>
+          <p className="text-gray-600">Welcome back! Here's what's happening with your platform.</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <select
+            value={selectedTimeRange}
+            onChange={(e) => setSelectedTimeRange(e.target.value)}
+            className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+          >
+            <option value="7d">Last 7 days</option>
+            <option value="30d">Last 30 days</option>
+            <option value="90d">Last 90 days</option>
+          </select>
+          <button
+            onClick={() => {
+              fetchUsers()
+              fetchEvents()
+              fetchClubs()
+              fetchPendingRequests()
+            }}
+            disabled={loading.users || loading.events || loading.clubs || loading.requests}
+            className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-lg hover:from-blue-700 hover:to-blue-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+          >
+            <RefreshCw
+              className={`w-4 h-4 ${loading.users || loading.events || loading.clubs || loading.requests ? "animate-spin" : ""}`}
+            />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {/* Error Messages */}
+      {(errors.users || errors.events || errors.clubs || errors.requests) && (
+        <div className="space-y-2">
+          {errors.users && <ErrorMessage message={`Users API Error: ${errors.users}`} onRetry={fetchUsers} />}
+          {errors.events && <ErrorMessage message={`Events API Error: ${errors.events}`} onRetry={fetchEvents} />}
+          {errors.clubs && <ErrorMessage message={`Clubs API Error: ${errors.clubs}`} onRetry={fetchClubs} />}
+          {errors.requests && (
+            <ErrorMessage message={`Requests API Error: ${errors.requests}`} onRetry={fetchPendingRequests} />
+          )}
+        </div>
+      )}
+
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <StatCard
+          title="Total Users"
+          value={stats.totalUsers.toLocaleString()}
+          change={12}
+          icon={Users}
+          color="blue"
+          loading={loading.users}
+        />
+        <StatCard
+          title="Active Events"
+          value={stats.upcomingEvents}
+          change={8}
+          icon={Calendar}
+          color="green"
+          loading={loading.events}
+        />
+        <StatCard
+          title="Total Clubs"
+          value={stats.totalClubs}
+          change={-2}
+          icon={Globe}
+          color="purple"
+          loading={loading.clubs}
+        />
+        <StatCard
+          title="Attendance Rate"
+          value={`${stats.attendanceRate}%`}
+          change={5}
+          icon={TrendingUp}
+          color="orange"
+          loading={loading.events}
+        />
+      </div>
+
+      {/* Charts Row */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-8">
+        {/* Registration Trend */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-gray-900">Registration Trend</h3>
+            <div className="flex items-center gap-4">
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-blue-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Registrations</span>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="w-3 h-3 bg-green-500 rounded-full"></div>
+                <span className="text-sm text-gray-600">Events</span>
               </div>
             </div>
-            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-2 md:gap-3 mb-4 md:mb-6">
-              {defaultCards.filter(card => visibleCards.includes(card.key)).map(({ key, title, value, Icon }) => (
-                <div
-                  key={key}
-                  className="bg-white backdrop-blur-md border border-slate-300 p-4 md:p-6 rounded-xl shadow-md hover:shadow-lg transition-all"
-                >
-                  <div className="flex items-center mb-3 md:mb-4">
-                    <Icon className="h-6 w-6 text-blue-500 mr-3" />
-                    <h3 className="text-sm md:text-md font-medium text-slate-800">{title}</h3>
+          </div>
+          {loading.users || loading.events ? (
+            <LoadingSpinner />
+          ) : errors.users || errors.events ? (
+            <div className="flex items-center justify-center h-80 text-red-500">
+              <div className="text-center">
+                <AlertCircle className="w-16 h-16 mx-auto mb-4" />
+                <p className="text-lg font-medium">Failed to load chart data</p>
+                <p className="text-sm">Check API connection</p>
+              </div>
+            </div>
+          ) : (
+            <div className="h-80">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={registrationTrend}>
+                  <XAxis dataKey="date" stroke="#6B7280" />
+                  <YAxis stroke="#6B7280" />
+                  <Tooltip
+                    contentStyle={{
+                      backgroundColor: "white",
+                      border: "1px solid #e5e7eb",
+                      borderRadius: "8px",
+                      boxShadow: "0 10px 25px -5px rgba(0, 0, 0, 0.1)",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="registrations"
+                    stackId="1"
+                    stroke="#3B82F6"
+                    fill="#3B82F6"
+                    fillOpacity={0.6}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="events"
+                    stackId="2"
+                    stroke="#10B981"
+                    fill="#10B981"
+                    fillOpacity={0.6}
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+        </div>
+
+        {/* Event Types Distribution */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">Event Types Distribution</h3>
+          {loading.events ? (
+            <LoadingSpinner />
+          ) : errors.events ? (
+            <div className="flex items-center justify-center h-80 text-red-500">
+              <div className="text-center">
+                <AlertCircle className="w-16 h-16 mx-auto mb-4" />
+                <p className="text-lg font-medium">Failed to load event data</p>
+                <p className="text-sm">Check API connection</p>
+              </div>
+            </div>
+          ) : eventTypes.length > 0 ? (
+            <>
+              <div className="h-80">
+                <ResponsiveContainer width="100%" height="100%">
+                  <PieChart>
+                    <Pie
+                      data={eventTypes}
+                      cx="50%"
+                      cy="50%"
+                      innerRadius={60}
+                      outerRadius={120}
+                      paddingAngle={5}
+                      dataKey="value"
+                    >
+                      {eventTypes.map((entry, index) => (
+                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              </div>
+              <div className="grid grid-cols-2 gap-4 mt-6">
+                {eventTypes.map((type, index) => (
+                  <div key={index} className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="w-4 h-4 rounded-full" style={{ backgroundColor: type.color }}></div>
+                    <div>
+                      <span className="text-sm font-medium text-gray-900">{type.name}</span>
+                      <div className="text-xs text-gray-500">
+                        {type.count} events ({type.value}%)
+                      </div>
+                    </div>
                   </div>
-                  <p className="text-2xl md:text-3xl font-semibold text-slate-800">{value}</p>
+                ))}
+              </div>
+            </>
+          ) : (
+            <div className="flex items-center justify-center h-80 text-gray-500">
+              <div className="text-center">
+                <BarChart2 className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No event data available</p>
+                <p className="text-sm">Events will appear here once created</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+
+      {/* Bottom Row */}
+      <div className="grid grid-cols-1 xl:grid-cols-3 gap-8">
+        {/* Top Performing Clubs */}
+        <div className="xl:col-span-2 bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-semibold text-gray-900">Top Performing Clubs</h3>
+            <button
+              onClick={() => setActiveTab("clubs")}
+              className="text-blue-600 hover:text-blue-700 text-sm font-medium hover:underline"
+            >
+              View All
+            </button>
+          </div>
+          {loading.clubs ? (
+            <LoadingSpinner />
+          ) : errors.clubs ? (
+            <div className="flex items-center justify-center h-40 text-red-500">
+              <div className="text-center">
+                <AlertCircle className="w-12 h-12 mx-auto mb-4" />
+                <p className="text-lg font-medium">Failed to load clubs</p>
+                <p className="text-sm">Check API connection</p>
+              </div>
+            </div>
+          ) : clubs.length > 0 ? (
+            <div className="space-y-4">
+              {clubs.slice(0, 4).map((club, index) => (
+                <div
+                  key={club._id}
+                  className="flex items-center justify-between p-4 bg-gradient-to-r from-gray-50 to-gray-100 rounded-lg hover:from-blue-50 hover:to-blue-100 transition-all duration-200"
+                >
+                  <div className="flex items-center gap-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                      <Globe className="w-6 h-6 text-white" />
+                    </div>
+                    <div>
+                      <h4 className="font-semibold text-gray-900">{club.name}</h4>
+                      <p className="text-sm text-gray-600">
+                        {club.memberCount || 0} members • {club.eventCount || 0} events
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1">
+                      <Star className="w-4 h-4 text-yellow-500" />
+                      <span className="text-sm font-medium text-gray-700">#{index + 1}</span>
+                    </div>
+                    <TrendingUp className="w-4 h-4 text-green-500" />
+                    <span className="text-sm font-medium text-green-600">{Math.floor(Math.random() * 20) + 5}%</span>
+                  </div>
                 </div>
               ))}
             </div>
-
-            <div className="flex flex-col md:flex-row gap-2 md:gap-x-4 mb-4 md:mb-6">
-              {showEvents && (
-                <div className="bg-white backdrop-blur-md border border-slate-300 rounded-xl shadow-lg p-4 md:p-6 flex flex-col min-h-[260px] min-w-[340px] md:min-w-[400px] max-w-[420px] w-full mb-2 md:mb-0">
-                  <h2 className="text-base md:text-lg font-semibold text-slate-800 mb-4 md:mb-6">Your Upcoming Events</h2>
-                  {upcomingEvents.length === 0 ? (
-                    <div className="flex flex-col items-center justify-center h-40 text-center text-slate-500 gap-2 animate-fade-in">
-                      <Calendar className="w-10 h-10 mb-2 text-blue-300" />
-                      <span className="font-semibold">No upcoming events</span>
-                      <span className="text-xs">Check back soon or add a new event!</span>
-                    </div>
-                  ) : (
-                    <ul className="space-y-3 md:space-y-4 overflow-y-auto pr-1 md:pr-2 max-h-72 md:max-h-96">
-                      {upcomingEvents.map((event, idx) => (
-                        <li
-                          key={idx}
-                          className="flex items-center gap-3 md:gap-4 p-3 md:p-4 bg-white backdrop-blur rounded-xl border border-slate-300 shadow-sm hover:shadow-md transition cursor-pointer transform-gpu hover:scale-[1.02] duration-200 animate-fade-in"
-                          onClick={() => openModal('event', event)}
-                        >
-                          <div className="flex flex-col flex-1">
-                            <div className="flex items-center gap-2 md:gap-3 mb-1 md:mb-2">
-                              <span className="bg-blue-100 text-blue-700 px-2 py-0.5 rounded-full text-xs font-semibold">
-                                {event.eventType}
-                              </span>
-                              <h4 className="text-sm md:text-md font-semibold text-slate-800 truncate">
-                                {event.name}
-                              </h4>
-                            </div>
-                            <div className="flex items-center gap-4 md:gap-6 text-xs text-slate-500">
-                              <span className="flex items-center gap-1">
-                                <Clock className="w-4 h-4 text-blue-500" /> {event.date}
-                              </span>
-                              <span className="flex items-center gap-1">
-                                <MapPin className="w-4 h-4 text-indigo-500" /> {event.location}
-                              </span>
-                            </div>
-                          </div>
-                          <div className="flex items-center gap-3 md:gap-4">
-                            <Calendar className="w-5 h-5 text-blue-400" />
-                            <button
-                              onClick={(e) => { e.stopPropagation(); handleDeleteEvent(event.name); }}
-                              className="p-2 rounded-full hover:bg-red-50"
-                              aria-label="Delete event"
-                              title="Delete"
-                            >
-                              <Trash2 className="w-4 h-4 text-red-500 hover:scale-110 transition" />
-                            </button>
-                          </div>
-                        </li>
-                      ))}
-                    </ul>
-                  )}
-                </div>
-              )}
-
-              {showTrend && (
-                <div className="bg-white backdrop-blur-md border border-slate-300 rounded-xl shadow-lg p-4 md:p-6 min-h-[260px] flex-1 min-w-0">
-                  <h3 className="text-base md:text-lg font-medium text-slate-800 mb-4 md:mb-6">Registration Trend</h3>
-                  <div className="h-56 md:h-80">
-                    <ResponsiveContainer width="100%" height="100%">
-                      <LineChart data={regTrend} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-                        <XAxis dataKey="date" stroke="#334155" />
-                        <YAxis stroke="#334155" />
-                        <Tooltip />
-                        <Line
-                          type="monotone"
-                          dataKey="registrations"
-                          stroke="#2563eb"
-                          strokeWidth={3}
-                          dot={{ r: 5, stroke: '#2563eb', fill: '#fff' }}
-                          activeDot={{ r: 7 }}
-                        />
-                      </LineChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {showRegistrations && (
-              <div className="bg-white backdrop-blur-md border border-slate-300 rounded-xl shadow-xl p-4 md:p-6">
-                <div className="flex flex-col sm:flex-row sm:justify-between sm:items-center gap-2 mb-2 md:mb-3">
-                  <h3 className="text-xl md:text-2xl font-bold text-slate-800">Recent Registrations</h3>
-                  <div className="flex gap-2 md:gap-3">
-                    <button
-                      onClick={handleUndo}
-                      disabled={!undoStack.length}
-                      className="p-2 rounded-full bg-white/40 backdrop-blur hover:ring-2 ring-blue-300 hover:scale-105 transition"
-                    >
-                      <Undo2 className="w-5 h-5 text-blue-500" />
-                    </button>
-                    <button
-                      onClick={handleRedo}
-                      disabled={!redoStack.length}
-                      className="p-2 rounded-full bg-white/40 backdrop-blur hover:ring-2 ring-blue-300 hover:scale-105 transition"
-                    >
-                      <Redo2 className="w-5 h-5 text-blue-500" />
-                    </button>
-                    <button
-                      onClick={handleAcceptAll}
-                      className="bg-gradient-to-r from-blue-400 to-blue-600 hover:from-blue-500 hover:to-blue-700 text-white px-4 md:px-5 py-2 rounded-full shadow-md transition"
-                    >
-                      Accept All
-                    </button>
-                  </div>
-                </div>
-                {registrations.length === 0 ? (
-                  <div className="flex flex-col items-center justify-center h-40 text-center text-slate-500 gap-2 animate-fade-in">
-                    <Users className="w-10 h-10 mb-2 text-blue-300" />
-                    <span className="font-semibold">No recent registrations</span>
-                    <span className="text-xs">Invite people to register or check back later!</span>
-                  </div>
-                ) : (
-                  <ul className="divide-y divide-gray-200">
-                    {registrations.map(({ name, status }) => (
-                      <li
-                        key={name}
-                        className="flex flex-col sm:flex-row sm:justify-between sm:items-center py-3 md:py-4 px-3 md:px-4 hover:bg-slate-50 hover:backdrop-blur rounded-lg transition cursor-pointer transform-gpu hover:scale-[1.01] duration-200 animate-fade-in"
-                        onClick={() => openModal('registration', registrations.find(r => r.name === name))}
-                      >
-                        {/* Avatar for registrant */}
-                        <div className="flex items-center gap-3 flex-1">
-                          <div className="flex-shrink-0 w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold text-lg shadow">
-                            {getInitials(name)}
-                          </div>
-                          <span className="text-base md:text-lg text-slate-800 font-medium">{name}</span>
-                        </div>
-                        <div className="flex gap-2 md:gap-3 items-center mt-2 sm:mt-0">
-                          <span
-                            className={`px-3 py-1 rounded-full text-xs font-semibold shadow-sm ${status === "accepted"
-                                ? "bg-green-100 text-green-700"
-                                : "bg-blue-100 text-blue-700"
-                              }`}
-                          >
-                            {status}
-                          </span>
-                          {status !== "accepted" && (
-                            <>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleAccept(name); }}
-                                className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-700 shadow transition"
-                                aria-label="Accept registration"
-                                title="Accept"
-                              >
-                                <CheckCircle className="w-5 h-5" />
-                              </button>
-                              <button
-                                onClick={(e) => { e.stopPropagation(); handleRemove(name); }}
-                                className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-700 shadow transition"
-                                aria-label="Remove registration"
-                                title="Remove"
-                              >
-                                <Trash2 className="w-5 h-5" />
-                              </button>
-                            </>
-                          )}
-                        </div>
-                      </li>
-                    ))}
-                  </ul>
-                )}
+          ) : (
+            <div className="flex items-center justify-center h-40 text-gray-500">
+              <div className="text-center">
+                <Globe className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No clubs available</p>
+                <p className="text-sm">Clubs will appear here once created</p>
               </div>
-            )}
-          </>
-        );
-      case 'events':
-        return (
-          <div className="space-y-6">
-            <div className="flex justify-between items-center">
-              <h1 className="text-3xl font-bold text-slate-800">Events Management</h1>
-              <button className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                <Plus className="w-4 h-4" />
-                Create Event
-              </button>
             </div>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">All Events</h2>
-              <div className="grid gap-4">
-                {upcomingEvents.map((event, idx) => (
-                  <div key={idx} className="border border-slate-200 rounded-lg p-4 hover:shadow-md transition">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h3 className="font-semibold text-lg">{event.name}</h3>
-                        <p className="text-slate-600">{event.eventType}</p>
-                        <div className="flex gap-4 mt-2 text-sm text-slate-500">
-                          <span className="flex items-center gap-1">
-                            <Clock className="w-4 h-4" /> {event.date}
-                          </span>
-                          <span className="flex items-center gap-1">
-                            <MapPin className="w-4 h-4" /> {event.location}
-                          </span>
+          )}
+        </div>
+
+        {/* Recent Activity */}
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
+          <h3 className="text-xl font-semibold text-gray-900 mb-6">Recent Activity</h3>
+          {loading.users || loading.events ? (
+            <LoadingSpinner />
+          ) : errors.users || errors.events ? (
+            <div className="flex items-center justify-center h-40 text-red-500">
+              <div className="text-center">
+                <AlertCircle className="w-12 h-12 mx-auto mb-4" />
+                <p className="text-lg font-medium">Failed to load activity</p>
+                <p className="text-sm">Check API connection</p>
+              </div>
+            </div>
+          ) : recentActivity.length > 0 ? (
+            <div className="space-y-4">
+              {recentActivity.map((activity) => (
+                <div
+                  key={activity.id}
+                  className="flex items-start gap-3 p-3 hover:bg-gray-50 rounded-lg transition-colors"
+                >
+                  <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center flex-shrink-0 shadow-lg">
+                    <Activity className="w-5 h-5 text-white" />
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-sm text-gray-900">
+                      <span className="font-semibold">{activity.user}</span>
+                      {activity.type === "registration" && " registered for "}
+                      {activity.type === "event_created" && " created event "}
+                      {activity.type === "club_request" && " requested admin access for "}
+                      <span className="font-semibold text-blue-600">{activity.event || activity.club}</span>
+                    </p>
+                    <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="flex items-center justify-center h-40 text-gray-500">
+              <div className="text-center">
+                <Activity className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                <p className="text-lg font-medium">No recent activity</p>
+                <p className="text-sm">Activity will appear here as users interact</p>
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  )
+
+  const renderUsers = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
+          <p className="text-gray-600 mt-1">Manage all platform users and their permissions</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search users..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            />
+          </div>
+          <button
+            onClick={() => exportData("users")}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </button>
+          <button
+            onClick={() => setShowCreateForm({ ...showCreateForm, user: true })}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <UserPlus className="w-4 h-4" />
+            Add User
+          </button>
+          <button
+            onClick={fetchUsers}
+            disabled={loading.users}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading.users ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {errors.users && <ErrorMessage message={`Error loading users: ${errors.users}`} onRetry={fetchUsers} />}
+
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">All Users ({users.length})</h3>
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-400" />
+              <select className="text-sm border border-gray-300 rounded px-3 py-1 bg-white">
+                <option>All Roles</option>
+                <option>Students</option>
+                <option>Club Admins</option>
+                <option>Hosts</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {loading.users ? (
+          <LoadingSpinner />
+        ) : users.length === 0 ? (
+          <div className="p-12 text-center">
+            <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-lg font-medium text-gray-600">No users found</p>
+            <p className="text-sm text-gray-500">Users will appear here once they register</p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50">
+                <tr>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    User
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Role
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Joined
+                  </th>
+                  <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                    Actions
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="bg-white divide-y divide-gray-200">
+                {users
+                  .filter(
+                    (user) =>
+                      user.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                      user.email?.toLowerCase().includes(searchQuery.toLowerCase()),
+                  )
+                  .map((user) => (
+                    <tr key={user._id} className="hover:bg-gray-50 transition-colors">
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <div className="flex items-center">
+                          <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                            <span className="text-white font-semibold text-lg">
+                              {(user.name || user.username || "?")
+                                .split(" ")
+                                .map((n) => n[0])
+                                .join("")}
+                            </span>
+                          </div>
+                          <div className="ml-4">
+                            <div className="text-sm font-semibold text-gray-900">{user.name || user.username}</div>
+                            <div className="text-sm text-gray-500">{user.email}</div>
+                          </div>
+                        </div>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                            user.role === "admin"
+                              ? "bg-red-100 text-red-800"
+                              : user.role === "club_admin"
+                                ? "bg-purple-100 text-purple-800"
+                                : user.role === "host"
+                                  ? "bg-green-100 text-green-800"
+                                  : "bg-blue-100 text-blue-800"
+                          }`}
+                        >
+                          {user.role || "Student"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        <span
+                          className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                            user.isActive !== false ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          }`}
+                        >
+                          {user.isActive !== false ? "Active" : "Inactive"}
+                        </span>
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                        {user.createdAt ? new Date(user.createdAt).toLocaleDateString() : "Unknown"}
+                      </td>
+                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => alert(`Viewing user: ${user.name}`)}
+                            className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded-lg transition-colors"
+                          >
+                            <Eye className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => setEditingUser(user)}
+                            className="text-gray-600 hover:text-gray-900 p-2 hover:bg-gray-50 rounded-lg transition-colors"
+                          >
+                            <Edit className="w-4 h-4" />
+                          </button>
+                          <button
+                            onClick={() => deleteUser(user._id)}
+                            disabled={loading.action}
+                            className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Forms */}
+      {editingUser && (
+        <UserForm
+          user={editingUser}
+          onSave={(data) => updateUser(editingUser._id, data)}
+          onCancel={() => setEditingUser(null)}
+        />
+      )}
+      {showCreateForm.user && (
+        <UserForm onSave={createUser} onCancel={() => setShowCreateForm({ ...showCreateForm, user: false })} />
+      )}
+    </div>
+  )
+
+  const renderEvents = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Event Management</h1>
+          <p className="text-gray-600 mt-1">Create and manage all platform events</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search events..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            />
+          </div>
+          <button
+            onClick={() => exportData("events")}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </button>
+          <button
+            onClick={() => setShowCreateForm({ ...showCreateForm, event: true })}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Create Event
+          </button>
+          <button
+            onClick={fetchEvents}
+            disabled={loading.events}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading.events ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {errors.events && <ErrorMessage message={`Error loading events: ${errors.events}`} onRetry={fetchEvents} />}
+
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-semibold text-gray-900">All Events ({events.length})</h3>
+        </div>
+
+        {loading.events ? (
+          <LoadingSpinner />
+        ) : events.length === 0 ? (
+          <div className="p-12 text-center">
+            <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-lg font-medium text-gray-600">No events found</p>
+            <p className="text-sm text-gray-500">Create your first event to get started</p>
+          </div>
+        ) : (
+          <div className="grid gap-6 p-6">
+            {events
+              .filter(
+                (event) =>
+                  event.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  event.eventType?.toLowerCase().includes(searchQuery.toLowerCase()),
+              )
+              .map((event) => (
+                <div
+                  key={event._id}
+                  className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-200 hover:border-blue-300"
+                >
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-3 mb-3">
+                        <span
+                          className={`px-3 py-1 text-xs font-semibold rounded-full ${
+                            event.eventType === "Workshop"
+                              ? "bg-blue-100 text-blue-800"
+                              : event.eventType === "Seminar"
+                                ? "bg-green-100 text-green-800"
+                                : event.eventType === "Hackathon"
+                                  ? "bg-purple-100 text-purple-800"
+                                  : event.eventType === "Webinar"
+                                    ? "bg-orange-100 text-orange-800"
+                                    : "bg-gray-100 text-gray-800"
+                          }`}
+                        >
+                          {event.eventType || event.type}
+                        </span>
+                        <h3 className="text-xl font-semibold text-gray-900">{event.name || event.title}</h3>
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-600">
+                        <div className="flex items-center gap-2">
+                          <Clock className="w-4 h-4 text-blue-500" />
+                          <span>{new Date(event.date || event.eventDate).toLocaleDateString()}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <MapPin className="w-4 h-4 text-green-500" />
+                          <span>{event.location || "TBD"}</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Users className="w-4 h-4 text-purple-500" />
+                          <span>{event.registeredUsers?.length || 0} registered</span>
                         </div>
                       </div>
-                      <button className="p-2 text-red-500 hover:bg-red-50 rounded-full">
+                    </div>
+                    <div className="flex items-center gap-2 ml-4">
+                      <button
+                        onClick={() => alert(`Viewing event: ${event.name}`)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                      >
+                        <Eye className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => setEditingEvent(event)}
+                        className="p-2 text-gray-600 hover:bg-gray-50 rounded-lg transition-colors"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteEvent(event._id)}
+                        disabled={loading.action}
+                        className="p-2 text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                      >
                         <Trash2 className="w-4 h-4" />
                       </button>
                     </div>
                   </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      case 'registrations':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-slate-800">Registrations</h1>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">All Registrations</h2>
-                <button className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition">
-                  Export Data
-                </button>
-              </div>
-              <div className="space-y-3">
-                {registrations.map(({ name, status }) => (
-                  <div key={name} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
-                    <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 rounded-full bg-indigo-200 flex items-center justify-center text-indigo-700 font-bold">
-                        {getInitials(name)}
-                      </div>
-                      <span className="font-medium">{name}</span>
-                    </div>
-                    <span className={`px-3 py-1 rounded-full text-xs font-semibold ${status === "accepted" ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"
-                      }`}>
-                      {status}
-                    </span>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        );
-      case 'analytics':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-slate-800">Analytics</h1>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Registration Trends</h2>
-              <div className="h-80">
-                <ResponsiveContainer width="100%" height="100%">
-                  <LineChart data={regTrend} margin={{ top: 20, right: 20, bottom: 20, left: 0 }}>
-                    <XAxis dataKey="date" stroke="#334155" />
-                    <YAxis stroke="#334155" />
-                    <Tooltip />
-                    <Line
-                      type="monotone"
-                      dataKey="registrations"
-                      stroke="#2563eb"
-                      strokeWidth={3}
-                      dot={{ r: 5, stroke: '#2563eb', fill: '#fff' }}
-                      activeDot={{ r: 7 }}
-                    />
-                  </LineChart>
-                </ResponsiveContainer>
-              </div>
-            </div>
-          </div>
-        );
-      case 'notifications':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-slate-800">Notifications</h1>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Notifications</h2>
-              <div className="space-y-3">
-                <div className="p-3 border border-slate-200 rounded-lg">
-                  <p className="font-medium">New registration for AI Workshop</p>
-                  <p className="text-sm text-slate-600">2 hours ago</p>
                 </div>
-                <div className="p-3 border border-slate-200 rounded-lg">
-                  <p className="font-medium">Event "Hackathon 2025" is starting soon</p>
-                  <p className="text-sm text-slate-600">1 day ago</p>
-                </div>
-              </div>
-            </div>
+              ))}
           </div>
-        );
-      case 'settings':
-        return (
-          <div className="space-y-6">
-            <h1 className="text-3xl font-bold text-slate-800">Settings</h1>
-            <div className="bg-white rounded-xl shadow-lg p-6">
-              <h2 className="text-xl font-semibold mb-4">Dashboard Preferences</h2>
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <span>Show registration trend</span>
-                  <input type="checkbox" checked={showTrend} onChange={() => setShowTrend(!showTrend)} className="accent-blue-500" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Show events section</span>
-                  <input type="checkbox" checked={showEvents} onChange={() => setShowEvents(!showEvents)} className="accent-blue-500" />
-                </div>
-                <div className="flex items-center justify-between">
-                  <span>Show registrations section</span>
-                  <input type="checkbox" checked={showRegistrations} onChange={() => setShowRegistrations(!showRegistrations)} className="accent-blue-500" />
-                </div>
-              </div>
-            </div>
-          </div>
-        );
-      default:
-        return null;
-    }
-  };
-
-  return (
-    <div className="min-h-screen flex flex-col sm:bg-[#2073ea] sm:items-center sm:justify-center">
-      <div className="w-full flex flex-col min-h-screen sm:min-h-[80vh] sm:max-w-7xl sm:bg-white sm:rounded-2xl sm:shadow-2xl sm:flex-row sm:my-8 sm:overflow-hidden">
-        {/* Mobile sidebar overlay */}
-        {mobileSidebarOpen && (
-          <div
-            className="fixed inset-0 z-40 bg-black bg-opacity-50 sm:hidden"
-            onClick={() => setMobileSidebarOpen(false)}
-          />
         )}
+      </div>
 
-        {/* Sidebar */}
-        <div
-          className={`
-            fixed top-0 left-0 h-full max-w-xs w-4/5 bg-white border-r border-slate-200 z-50 transition-transform duration-300 ease-in-out
-            sm:static sm:z-10 sm:w-64 sm:max-w-none sm:translate-x-0
-            ${mobileSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
-            ${!sidebarOpen ? 'lg:w-16' : ''}
-            ${!mobileSidebarOpen && 'hidden sm:block'}
-          `}
-          style={{ boxShadow: mobileSidebarOpen ? '0 0 24px 0 rgba(0,0,0,0.10)' : undefined }}
-        >
-          <div className="flex flex-col h-full">
-            {/* Header */}
-            <div className="flex items-center justify-between p-4 border-b border-slate-200">
-              {sidebarOpen && (
-                <div className="flex items-center gap-2">
-                  <div className="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
-                    <span className="text-white font-bold text-sm">C</span>
-                  </div>
-                  <span className="font-semibold text-slate-800 text-base">Club Admin</span>
-                </div>
-              )}
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setSidebarOpen(!sidebarOpen)}
-                  className="p-1 rounded-lg hover:bg-slate-100 transition lg:block hidden"
-                >
-                  {sidebarOpen ? <ChevronLeft className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
-                </button>
-                <button
-                  onClick={() => setMobileSidebarOpen(false)}
-                  className="p-2 rounded-lg hover:bg-slate-100 transition sm:hidden"
-                >
-                  <X className="w-6 h-6" />
-                </button>
-              </div>
-            </div>
+      {/* Forms */}
+      {editingEvent && (
+        <EventForm
+          event={editingEvent}
+          onSave={(data) => updateEvent(editingEvent._id, data)}
+          onCancel={() => setEditingEvent(null)}
+        />
+      )}
+      {showCreateForm.event && (
+        <EventForm onSave={createEvent} onCancel={() => setShowCreateForm({ ...showCreateForm, event: false })} />
+      )}
+    </div>
+  )
 
-            {/* Navigation */}
-            <nav className="flex-1 p-4 space-y-2">
-              {navigationItems.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <button
-                    key={item.id}
-                    onClick={() => {
-                      setActiveSection(item.id);
-                      setMobileSidebarOpen(false);
-                    }}
-                    className={`w-full flex items-center gap-3 px-3 py-3 rounded-lg transition text-base ${activeSection === item.id
-                        ? 'bg-blue-50 text-blue-700 border border-blue-200'
-                        : 'text-slate-600 hover:bg-slate-100'
-                      }`}
-                  >
-                    <Icon className="w-5 h-5 flex-shrink-0" />
-                    {sidebarOpen && <span className="font-medium">{item.label}</span>}
-                  </button>
-                );
-              })}
-            </nav>
-
-            {/* User Profile */}
-            <div className="p-4 border-t border-slate-200">
-              <div className="flex items-center gap-3">
-                <div className="w-8 h-8 bg-indigo-200 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-indigo-700" />
-                </div>
-                {sidebarOpen && (
-                  <div className="flex-1">
-                    <p className="text-sm font-medium text-slate-800">Admin User</p>
-                    <p className="text-xs text-slate-500">admin@club.com</p>
-                  </div>
-                )}
-              </div>
-            </div>
-          </div>
+  const renderClubs = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Club Management</h1>
+          <p className="text-gray-600 mt-1">Manage all clubs and their activities</p>
         </div>
-
-        {/* Main Content */}
-        <div className="flex-1 flex flex-col min-h-full">
-          {/* Top Bar */}
-          <header className="bg-white shadow-sm border-b border-slate-200 px-3 py-2 sm:px-4 sm:py-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3 sm:gap-4">
-                <button
-                  onClick={() => setMobileSidebarOpen(true)}
-                  className="p-2 rounded-lg hover:bg-slate-100 transition sm:hidden"
-                >
-                  <Menu className="w-5 h-5" />
-                </button>
-                <h1 className="text-lg sm:text-xl font-semibold text-slate-800">
-                  {navigationItems.find(item => item.id === activeSection)?.label}
-                </h1>
-              </div>
-              <div className="flex items-center gap-2 sm:gap-3">
-                <button className="p-2 rounded-lg hover:bg-slate-100 transition relative">
-                  <Bell className="w-5 h-5" />
-                  <span className="absolute -top-1 -right-1 w-2.5 h-2.5 sm:w-3 sm:h-3 bg-red-500 rounded-full"></span>
-                </button>
-                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-indigo-200 rounded-full flex items-center justify-center">
-                  <User className="w-4 h-4 text-indigo-700" />
-                </div>
-              </div>
-            </div>
-          </header>
-
-          {/* Page Content */}
-          <main className="flex-1 overflow-y-auto p-2 sm:p-4 md:p-6">
-            {renderContent()}
-          </main>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search clubs..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            />
+          </div>
+          <button
+            onClick={() => exportData("clubs")}
+            className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+          >
+            <Download className="w-4 h-4" />
+            Export
+          </button>
+          <button
+            onClick={() => setShowCreateForm({ ...showCreateForm, club: true })}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Plus className="w-4 h-4" />
+            Create Club
+          </button>
+          <button
+            onClick={fetchClubs}
+            disabled={loading.clubs}
+            className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading.clubs ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
         </div>
       </div>
 
-      {/* Dashboard customization modal */}
-      {customizeOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all px-2 animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl p-4 sm:p-6 w-full max-w-xs relative animate-slide-up border border-slate-200">
-            <button
-              onClick={() => setCustomizeOpen(false)}
-              className="absolute top-2 right-2 sm:top-3 sm:right-3 text-slate-400 hover:text-slate-700 text-xl sm:text-2xl font-bold"
-              aria-label="Close"
-              title="Close"
-            >
-              &times;
-            </button>
-            <h2 className="text-base sm:text-lg font-bold mb-3 sm:mb-4 text-slate-800">Customize Dashboard</h2>
-            <form className="flex flex-col gap-2 sm:gap-3">
-              {defaultCards.map(card => (
-                <label key={card.key} className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
-                  <input
-                    type="checkbox"
-                    checked={visibleCards.includes(card.key)}
-                    onChange={() => handleCardToggle(card.key)}
-                    className="accent-blue-500 w-4 h-4"
-                  />
-                  <span className="text-slate-700 font-medium">{card.title}</span>
-                </label>
-              ))}
-              <hr className="my-1 sm:my-2" />
-              <label className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
-                <input
-                  type="checkbox"
-                  checked={showTrend}
-                  onChange={() => setShowTrend(v => !v)}
-                  className="accent-blue-500 w-4 h-4"
-                />
-                <span className="text-slate-700 font-medium">Registration Trend</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
-                <input
-                  type="checkbox"
-                  checked={showEvents}
-                  onChange={() => setShowEvents(v => !v)}
-                  className="accent-blue-500 w-4 h-4"
-                />
-                <span className="text-slate-700 font-medium">Upcoming Events Section</span>
-              </label>
-              <label className="flex items-center gap-2 cursor-pointer text-sm sm:text-base">
-                <input
-                  type="checkbox"
-                  checked={showRegistrations}
-                  onChange={() => setShowRegistrations(v => !v)}
-                  className="accent-blue-500 w-4 h-4"
-                />
-                <span className="text-slate-700 font-medium">Recent Registrations Section</span>
-              </label>
-            </form>
-            <button
-              onClick={() => setCustomizeOpen(false)}
-              className="mt-4 sm:mt-6 w-full py-2 rounded-lg bg-blue-500 text-white font-semibold shadow hover:bg-blue-600 transition text-sm sm:text-base"
-            >
-              Done
-            </button>
-          </div>
-        </div>
-      )}
+      {errors.clubs && <ErrorMessage message={`Error loading clubs: ${errors.clubs}`} onRetry={fetchClubs} />}
 
-      {/* Modal for detailed view */}
-      {modalOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm transition-all px-2 animate-fade-in">
-          <div className="bg-white rounded-xl shadow-2xl p-3 sm:p-4 md:p-8 w-full max-w-md relative animate-slide-up border border-slate-300">
-            <button
-              onClick={closeModal}
-              className="absolute top-2 right-2 sm:top-3 sm:right-3 text-slate-400 hover:text-slate-700 text-xl sm:text-2xl font-bold"
-              aria-label="Close"
-              title="Close"
-            >
-              &times;
-            </button>
-            {modalType === 'event' && modalData && (
-              <div>
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2 text-slate-800">{modalData.name}</h2>
-                <p className="mb-1 text-slate-700 text-sm sm:text-base"><span className="font-semibold">Type:</span> {modalData.eventType}</p>
-                <p className="mb-1 text-slate-700 text-sm sm:text-base"><span className="font-semibold">Date:</span> {modalData.date}</p>
-                <p className="mb-1 text-slate-700 text-sm sm:text-base"><span className="font-semibold">Location:</span> {modalData.location}</p>
-                {/* Add more event details/actions here */}
-              </div>
-            )}
-            {modalType === 'registration' && modalData && (
-              <div>
-                <h2 className="text-lg sm:text-xl md:text-2xl font-bold mb-1 sm:mb-2 text-slate-800">{modalData.name}</h2>
-                <p className="mb-1 text-slate-700 text-sm sm:text-base"><span className="font-semibold">Status:</span> {modalData.status}</p>
-                <div className="flex gap-2 mt-3 sm:mt-4">
-                  {modalData.status !== 'accepted' && (
-                    <button
-                      onClick={() => { handleAccept(modalData.name); closeModal(); }}
-                      className="p-2 rounded-full bg-green-100 hover:bg-green-200 text-green-700 shadow transition"
-                      aria-label="Accept registration"
-                      title="Accept"
-                    >
-                      <CheckCircle className="w-5 h-5" />
-                    </button>
-                  )}
-                  <button
-                    onClick={() => { handleRemove(modalData.name); closeModal(); }}
-                    className="p-2 rounded-full bg-red-100 hover:bg-red-200 text-red-700 shadow transition"
-                    aria-label="Remove registration"
-                    title="Remove"
-                  >
-                    <Trash2 className="w-5 h-5" />
-                  </button>
-                </div>
-              </div>
-            )}
-          </div>
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <h3 className="text-lg font-semibold text-gray-900">All Clubs ({clubs.length})</h3>
         </div>
+
+        {loading.clubs ? (
+          <LoadingSpinner />
+        ) : clubs.length === 0 ? (
+          <div className="p-12 text-center">
+            <Globe className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-lg font-medium text-gray-600">No clubs found</p>
+            <p className="text-sm text-gray-500">Create your first club to get started</p>
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 p-6">
+            {clubs
+              .filter((club) => club.name?.toLowerCase().includes(searchQuery.toLowerCase()))
+              .map((club) => (
+                <div
+                  key={club._id}
+                  className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-200 hover:border-blue-300 bg-gradient-to-br from-white to-gray-50"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                      <Globe className="w-6 h-6 text-white" />
+                    </div>
+                    <div className="flex items-center gap-1">
+                      <button
+                        onClick={() => setEditingClub(club)}
+                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-lg transition-colors"
+                      >
+                        <Edit className="w-4 h-4" />
+                      </button>
+                      <button
+                        onClick={() => deleteClub(club._id)}
+                        disabled={loading.action}
+                        className="p-2 text-red-600 hover:bg-red-100 rounded-lg transition-colors disabled:opacity-50"
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">{club.name}</h3>
+                  <div className="space-y-2 text-sm text-gray-600">
+                    <div className="flex items-center gap-2">
+                      <Users className="w-4 h-4 text-blue-500" />
+                      <span>{club.memberCount || 0} members</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Calendar className="w-4 h-4 text-green-500" />
+                      <span>{club.eventCount || 0} events</span>
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <span
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
+                          club.isActive !== false ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                        }`}
+                      >
+                        {club.isActive !== false ? "Active" : "Inactive"}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+
+      {/* Forms */}
+      {editingClub && (
+        <ClubForm
+          club={editingClub}
+          onSave={(data) => updateClub(editingClub._id, data)}
+          onCancel={() => setEditingClub(null)}
+        />
+      )}
+      {showCreateForm.club && (
+        <ClubForm onSave={createClub} onCancel={() => setShowCreateForm({ ...showCreateForm, club: false })} />
       )}
     </div>
-  );
+  )
+
+  const renderRequests = () => (
+    <div className="space-y-6">
+      <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Club Admin Requests</h1>
+          <p className="text-gray-600 mt-1">Review and manage club administrator requests</p>
+        </div>
+        <div className="flex items-center gap-3">
+          <div className="relative">
+            <Search className="w-5 h-5 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search requests..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent bg-white"
+            />
+          </div>
+          <button
+            onClick={fetchPendingRequests}
+            disabled={loading.requests}
+            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw className={`w-4 h-4 ${loading.requests ? "animate-spin" : ""}`} />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {errors.requests && (
+        <ErrorMessage message={`Error loading requests: ${errors.requests}`} onRetry={fetchPendingRequests} />
+      )}
+
+      <div className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">Pending Requests ({pendingRequests.length})</h3>
+            <div className="flex items-center gap-2">
+              <Filter className="w-4 h-4 text-gray-400" />
+              <select className="text-sm border border-gray-300 rounded px-3 py-1 bg-white">
+                <option>All Requests</option>
+                <option>Recent</option>
+                <option>Oldest</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        {loading.requests ? (
+          <LoadingSpinner />
+        ) : pendingRequests.length === 0 ? (
+          <div className="p-12 text-center">
+            <UserCheck className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+            <p className="text-lg font-medium text-gray-600">No pending requests</p>
+            <p className="text-sm text-gray-500">New club admin requests will appear here</p>
+          </div>
+        ) : (
+          <div className="divide-y divide-gray-200">
+            {pendingRequests
+              .filter(
+                (request) =>
+                  request.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  request.email?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+                  request.club?.toLowerCase().includes(searchQuery.toLowerCase()),
+              )
+              .map((request) => (
+                <div key={request._id} className="p-6 hover:bg-gray-50 transition-colors">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-4">
+                      <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                        <span className="text-white font-semibold text-lg">
+                          {request.name
+                            ?.split(" ")
+                            .map((n) => n[0])
+                            .join("") || "?"}
+                        </span>
+                      </div>
+                      <div>
+                        <h4 className="font-semibold text-gray-900 text-lg">{request.name}</h4>
+                        <div className="flex items-center gap-2 text-gray-600 mt-1">
+                          <Mail className="w-4 h-4" />
+                          <span>{request.email}</span>
+                        </div>
+                        <div className="flex items-center gap-4 mt-2">
+                          <div className="flex items-center gap-1">
+                            <Globe className="w-4 h-4 text-blue-500" />
+                            <span className="text-sm text-gray-600">Club: {request.club}</span>
+                          </div>
+                          <div className="flex items-center gap-1">
+                            <Clock className="w-4 h-4 text-green-500" />
+                            <span className="text-sm text-gray-600">
+                              Requested: {new Date(request.createdAt).toLocaleDateString()}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <button
+                        onClick={() => approveClubAdmin(request._id)}
+                        disabled={loading.action}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+                      >
+                        <CheckCircle className="w-4 h-4" />
+                        Approve
+                      </button>
+                      <button
+                        onClick={() => rejectClubAdmin(request._id)}
+                        disabled={loading.action}
+                        className="flex items-center gap-2 px-6 py-3 bg-gradient-to-r from-red-600 to-red-700 text-white rounded-lg hover:from-red-700 hover:to-red-800 transition-all duration-200 shadow-lg hover:shadow-xl disabled:opacity-50"
+                      >
+                        <X className="w-4 h-4" />
+                        Reject
+                      </button>
+                      <button className="p-3 text-gray-400 hover:text-gray-600 rounded-lg hover:bg-gray-100 transition-colors">
+                        <MoreHorizontal className="w-4 h-4" />
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+
+  const sidebarItems = [
+    { id: "dashboard", label: "Dashboard", icon: BarChart2 },
+    { id: "users", label: "Users", icon: Users },
+    { id: "events", label: "Events", icon: Calendar },
+    { id: "clubs", label: "Clubs", icon: Globe },
+    { id: "requests", label: "Club Requests", icon: UserCheck, badge: pendingRequests.length },
+    { id: "analytics", label: "Analytics", icon: Activity },
+    { id: "settings", label: "Settings", icon: Settings },
+  ]
+
+  const renderContent = () => {
+    switch (activeTab) {
+      case "dashboard":
+        return renderDashboard()
+      case "users":
+        return renderUsers()
+      case "events":
+        return renderEvents()
+      case "clubs":
+        return renderClubs()
+      case "requests":
+        return renderRequests()
+      case "analytics":
+        return (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <Activity className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Analytics Coming Soon</h2>
+              <p className="text-gray-600">Advanced analytics and reporting features will be available here.</p>
+            </div>
+          </div>
+        )
+      case "settings":
+        return (
+          <div className="flex items-center justify-center h-96">
+            <div className="text-center">
+              <Settings className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Settings</h2>
+              <p className="text-gray-600">System settings and configuration options will be available here.</p>
+            </div>
+          </div>
+        )
+      default:
+        return renderDashboard()
+    }
+  }
+
+  return (
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 flex">
+      {/* Sidebar */}
+      <div
+        className={`${sidebarOpen ? "w-64" : "w-16"} bg-white shadow-xl transition-all duration-300 flex flex-col border-r border-gray-200`}
+      >
+        {/* Logo */}
+        <div className="p-6 border-b border-gray-200">
+          <div className="flex items-center gap-3">
+            <div className="w-10 h-10 bg-gradient-to-br from-blue-600 to-blue-700 rounded-xl flex items-center justify-center shadow-lg">
+              <Shield className="w-6 h-6 text-white" />
+            </div>
+            {sidebarOpen && (
+              <div>
+                <h1 className="font-bold text-gray-900 text-lg">Admin Panel</h1>
+                <p className="text-xs text-gray-500">Club Management System</p>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Navigation */}
+        <nav className="flex-1 p-4 space-y-2">
+          {sidebarItems.map((item) => {
+            const Icon = item.icon
+            return (
+              <button
+                key={item.id}
+                onClick={() => setActiveTab(item.id)}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                  activeTab === item.id
+                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }`}
+              >
+                <Icon className="w-5 h-5 flex-shrink-0" />
+                {sidebarOpen && (
+                  <>
+                    <span className="font-medium">{item.label}</span>
+                    {item.badge && item.badge > 0 && (
+                      <span className="ml-auto bg-red-500 text-white text-xs rounded-full px-2 py-1 min-w-[20px] text-center font-semibold">
+                        {item.badge}
+                      </span>
+                    )}
+                  </>
+                )}
+              </button>
+            )
+          })}
+        </nav>
+
+        {/* Sidebar Toggle */}
+        <div className="p-4 border-t border-gray-200">
+          <button
+            onClick={() => setSidebarOpen(!sidebarOpen)}
+            className="w-full flex items-center justify-center p-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+          >
+            {sidebarOpen ? <ChevronRight className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
+          </button>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="flex-1 flex flex-col min-h-screen">
+        {/* Header */}
+        <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-4">
+              <h2 className="text-2xl font-semibold text-gray-900">
+                {sidebarItems.find((item) => item.id === activeTab)?.label}
+              </h2>
+            </div>
+            <div className="flex items-center gap-4">
+              <button className="relative p-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                <Bell className="w-5 h-5" />
+                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
+              </button>
+              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
+                <span className="text-white font-semibold">A</span>
+              </div>
+            </div>
+          </div>
+        </header>
+
+        {/* Page Content */}
+        <main className="flex-1 p-6 overflow-y-auto">{renderContent()}</main>
+      </div>
+    </div>
+  )
 }
+
+export default ClubAdminDashboard;

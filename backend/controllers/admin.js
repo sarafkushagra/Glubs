@@ -9,13 +9,22 @@ exports.getPendingClubAdmins = async (req, res) => {
 
 
 exports.approveClubAdmin = async (req, res) => {
-  const user = await User.findById(req.params.id);
-  if (!user || user.role !== "pending-club-admin") {
-    return res.status(400).json({ message: "Invalid user or role" });
+  try {
+    const user = await User.findById(req.params.id);
+    if (!user || user.role !== "pending-club-admin") {
+      return res.status(400).json({ message: "Invalid user or role" });
+    }
+
+    user.role = "club-admin";
+    await User.findByIdAndUpdate(
+      req.params.id,
+      { role: user.role },
+      { new: true }
+    );
+
+    res.status(200).json({ message: "User approved as club admin" });
+  } catch (error) {
+    console.error("Error in approveClubAdmin:", error);
+    res.status(500).json({ message: "Internal Server Error", error: error.message });
   }
-
-  user.role = "club-admin";
-  await user.save();
-
-  res.status(200).json({ message: "User approved as club admin" });
 };
