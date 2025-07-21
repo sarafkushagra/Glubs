@@ -17,9 +17,7 @@ import MyProfile from "./Users/MyProfile";
 import HostOpportunityPage from "./Hosts/HostLandingPage";
 import HostForm from "./Hosts/HostForm";
 import AddEvent from "./Events/AddEvent";
-import Dashboard from "./DashBoard/UserAdminDashboard";
-import DashSwitch from "./DashBoard/DashSwitch";
-import ClubAdminDashboard from "./DashBoard/AdminDashboard";
+import ClubAdminDashboard from "./DashBoard/ClubAdminDashboard";
 import ClubDetails from "./Clubs/ClubDetails";
 import ClubMembers from "./Clubs/ClubMembers";
 import ClubEvents from "./Clubs/ClubEvents";
@@ -79,8 +77,6 @@ export default function Router() {
         <Route path="/features/event-analytics" element={<EventAnalytics />} />
         <Route path="/features/organizers" element={<Organizers />} />
         <Route path="/host" element={<HostOpportunityPage />} />
-        <Route path="/host/dash" element={<Dashboard />} />
-        <Route path="/host/dashswitch" element={<DashSwitch />} />
         <Route path="/host/hostform" element={<HostForm />} />
       </Route>
 
