@@ -36,7 +36,7 @@ export default function Navbar() {
         withCredentials: true,
       });
       setIsLoggedIn(false);
-      navigate("/auth");
+      navigate("/");
       window.location.reload(); // force UI refresh after logout
     } catch (err) {
       console.error("Logout failed", err);
