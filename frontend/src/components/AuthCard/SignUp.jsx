@@ -119,6 +119,7 @@
 
 
 
+
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
@@ -210,6 +211,7 @@ const SignUpForm = ({ onSwitch }) => {
       const errMsg = error?.response?.data?.message || "Something went wrong.";
       toast.error(errMsg);
       setServerError(errMsg);
+      console.log
     } finally {
       setLoading(false);
     }
@@ -321,6 +323,7 @@ const SignUpForm = ({ onSwitch }) => {
 };
 
 export default SignUpForm;
+
 
 
 // import React, { useState } from "react";

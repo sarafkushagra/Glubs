@@ -5,6 +5,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../Context/userStore";
+import RoleSelectionDialog from "./RoleSelectionDialog";
 
 const EmailVerificationPage = () => {
   const [otp, setOtp] = useState(["", "", "", ""]);
@@ -12,6 +13,10 @@ const EmailVerificationPage = () => {
   const inputsRef = useRef([]);
   const navigate = useNavigate();
   const { updateUser, user } = useAuth();
+
+  //dialog box 
+  const [showDialog, setShowDialog] = useState(false);
+
 
   const handleChange = (e, index) => {
     const value = e.target.value;
@@ -47,7 +52,8 @@ const EmailVerificationPage = () => {
         localStorage.getItem("redirectAfterVerify") || "/events";
       localStorage.removeItem("redirectAfterVerify");
       console.log(redirectPath)
-      navigate(redirectPath);
+      setShowDialog(true);
+      // navigate(redirectPath);
     } catch (err) {
       toast.error(
         "Verification failed: " + (err.response?.data?.message || "")
@@ -153,6 +159,16 @@ return (
         </div>
       </motion.div>
     </div>
+        {/* Place the dialog here */}
+    <RoleSelectionDialog
+      isOpen={showDialog}
+      onClose={() => {
+        setShowDialog(false);
+        const redirectPath = localStorage.getItem("redirectAfterVerify") || "/events";
+        localStorage.removeItem("redirectAfterVerify");
+        navigate(redirectPath);
+      }}
+       />
   </div>
 );
 }

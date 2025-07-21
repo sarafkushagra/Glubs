@@ -19,9 +19,10 @@ const createSendToken = (user, statusCode, res, message) => {
       Date.now() +
         Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
     ),
+
     httpOnly: true,
     secure: false, //only secure in production
-    sameSite: process.env.NODE_ENV === "production" ? "none" : "Lax",
+    sameSite: "Lax", //process.env.NODE_ENV === "production" ? "none" :
   };
 
   res.cookie("token", token, cookieOptions);
@@ -51,6 +52,9 @@ exports.signup = catchAsync(async (req, res, next) => {
 
   const otpExpires = Date.now() + 10 * 60 * 1000;
 
+  const role = "student";
+  const isVerified = false;
+
   const newUser = await User.create({
     username,
     email,
@@ -58,6 +62,8 @@ exports.signup = catchAsync(async (req, res, next) => {
     passwordConfirm,
     otp,
     otpExpires,
+    role,
+    isVerified,
   });
 
   try {
@@ -142,7 +148,7 @@ exports.resentOTP = catchAsync(async (req, res, next) => {
   // now if anything is not then we have to send a new otp again
   const newOtp = generateOtp();
   user.otp = newOtp;
-  user.otpExpires = Date.now() + 10* 60 * 1000;
+  user.otpExpires = Date.now() + 10 * 60 * 1000;
 
   await user.save({ validateBeforeSave: false });
 
@@ -188,7 +194,7 @@ exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
   if (!email || !password) {
-    return next(new AppError("Please provide email and password",400));
+    return next(new AppError("Please provide email and password", 400));
   }
 
   const user = await User.findOne({ email }).select("+password");
@@ -196,7 +202,6 @@ exports.login = catchAsync(async (req, res, next) => {
   if (!user) {
     return next(new AppError("Incorrect Email or Password", 401));
   }
-
 
   if (!user.isVerified) {
     return next(
@@ -293,8 +298,8 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     return next(new AppError("No user found", 400));
   }
 
-  user.password = password 
-  user.passwordConfirm = passwordConfirm
+  user.password = password;
+  user.passwordConfirm = passwordConfirm;
   user.resetPasswordOTP = undefined;
   user.resetPasswordOTPExpires = undefined;
 

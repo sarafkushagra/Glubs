@@ -65,4 +65,34 @@ module.exports.deleteUser = async (req, res) => {
 
 
 
+module.exports.requestClubAdmin = async (req, res) => {
+  const { requestedRole } = req.body;
+  const validRoles = ["student", "club-admin"];
+  if (!validRoles.includes(requestedRole)) {
+    return res.status(400).json({ message: "Invalid role" });
+  }
 
+  const user = await User.findById(req.user._id);
+  if (!user || !user.isVerified) {
+    return res
+      .status(401)
+      .json({ message: "Unauthorized or email not verified" });
+  }
+
+  if (requestedRole === "club-admin") {
+    user.role = "pending-club-admin"; // Request
+  } else {
+    user.role = "student";
+  }
+
+  await User.findByIdAndUpdate(
+    req.user._id,
+    { role: "pending-club-admin" },
+    { new: true } 
+  );
+
+
+  res
+    .status(200)
+    .json({ message: "Club admin request submitted. Await admin approval." });
+};
