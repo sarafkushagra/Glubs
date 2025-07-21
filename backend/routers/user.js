@@ -5,12 +5,12 @@ const { signup, verifyAccount, resentOTP, login, logout, forgetPassword, resetPa
 const { isAuthenticated, restrictTo } = require('../middlewares/auth');
 const { getMe } = require('../controllers/user');
 
-router.get('/',isAuthenticated, restrictTo("admin"), userController.showAllUsers);
-router.get('/details/:id',isAuthenticated, restrictTo(["club-admin", "admin"]), userController.showUser);
+router.get('/', userController.showAllUsers);
+router.get('/details/:id', userController.showUser);
 router.get('/me', isAuthenticated, getMe);
-router.put('/:id', isAuthenticated,userController.updateUser);
-router.delete('/:id', isAuthenticated, restrictTo("admin"),userController.deleteUser);
-router.post("/request-club-admin",isAuthenticated, restrictTo("student"), userController.requestClubAdmin);
+router.put('/:id', isAuthenticated, userController.updateUser);
+router.delete('/:id', isAuthenticated, userController.deleteUser);
+router.post("/request-club-admin", isAuthenticated, restrictTo("student"), userController.requestClubAdmin);
 
 // auths routes
 
