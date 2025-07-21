@@ -39,8 +39,8 @@ const eventSchema = new mongoose.Schema({
   ],
   club: {
   type: mongoose.Schema.Types.ObjectId,
-  ref: 'Club',
-  required: true
+  ref: 'Club'
+  // required: true
 },
   views: { type: Number, default: 0 },
   registrations: { type: Number, default: 0 },
