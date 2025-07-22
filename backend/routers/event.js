@@ -15,6 +15,7 @@ router.get('/participated/:userid', eventController.getUserParticipatedEvents);
 router.get('/upcoming/:userid', eventController.getUserUpcomingEvents);
 router.get('/completed/:userid', eventController.getUserCompletedEvents);
 router.post('/:id/register',isAuthenticated, eventController.registerUserToEvent);
+router.post("/:eventId/register-team", isAuthenticated, eventController.registerTeamToEvent)
 
 
 module.exports = router;

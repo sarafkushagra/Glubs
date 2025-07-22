@@ -71,6 +71,12 @@ const eventSchema = new mongoose.Schema({
   views: { type: Number, default: 0 },
   registrations: { type: Number, default: 0 },
   commentsCount: { type: Number, default: 0 },
+  // Additional fields for the registration form
+  prizePool: { type: Number },
+  eligibility: {type :String},
+  rules: {type : String },
+  contactEmail : {type : String},
+  contactPhone: {type :String},
 
 }, { timestamps: true });
 

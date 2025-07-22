@@ -34,6 +34,7 @@ import ResetSuccess from "./AuthCard/ResetSuccess";
 import EditFeedback from "./Events/EditFeedback";
 import AddHostBasicDetails from "./Hosts/AddHostBasicDetails";
 import EditHostBasicDetails from "./Hosts/EditHostBasicDetails";
+import TeamRoomPage from "./Hosts/TeamRoomPage";
 
 export default function Router() {
   return (
@@ -56,6 +57,8 @@ export default function Router() {
       <Route path="/features/qr-registration" element={<QRRegistration />} />
       <Route path="/features/event-analytics" element={<EventAnalytics />} />
       <Route path="/features/organizers" element={<Organizers />} />
+      <Route path="/events/:eventId/team-room" element={<TeamRoomPage/>} />
+
 
       {/* All users allowed but after verification  */}
       <Route element={<ProtectedRoute />}>
