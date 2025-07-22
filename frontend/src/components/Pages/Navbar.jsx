@@ -291,6 +291,7 @@ export default function Navbar() {
 
         {isLoggedIn ? (
           <>
+
             {/* Notification Icon */}
             <li title="Notifications">
               <Link
@@ -306,21 +307,27 @@ export default function Navbar() {
               </Link>
             </li>
 
-            {/* Profile Icon */}
-            <li title="Profile">
-              <Link to="/profile" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300">
-                <CgProfile size={24} />
-              </Link>
-            </li>
+           </>
 
-            {/* QR Code Icon */}
-            <li title="Mark Attendance">
-              <Link to="/qr-scan" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300">
-                <QrCode className="w-6 h-6" />
-              </Link>
-            </li>
+            {/* Profile and QR Icons */}
+            {isLoggedIn && (
+              <>
+                <li title="Profile">
+                  <Link
+                    to={localStorage.getItem("glubsUser") && JSON.parse(localStorage.getItem("glubsUser")).role === "admin" || "clubadmin" ? "/clubadmin/dash" : "/profile"}
+                    className="text-gray-300 hover:text-cyan-400 transition-colors duration-300"
+                  >
+                    <CgProfile size={24} />
+                  </Link>
+                </li>
+                <li title="Mark Attendance">
+                  <Link to="/qr-scan" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300">
+                    <QrCode className="w-6 h-6" />
+                  </Link>
+                </li>
+              </>
+            )}
 
-            {/* Logout Button */}
             <li title="Logout">
               <button
                 onClick={handleLogout}

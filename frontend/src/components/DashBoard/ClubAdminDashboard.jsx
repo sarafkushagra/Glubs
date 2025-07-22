@@ -1,6 +1,8 @@
 
 import { useState, useEffect } from "react"
-import { ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, AreaChart, Area } from "recharts"
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
+
+import { CgProfile } from "react-icons/cg";
 import {
   Users,
   BarChart2,
@@ -33,7 +35,9 @@ import {
   Mail,
   Shield,
   UserPlus,
+  Home,
 } from "lucide-react"
+import { Link } from "react-router-dom";
 
 // If you deploy the backend elsewhere (e.g. Render, Railway) set NEXT_PUBLIC_API_BASE_URL.
 const API_BASE_URL = "http://localhost:3000"
@@ -561,12 +565,11 @@ const fetchPendingRequests = async () => {
   // Form Components
   const UserForm = ({ user, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
-      name: user?.name || "",
+      name: user?.username || "",
       email: user?.email || "",
       role: user?.role || "student",
       isActive: user?.isActive !== false,
     })
-
     const handleSubmit = (e) => {
       e.preventDefault()
       onSave(formData)
@@ -646,10 +649,10 @@ const fetchPendingRequests = async () => {
 
   const EventForm = ({ event, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
-      name: event?.name || "",
+      name: event?.title || "",
       eventType: event?.eventType || "Workshop",
       date: event?.date ? event.date.split("T")[0] : "",
-      location: event?.location || "",
+      location: event?.venue || "",
       description: event?.description || "",
     })
 
@@ -1045,7 +1048,7 @@ const fetchPendingRequests = async () => {
                     <div>
                       <h4 className="font-semibold text-gray-900">{club.name}</h4>
                       <p className="text-sm text-gray-600">
-                        {club.memberCount || 0} members • {club.eventCount || 0} events
+                        {club.members.length || 0} members • {club.events.length || 0} events
                       </p>
                     </div>
                   </div>
@@ -1126,7 +1129,7 @@ const fetchPendingRequests = async () => {
       <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
         <div>
           <h1 className="text-3xl font-bold text-gray-900">User Management</h1>
-          <p className="text-gray-600 mt-1">Manage all platform users and their permissions</p>
+          <p className="text-gray-600 mt-1">Manage all platform users</p>
         </div>
         <div className="flex items-center gap-3">
           <div className="relative">
@@ -1267,7 +1270,7 @@ const fetchPendingRequests = async () => {
                       <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
                         <div className="flex items-center gap-2">
                           <button
-                            onClick={() => alert(`Viewing user: ${user.name}`)}
+                            onClick={() => alert(`Viewing user: ${user.username}`)}
                             className="text-blue-600 hover:text-blue-900 p-2 hover:bg-blue-50 rounded-lg transition-colors"
                           >
                             <Eye className="w-4 h-4" />
@@ -1407,7 +1410,7 @@ const fetchPendingRequests = async () => {
                         </div>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4 text-green-500" />
-                          <span>{event.location || "TBD"}</span>
+                          <span>{event.venue || "TBD"}</span>
                         </div>
                         <div className="flex items-center gap-2">
                           <Users className="w-4 h-4 text-purple-500" />
@@ -1417,7 +1420,7 @@ const fetchPendingRequests = async () => {
                     </div>
                     <div className="flex items-center gap-2 ml-4">
                       <button
-                        onClick={() => alert(`Viewing event: ${event.name}`)}
+                        onClick={() => alert(`Viewing event: ${event.title}`)}
                         className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
                       >
                         <Eye className="w-4 h-4" />
@@ -1548,11 +1551,11 @@ const fetchPendingRequests = async () => {
                   <div className="space-y-2 text-sm text-gray-600">
                     <div className="flex items-center gap-2">
                       <Users className="w-4 h-4 text-blue-500" />
-                      <span>{club.memberCount || 0} members</span>
+                      <span>{club.members.length || 0} members</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <Calendar className="w-4 h-4 text-green-500" />
-                      <span>{club.eventCount || 0} events</span>
+                      <span>{club.events.length || 0} events</span>
                     </div>
                     <div className="flex items-center gap-2">
                       <span
@@ -1826,6 +1829,7 @@ const fetchPendingRequests = async () => {
         <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <Link to="/" ><Home className="w-6 h-6 "/></Link>
               <h2 className="text-2xl font-semibold text-gray-900">
                 {sidebarItems.find((item) => item.id === activeTab)?.label}
               </h2>
@@ -1835,8 +1839,11 @@ const fetchPendingRequests = async () => {
                 <Bell className="w-5 h-5" />
                 <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
               </button>
+              <span className="font-semibold text-gray-700">Hi,{" "}
+                {users[0]?.name || users[0]?.username || "User"}
+              </span>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-semibold">A</span>
+                <span className="text-white font-semibold"><CgProfile size={30}/></span>
               </div>
             </div>
           </div>
