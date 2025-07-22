@@ -373,16 +373,98 @@ module.exports.getSentRequests = async (req, res) => {
   }
 }
 
-// Enhanced team request sending with better validation
+// // Enhanced team request sending with better validation
+// module.exports.sendTeamRequest = async (req, res) => {
+//   try {
+//     const { teamId, targetUserId, eventId, message } = req.body
+//     const fromUserId = req.user._id
+
+//     const Team = require("../schema/team")
+//     const Event = require("../schema/event")
+//     const User = require("../schema/user")
+//     const TeamRequest = require("../schema/teamRequest")
+
+//     // Validate team exists and user is the leader
+//     const team = await Team.findById(teamId).populate("members")
+//     if (!team) {
+//       return res.status(404).json({ message: "Team not found" })
+//     }
+
+//     if (team.leader.toString() !== fromUserId.toString()) {
+//       return res.status(403).json({ message: "Only team leaders can send invitations" })
+//     }
+
+//     // Check if team is already full
+//     const event = await Event.findById(eventId)
+//     if (team.members.length >= event.teamMax) {
+//       return res.status(400).json({ message: "Team is already full" })
+//     }
+
+//     // Check if target user exists and is available
+//     const targetUser = await User.findById(targetUserId)
+//     if (!targetUser) {
+//       return res.status(404).json({ message: "Target user not found" })
+//     }
+
+//     // Check if target user is already registered for the event
+//     if (event.registeredUsers.includes(targetUserId)) {
+//       return res.status(400).json({ message: "User is already registered for this event" })
+//     }
+
+//     // Check if target user is already in a team for this event
+//     const existingTeam = await Team.findOne({
+//       event: eventId,
+//       members: targetUserId,
+//     })
+//     if (existingTeam) {
+//       return res.status(400).json({ message: "User is already in a team for this event" })
+//     }
+
+//     // Check if there's already a pending request
+//     const existingRequest = await TeamRequest.findOne({
+//       team: teamId,
+//       to: targetUserId,
+//       event: eventId,
+//       status: "pending",
+//     })
+//     if (existingRequest) {
+//       return res.status(400).json({ message: "Request already sent to this user" })
+//     }
+
+//     // Create the team request
+//     const teamRequest = new TeamRequest({
+//       team: teamId,
+//       from: fromUserId,
+//       to: targetUserId,
+//       event: eventId,
+//       message: message || "",
+//       status: "pending",
+//     })
+
+//     await teamRequest.save()
+
+//     res.status(201).json({
+//       message: "Team invitation sent successfully",
+//       request: teamRequest,
+//     })
+//   } catch (error) {
+//     console.error("Error sending team request:", error)
+//     res.status(500).json({ message: "Error sending team request", error: error.message })
+//   }
+// }
+
+
+
+// Enhanced team request sending with email notification
 module.exports.sendTeamRequest = async (req, res) => {
   try {
     const { teamId, targetUserId, eventId, message } = req.body
     const fromUserId = req.user._id
-
     const Team = require("../schema/team")
     const Event = require("../schema/event")
     const User = require("../schema/user")
     const TeamRequest = require("../schema/teamRequest")
+    const sendEmail = require("../utils/email")
 
     // Validate team exists and user is the leader
     const team = await Team.findById(teamId).populate("members")
@@ -416,6 +498,7 @@ module.exports.sendTeamRequest = async (req, res) => {
       event: eventId,
       members: targetUserId,
     })
+
     if (existingTeam) {
       return res.status(400).json({ message: "User is already in a team for this event" })
     }
@@ -427,6 +510,7 @@ module.exports.sendTeamRequest = async (req, res) => {
       event: eventId,
       status: "pending",
     })
+
     if (existingRequest) {
       return res.status(400).json({ message: "Request already sent to this user" })
     }
@@ -443,6 +527,55 @@ module.exports.sendTeamRequest = async (req, res) => {
 
     await teamRequest.save()
 
+    // Get sender info for email
+    const sender = await User.findById(fromUserId)
+
+    // Send email notification
+    try {
+      await sendEmail({
+        email: targetUser.email,
+        subject: `Team Invitation: ${team.name} for ${event.title}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
+            <div style="text-align: center; margin-bottom: 20px;">
+              <h1 style="color: #6366f1; margin-bottom: 10px;">Team Invitation</h1>
+              <p style="color: #666; font-size: 16px;">You've been invited to join a team!</p>
+            </div>
+            
+            <div style="background-color: #f9fafb; padding: 20px; border-radius: 8px; margin-bottom: 20px;">
+              <p style="font-size: 16px; margin-bottom: 10px;">Hello <strong>${targetUser.username}</strong>,</p>
+              <p style="font-size: 16px; margin-bottom: 20px;">
+                <strong>${sender.username}</strong> has invited you to join their team <strong>"${team.name}"</strong> for the event <strong>${event.title}</strong>.
+              </p>
+              ${
+                message
+                  ? `
+                <div style="background-color: #fff; padding: 15px; border-left: 4px solid #6366f1; margin-bottom: 20px; border-radius: 4px;">
+                  <p style="font-style: italic; color: #4b5563; margin: 0;">"${message}"</p>
+                </div>
+              `
+                  : ""
+              }
+            </div>
+            
+            <div style="text-align: center; margin-bottom: 20px;">
+              <a href="http://localhost:3000/notifications" style="display: inline-block; background-color: #6366f1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold;">
+                View Invitation
+              </a>
+            </div>
+            
+            <div style="font-size: 14px; color: #6b7280; text-align: center; margin-top: 30px; padding-top: 20px; border-top: 1px solid #e0e0e0;">
+              <p>This is an automated message from Glubs Event Management System.</p>
+              <p>If you didn't expect this invitation, you can safely ignore this email.</p>
+            </div>
+          </div>
+        `,
+      })
+    } catch (emailError) {
+      console.error("Error sending email notification:", emailError)
+      // Continue even if email fails
+    }
+
     res.status(201).json({
       message: "Team invitation sent successfully",
       request: teamRequest,
@@ -452,3 +585,5 @@ module.exports.sendTeamRequest = async (req, res) => {
     res.status(500).json({ message: "Error sending team request", error: error.message })
   }
 }
+
+// module.exports = { sendTeamRequest }
