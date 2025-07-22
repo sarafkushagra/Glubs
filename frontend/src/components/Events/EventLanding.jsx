@@ -90,21 +90,24 @@ const EventLanding = () => {
       <div className="max-w-6xl mx-auto pt-24 pb-10 px-4 relative z-10">
         {/* Centered hero section */}
         <div className="flex flex-col items-center justify-center mb-10 gap-6 w-full">
+          <div className='flex justify-between items-center w-full px-4'>
           <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-900 tracking-tight drop-shadow-sm text-center">Explore Opportunities</h1>
+           <button
+            onClick={() => navigate('/hosts')}
+            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-6 py-3 shadow-md transition duration-300 text-lg"
+          >
+            + Host
+          </button>
+          </div>
           <input
             type="text"
             placeholder="Search events..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full md:w-1/2 p-4 rounded-full border border-blue-100 bg-white/70 backdrop-blur-md shadow-lg placeholder-gray-400 text-base font-medium focus:outline-none focus:ring-2 focus:ring-indigo-300 transition"
+            className="w-full items-center md:w-1/2 p-4 rounded-full border border-blue-100 bg-white/70 backdrop-blur-md shadow-lg placeholder-gray-400 text-base font-medium focus:outline-none focus:ring-2 focus:ring-indigo-300 transition"
             style={{ fontFamily: 'Poppins, sans-serif', WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)' }}
           />
-          <button
-            onClick={() => navigate('/events/add')}
-            className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-6 py-3 shadow-md transition duration-300 text-lg"
-          >
-            + Host New Event
-          </button>
+         
         </div>
 
         {loading ? (

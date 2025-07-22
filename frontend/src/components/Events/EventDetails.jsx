@@ -93,7 +93,7 @@ const EventDetails = () => {
       {/* Optional: Add a subtle background pattern overlay */}
       <div className="absolute inset-0 pointer-events-none opacity-10 z-0" style={{background: 'radial-gradient(circle at 60% 40%, #a5b4fc 0%, transparent 70%)'}}></div>
       <Navbar />
-      <div className="max-w-4xl mx-auto pt-32 pb-10 px-4 relative z-10">
+      <div className="max-w-5xl mx-auto pt-32 pb-10 px-4 relative z-10">
         <div className="bg-white/95 border border-blue-100 rounded-3xl shadow-xl p-8 md:p-12 mb-10 relative overflow-hidden">
           {/* Event type icon and accent */}
           <div className="flex items-center gap-3 mb-6">
@@ -104,7 +104,7 @@ const EventDetails = () => {
               {event.eventType || 'Event'}
             </span>
           </div>
-          <div><h1 className="text-4xl md:text-5xl font-extrabold mb-3 text-indigo-900 tracking-tight text-center drop-shadow-sm">{event.title}</h1></div>
+          <div><h1 className="text-4xl md:text-5xl font-extrabold mb-5 text-indigo-900 tracking-tight text-center drop-shadow-sm">{event.title.toUpperCase()}</h1></div>
           <div className="flex flex-wrap gap-3 justify-center mb-6">
             <button onClick={handleEdit} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-3 py-2 shadow-md transition text-lg"><PencilIcon /></button>
             <button onClick={handleDelete} className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-full px-3 py-2 shadow-md transition text-lg"><Trash /></button>

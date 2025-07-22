@@ -57,7 +57,7 @@ export default function Navbar() {
 
       {/* Desktop Menu - Refreshed with new styles */}
       <ul className="hidden sm:flex justify-end items-center flex-1 space-x-8">
-        {['Home', 'About', 'Events', 'Clubs', 'Hosts'].map((item) => (
+        {['Home', 'About', 'Events', 'Clubs'].map((item) => (
           <li key={item} className={`${linkStyle} group`}>
             <Link
               to={`/${item.toLowerCase() === 'home' ? '' : item.toLowerCase()}`}

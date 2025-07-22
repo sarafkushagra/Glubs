@@ -14,7 +14,6 @@ const eventSchema = new mongoose.Schema({
 
   // Hosting & Visibility
   visibility: { type: String, enum: ['public', 'invite', 'both'], default: 'public' },
-  opportunityType: { type: String }, // For display, e.g., Hackathon, Innovation Challenge
   categories: [String], // e.g., Coding, Business, Robotics
   skillsToBeAssessed: String,
   website: String,

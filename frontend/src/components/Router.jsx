@@ -6,7 +6,6 @@ import LandingPage from "./Pages/Home";
 import About from "./Pages/About";
 import EventLanding from "./Events/EventLanding";
 import EventDetails from "./Events/EventDetails";
-import EditEvent from "./Events/EditEvent";
 import QRRegistration from "./Features/QRRegistration";
 import EventAnalytics from "./Features/EventAnalytics";
 import Organizers from "./Features/Organizers";
@@ -14,8 +13,6 @@ import QRCodeGenerator from "./QR/QR_Generator";
 import QRScanner from "./QR/QR_Scanner";
 import MyProfile from "./Users/MyProfile";
 import HostOpportunityPage from "./Hosts/HostLandingPage";
-import HostForm from "./Hosts/HostForm";
-// import AddEvent from "./Events/AddEvent";
 import ClubAdminDashboard from "./DashBoard/ClubAdminDashboard";
 import ClubDetails from "./Clubs/ClubDetails";
 import ClubMembers from "./Clubs/ClubMembers";
@@ -35,6 +32,8 @@ import ForgotPasswordEmail from "./AuthCard/ForgotPasswordEmailPage";
 import VerifyOTPAndReset from "./AuthCard/VerifyOtpAndResetPage";
 import ResetSuccess from "./AuthCard/ResetSuccess";
 import EditFeedback from "./Events/EditFeedback";
+import AddHostBasicDetails from "./Hosts/AddHostBasicDetails";
+import EditHostBasicDetails from "./Hosts/EditHostBasicDetails";
 
 export default function Router() {
   return (
@@ -69,6 +68,7 @@ export default function Router() {
         <Route path="/events/:eventId/edit-feedback/:feedbackId" element={<EditFeedback />} />
         <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
         <Route path="/profile" element={<MyProfile />} />
+        <Route path="/hosts" element={<HostOpportunityPage />} />
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={["admin", "student"]} />}>
@@ -78,13 +78,10 @@ export default function Router() {
       <Route
         element={<ProtectedRoute allowedRoles={["admin", "club-admin"]} />}
       >
-        <Route path="/host" element={<HostOpportunityPage />} />
-        {/* <Route path="/host/hostform" element={<HostForm />} /> */}
-        <Route path="/events/add" element={<HostForm />} />
-        <Route path="/events/edit/:eventId" element={<EditEvent />} />
+        <Route path="/events/add" element={<AddHostBasicDetails />} />
+        <Route path="/events/edit/:id" element={<EditHostBasicDetails />} />
         <Route path="/clubs/edit/:clubId" element={<EditClub />} />
         <Route path="/clubs/add" element={<AddClub />} />
-
         <Route path="/clubs/:clubId/members" element={<ClubMembers />} />
       </Route>
 

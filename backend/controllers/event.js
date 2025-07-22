@@ -25,6 +25,7 @@ module.exports.showEvent = async (req, res) => {
 // 📌 Create Event with Host Fields
 module.exports.createEvent = async (req, res) => {
   try {
+    console.log("Incoming event payload:", req.body);
     const {
       title,
       description,
@@ -47,7 +48,6 @@ module.exports.createEvent = async (req, res) => {
       registrationLimit,
       hideContact
     } = req.body;
-
     const event = new Event({
       title,
       description,
@@ -69,7 +69,7 @@ module.exports.createEvent = async (req, res) => {
       registrationEnd,
       registrationLimit,
       hideContact,
-      createdBy: req.user ? req.user._id : "662f0a93b46c5c5c77b59d29" // fallback
+      createdBy: req.user ? req.user._id : "687cd1a8b9b0a7fd9a92382f"
     });
 
     const savedEvent = await event.save();
@@ -79,6 +79,7 @@ module.exports.createEvent = async (req, res) => {
     res.status(400).json({ message: "Error creating event", error: error.message });
   }
 };
+
 
 // 📌 Update Event
 module.exports.updateEvent = async (req, res) => {
