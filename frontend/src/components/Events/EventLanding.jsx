@@ -82,16 +82,16 @@ const EventLanding = () => {
   };
 
   return (
-    <div className="bg-gradient-to-br from-blue-100 via-white to-blue-200 min-h-screen font-[Poppins] relative overflow-x-hidden">
+    <div className="bg-gradient-to-br from-blue-100 via-white to-blue-200 dark:from-gray-900 dark:via-gray-950 dark:to-gray-900 min-h-screen font-[Poppins] relative overflow-x-hidden">
       {/* Optional: Add a subtle background pattern overlay */}
-      <div className="absolute inset-0 pointer-events-none opacity-10 z-0" style={{background: 'radial-gradient(circle at 60% 40%, #a5b4fc 0%, transparent 70%)'}}></div>
+      <div className="absolute inset-0 pointer-events-none opacity-10 z-0 dark:opacity-20" style={{background: 'radial-gradient(circle at 60% 40%, #a5b4fc 0%, transparent 70%)'}}></div>
       <Navbar />
 
       <div className="max-w-6xl mx-auto pt-24 pb-10 px-4 relative z-10">
         {/* Centered hero section */}
-        <div className="flex flex-col items-center justify-center mb-10 gap-6 w-full">
+        <div className="flex flex-col items-center justify-center mb-10 gap-6 w-full pt-8">
           <div className='flex justify-between items-center w-full px-4'>
-          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-900 tracking-tight drop-shadow-sm text-center">Explore Opportunities</h1>
+          <h1 className="text-4xl md:text-5xl font-extrabold text-indigo-900 dark:text-white tracking-tight drop-shadow-sm text-center">Explore Opportunities</h1>
            <button
             onClick={() => navigate('/hosts')}
             className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-6 py-3 shadow-md transition duration-300 text-lg"
@@ -104,7 +104,7 @@ const EventLanding = () => {
             placeholder="Search events..."
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            className="w-full items-center md:w-1/2 p-4 rounded-full border border-blue-100 bg-white/70 backdrop-blur-md shadow-lg placeholder-gray-400 text-base font-medium focus:outline-none focus:ring-2 focus:ring-indigo-300 transition"
+            className="w-full items-center md:w-1/2 p-4 rounded-full border border-blue-100 dark:border-gray-700 bg-white/70 dark:bg-gray-800/70 backdrop-blur-md shadow-lg placeholder-gray-400 dark:placeholder-gray-500 text-base font-medium text-white focus:outline-none focus:ring-2 focus:ring-indigo-300 dark:focus:ring-indigo-800 transition"
             style={{ fontFamily: 'Poppins, sans-serif', WebkitBackdropFilter: 'blur(12px)', backdropFilter: 'blur(12px)' }}
           />
          
@@ -121,27 +121,27 @@ const EventLanding = () => {
             {filteredEvents.map((event) => (
               <div
                 key={event._id}
-                className="bg-white rounded-3xl border border-blue-100 hover:border-indigo-400 transition group shadow-md hover:shadow-2xl p-6 flex flex-col justify-between relative overflow-hidden min-h-[340px]"
+                className="bg-blue-50/80 dark:bg-gray-800/80 rounded-3xl border border-blue-100 dark:border-gray-700 hover:border-indigo-400 dark:hover:border-indigo-500 transition group shadow-md hover:shadow-2xl p-6 flex flex-col justify-between relative overflow-hidden min-h-[340px]"
                 style={{ fontFamily: 'Poppins, sans-serif' }}
               >
                 {/* Accent bar and icon */}
                 <div className="flex items-center gap-2 mb-3">
-                  <div className="rounded-full bg-blue-100 p-2 shadow">
+                  <div className="rounded-full bg-blue-100 dark:bg-gray-800 p-2 shadow">
                     {eventTypeIcons[event.eventType] || eventTypeIcons.Other}
                   </div>
-                  <span className="text-xs font-semibold uppercase tracking-wider text-indigo-700">
+                  <span className="text-xs font-semibold uppercase tracking-wider text-indigo-700 dark:text-indigo-200">
                     {event.eventType || 'Event'}
                   </span>
                 </div>
                 <Link to={`/events/${event._id}`} className="flex-1 flex flex-col justify-between">
                   <div>
-                    <h2 className="text-xl font-bold text-indigo-900 group-hover:text-indigo-700 mb-1 leading-tight">{event.title}</h2>
-                    <p className="text-sm text-gray-500 mb-2">{event.description?.slice(0, 80) || ''}</p>
+                    <h2 className="text-xl font-bold text-indigo-900 dark:text-white group-hover:text-indigo-700 dark:group-hover:text-indigo-300 mb-1 leading-tight">{event.title}</h2>
+                    <p className="text-sm text-gray-500 dark:text-gray-300 mb-2">{event.description?.slice(0, 80) || ''}</p>
                   </div>
 
                   <div className="mb-2 mt-2">
-                    <span className="text-xs font-medium text-gray-500">Venue: </span>
-                    <span className="inline-flex items-center gap-2 text-sm bg-blue-50 rounded-full px-3 py-1 w-fit font-medium">
+                    <span className="text-xs font-medium text-gray-500 dark:text-gray-300">Venue: </span>
+                    <span className="inline-flex items-center gap-2 text-sm bg-indigo-100 text-indigo-700 dark:bg-indigo-900/60 dark:text-indigo-200 rounded-full px-3 py-1 w-fit font-semibold">
                       {event.venue || "No Venue Specified"}
                     </span>
                   </div>
@@ -152,18 +152,18 @@ const EventLanding = () => {
                         key={idx}
                         src={avatar}
                         alt={`participant-${idx}`}
-                        className="w-8 h-8 rounded-full border-2 border-white -ml-2 first:ml-0 shadow"
+                        className="w-8 h-8 rounded-full border-2 border-white dark:border-gray-800 -ml-2 first:ml-0 shadow"
                       />
                     ))}
-                    <span className="text-green-600 text-sm ml-2 font-semibold">
+                    <span className="text-green-600 dark:text-green-400 text-sm ml-2 font-semibold">
                       +{event.registeredUsers?.length || 0} participating
                     </span>
                   </div>
 
                   <div className="flex gap-2 mt-3 flex-wrap">
-                    <span className="bg-blue-50 text-xs rounded-full px-3 py-1 font-semibold text-indigo-700">{event.mode || "Offline"}</span>
-                    <span className="bg-blue-50 text-xs rounded-full px-3 py-1 font-semibold text-indigo-700">{event.status || "Open"}</span>
-                    <span className="bg-blue-50 text-xs rounded-full px-3 py-1 font-semibold text-indigo-700">
+                    <span className="bg-blue-50 dark:bg-gray-800 text-xs rounded-full px-3 py-1 font-semibold text-indigo-700 dark:text-indigo-200">{event.mode || "Offline"}</span>
+                    <span className="bg-blue-50 dark:bg-gray-800 text-xs rounded-full px-3 py-1 font-semibold text-indigo-700 dark:text-indigo-200">{event.status || "Open"}</span>
+                    <span className="bg-blue-50 dark:bg-gray-800 text-xs rounded-full px-3 py-1 font-semibold text-indigo-700 dark:text-indigo-200">
                       STARTS {new Date(event.date).toLocaleDateString('en-GB')}
                     </span>
                   </div>
