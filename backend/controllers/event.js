@@ -1,5 +1,6 @@
 const Event = require("../schema/event");
-const Feedback = require("../schema/feedback");
+const Feedback = require("../schema/feedback")
+const Team = require("../schema/team")
 const mongoose = require("mongoose");
 
 // 📌 Show All Events
@@ -225,3 +226,170 @@ exports.registerUserToEvent = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 };
+
+
+
+
+// // Register entire team for an event
+// module.exports.registerTeamToEvent = async (req, res) => {
+//   try {
+//     const { eventId } = req.params
+//     const { teamId } = req.body
+//     const userId = req.user._id
+
+//     // Find the event
+//     const event = await Event.findById(eventId)
+//     if (!event) {
+//       return res.status(404).json({ message: "Event not found" })
+//     }
+
+//     // Find the team
+//     const team = await Team.findById(teamId).populate("members")
+//     if (!team) {
+//       return res.status(404).json({ message: "Team not found" })
+//     }
+
+//     // Check if user is team leader
+//     if (team.leader.toString() !== userId.toString()) {
+//       return res.status(403).json({ message: "Only team leaders can register the team" })
+//     }
+
+//     // Check team size requirements
+//     if (team.members.length < event.teamMin) {
+//       return res.status(400).json({
+//         message: `Team needs at least ${event.teamMin} members. Current: ${team.members.length}`,
+//       })
+//     }
+
+//     if (team.members.length > event.teamMax) {
+//       return res.status(400).json({
+//         message: `Team exceeds maximum size of ${event.teamMax} members. Current: ${team.members.length}`,
+//       })
+//     }
+
+//     // Check if any team member is already registered
+//     const memberIds = team.members.map((member) => member._id.toString())
+//     const alreadyRegistered = memberIds.some((memberId) =>
+//       event.registeredUsers.some((regUserId) => regUserId.toString() === memberId),
+//     )
+
+//     if (alreadyRegistered) {
+//       return res.status(400).json({ message: "One or more team members are already registered" })
+//     }
+
+//     // Register all team members
+//     event.registeredUsers.push(...memberIds)
+//     event.registrations = (event.registrations || 0) + team.members.length
+
+//     await event.save()
+
+//     res.json({
+//       message: "Team registered successfully!",
+//       registeredMembers: team.members.length,
+//       teamName: team.name,
+//     })
+//   } catch (error) {
+//     console.error("Error registering team:", error)
+//     res.status(500).json({ message: "Error registering team", error: error.message })
+//   }
+// }
+
+// Enhanced share event functionality
+module.exports.shareEventToWhatsApp = (event) => {
+  const eventUrl = `${window.location.origin}/events/${event._id}`
+  const message = `🎉 *${event.title}* - Amazing Event Alert! 🎉
+
+📅 *Date:* ${new Date(event.date).toLocaleDateString("en-US", {
+    weekday: "long",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
+  })}
+
+📍 *Mode:* ${event.mode || "Online"}
+${event.venue ? `🏢 *Venue:* ${event.venue}\n` : ""}
+${event.prizePool ? `💰 *Prize Pool:* ₹${event.prizePool.toLocaleString()}\n` : ""}
+👥 *Participation:* ${event.participationType || "Individual"}
+${event.participationType === "Team" ? `👥 *Team Size:* ${event.teamMin}-${event.teamMax} members\n` : ""}
+
+📝 *Description:*
+${event.description ? event.description.substring(0, 150) + "..." : "Join this exciting event!"}
+
+🔗 *Register Now:* ${eventUrl}
+
+#Glubs #Events #${event.eventType || "Competition"} #StudentLife`
+
+  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
+  window.open(whatsappUrl, "_blank")
+}
+
+// Add this to your existing event controller exports
+
+
+// Add this method to your existing event controller
+
+// Register entire team for an event
+module.exports.registerTeamToEvent = async (req, res) => {
+  try {
+    const { eventId } = req.params
+    const { teamId } = req.body
+    const userId = req.user._id
+
+    const Event = require("../schema/event")
+    const Team = require("../schema/team")
+
+    // Find the event
+    const event = await Event.findById(eventId)
+    if (!event) {
+      return res.status(404).json({ message: "Event not found" })
+    }
+
+    // Find the team
+    const team = await Team.findById(teamId).populate("members")
+    if (!team) {
+      return res.status(404).json({ message: "Team not found" })
+    }
+
+    // Check if user is team leader
+    if (team.leader.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "Only team leaders can register the team" })
+    }
+
+    // Check team size requirements
+    if (team.members.length < event.teamMin) {
+      return res.status(400).json({
+        message: `Team needs at least ${event.teamMin} members. Current: ${team.members.length}`,
+      })
+    }
+
+    if (team.members.length > event.teamMax) {
+      return res.status(400).json({
+        message: `Team exceeds maximum size of ${event.teamMax} members. Current: ${team.members.length}`,
+      })
+    }
+
+    // Check if any team member is already registered
+    const memberIds = team.members.map((member) => member._id.toString())
+    const alreadyRegistered = memberIds.some((memberId) =>
+      event.registeredUsers.some((regUserId) => regUserId.toString() === memberId),
+    )
+
+    if (alreadyRegistered) {
+      return res.status(400).json({ message: "One or more team members are already registered" })
+    }
+
+    // Register all team members
+    event.registeredUsers.push(...memberIds)
+    event.registrations = (event.registrations || 0) + team.members.length
+
+    await event.save()
+
+    res.json({
+      message: "Team registered successfully!",
+      registeredMembers: team.members.length,
+    })
+  } catch (error) {
+    console.error("Error registering team:", error)
+    res.status(500).json({ message: "Error registering team", error: error.message })
+  }
+}
