@@ -35,6 +35,7 @@ import EditFeedback from "./Events/EditFeedback";
 import AddHostBasicDetails from "./Hosts/AddHostBasicDetails";
 import EditHostBasicDetails from "./Hosts/EditHostBasicDetails";
 import TeamRoomPage from "./Hosts/TeamRoomPage";
+import Notifications from "./Notifications";
 
 export default function Router() {
   return (
@@ -58,6 +59,7 @@ export default function Router() {
       <Route path="/features/event-analytics" element={<EventAnalytics />} />
       <Route path="/features/organizers" element={<Organizers />} />
       <Route path="/events/:eventId/team-room" element={<TeamRoomPage/>} />
+              <Route path="/notifications" element={<Notifications />} />
 
 
       {/* All users allowed but after verification  */}

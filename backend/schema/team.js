@@ -35,6 +35,11 @@ const teamSchema = new mongoose.Schema(
       type: Boolean,
       default: true,
     },
+    inviteCode: {
+      type: String,
+      unique: true,
+      sparse: true, // Allows multiple documents to not have inviteCode
+    },
   },
   { timestamps: true },
 )
