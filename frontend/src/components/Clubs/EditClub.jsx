@@ -52,38 +52,47 @@ const EditClub = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="bg-gradient-to-b from-indigo-900 via-purple-50 to-white min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-indigo-800 relative">
       <Navbar />
-      <div className="max-w-5xl pt-30 pb-10 mx-auto p-8">
-        <div className="bg-white rounded-2xl shadow-xl border border-indigo-100 p-10">
-          <h1 className="text-2xl font-extrabold mb-8 text-gray-900">Edit Club</h1>
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div>
-              <label className="block font-semibold mb-2 text-indigo-700">Name</label>
-              <input
-                name="name"
-                value={form.name}
-                onChange={handleChange}
-                className="w-full p-3 border border-gray-200 rounded-full shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700"
-                required
-              />
+      <div className="container mx-auto px-4 py-10 pt-28 relative z-10 min-h-[calc(100vh-80px)] flex flex-1 items-center justify-center">
+        <div className="max-w-2xl w-full">
+          <div className="mb-8 text-left">
+            <h1 className="text-4xl font-extrabold text-white mb-8 tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              Edit Club
+            </h1>
+            <div className="bg-gray-900/60 backdrop-blur-lg shadow-xl rounded-md p-8">
+              <form onSubmit={handleSubmit} className="space-y-8">
+                <div>
+                  <label className="block font-semibold mb-2 text-indigo-200" style={{ fontFamily: 'Poppins, sans-serif' }}>Name</label>
+                  <input
+                    name="name"
+                    value={form.name}
+                    onChange={handleChange}
+                    className="w-full p-3 border border-indigo-700 bg-gray-900 text-white rounded-md shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-gray-400"
+                    required
+                    style={{ fontFamily: 'Poppins, sans-serif' }}
+                  />
+                </div>
+                <div>
+                  <label className="block font-semibold mb-2 text-indigo-200" style={{ fontFamily: 'Poppins, sans-serif' }}>Description</label>
+                  <textarea
+                    name="description"
+                    value={form.description}
+                    onChange={handleChange}
+                    className="w-full h-40 p-3 border border-indigo-700 bg-gray-900 text-white rounded-md shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 placeholder-gray-400"
+                    style={{ fontFamily: 'Poppins, sans-serif' }}
+                  />
+                </div>
+                <button
+                  type="submit"
+                  className="border border-indigo-400 text-indigo-200 bg-transparent rounded-md px-6 py-2 font-medium text-base transition-all duration-200 hover:bg-indigo-900/30 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400"
+                  style={{ fontFamily: 'Poppins, sans-serif' }}
+                >
+                  Update Club
+                </button>
+              </form>
             </div>
-            <div>
-              <label className="block font-semibold mb-2 text-indigo-700">Description</label>
-              <textarea
-                name="description"
-                value={form.description}
-                onChange={handleChange}
-                className="w-full h-40 p-3 border border-gray-200 rounded-2xl shadow focus:outline-none focus:ring-2 focus:ring-indigo-400 bg-white text-gray-700"
-              />
-            </div>
-            <button
-              type="submit"
-              className="bg-gradient-to-r from-indigo-600 to-purple-500 text-white font-semibold rounded-full px-7 py-3 shadow-lg hover:scale-105 hover:from-indigo-700 hover:to-purple-600 transition-all duration-300 border-none"
-            >
-              Update Club
-            </button>
-          </form>
+          </div>
         </div>
       </div>
       <Footer />

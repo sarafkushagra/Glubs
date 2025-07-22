@@ -29,30 +29,36 @@ const ClubMembers = () => {
   if (error) return <div>{error}</div>;
 
   return (
-    <div className="bg-gradient-to-b from-indigo-900 via-purple-50 to-white min-h-screen">
+    <div className="min-h-screen bg-gradient-to-br from-black via-gray-900 to-indigo-800 relative">
       <Navbar />
-      <div className="max-w-5xl pt-30 pb-10 mx-auto p-8">
-        <div className="bg-white rounded-2xl shadow-xl border border-indigo-100 p-10">
-          <h1 className="text-2xl font-extrabold mb-8 text-indigo-700">Club Members</h1>
-          <div className="overflow-x-auto">
-            <table className="w-full border rounded-xl shadow bg-white">
-              <thead>
-                <tr className="bg-indigo-100">
-                  <th className="p-3 text-left text-indigo-700">Name</th>
-                  <th className="p-3 text-left text-indigo-700">Position</th>
-                </tr>
-              </thead>
-              <tbody>
-                {members.length > 0 ? members.map((member) => (
-                  <tr key={member._id} className="border-t hover:bg-indigo-50 transition-all duration-200">
-                    <td className="p-3">{member.username}</td>
-                    <td className="p-3">{member.role}</td>
-                  </tr>
-                )) : (
-                  <tr><td colSpan="2" className="p-3 text-center text-gray-500">No members found.</td></tr>
-                )}
-              </tbody>
-            </table>
+      <div className="container mx-auto px-4 py-10 pt-28 relative z-10 min-h-[calc(100vh-80px)] flex flex-1 items-center justify-center">
+        <div className="max-w-2xl w-full">
+          <div className="mb-8 text-left">
+            <h1 className="text-4xl font-extrabold text-white mb-8 tracking-tight" style={{ fontFamily: 'Poppins, sans-serif' }}>
+              Club Members
+            </h1>
+            <div className="bg-gray-900/60 backdrop-blur-lg shadow-xl rounded-md p-8">
+              <div className="overflow-x-auto">
+                <table className="w-full border border-indigo-700 rounded-md shadow bg-gray-900 text-white" style={{ fontFamily: 'Poppins, sans-serif' }}>
+                  <thead>
+                    <tr className="bg-indigo-900/60">
+                      <th className="p-3 text-left text-indigo-200 font-semibold">Name</th>
+                      <th className="p-3 text-left text-indigo-200 font-semibold">Position</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {members.length > 0 ? members.map((member) => (
+                      <tr key={member._id} className="border-t border-indigo-800 hover:bg-indigo-900/30 transition-all duration-200">
+                        <td className="p-3">{member.username}</td>
+                        <td className="p-3">{member.role}</td>
+                      </tr>
+                    )) : (
+                      <tr><td colSpan="2" className="p-3 text-center text-gray-400">No members found.</td></tr>
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
           </div>
         </div>
       </div>
