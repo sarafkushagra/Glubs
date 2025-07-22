@@ -10,7 +10,7 @@ const About = () => {
       <Navbar />
 
       {/* Hero Section */}
-      <section className="relative min-h-[50vh] flex flex-col items-center justify-center text-center px-4 pt-24 pb-12 bg-gradient-to-b from-indigo-900 to-black text-white">
+      <section className="relative min-h-[100vh] flex flex-col items-center justify-center text-center px-4 pt-24 pb-12 bg-gradient-to-b from-indigo-900 to-black text-white">
 
         <h1 className="text-4xl md:text-6xl font-extrabold mb-4 leading-tight text-center">
           Revolutionizing Campus Engagement <br />with

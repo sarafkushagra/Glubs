@@ -237,6 +237,18 @@ export default function Navbar() {
     }
   }
 
+  const getProfileLink = () => {
+    const userData = localStorage.getItem("glubsUser");
+    if (userData) {
+      const role = JSON.parse(userData).role;
+      if (role === "student") return "/profile";
+      if (role === "admin" || role === "clubadmin") return "/clubadmin/dash";
+    }
+    console.log(userData);
+    return "/home";
+  };
+
+
   const handleLogout = async () => {
     try {
       await axios.post(
@@ -314,11 +326,12 @@ export default function Navbar() {
 
                 <li title="Profile">
                   <Link
-                    to={localStorage.getItem("glubsUser") && JSON.parse(localStorage.getItem("glubsUser")).role === "admin" || "clubadmin" ? "/clubadmin/dash" : "/profile"}
+                    to={getProfileLink()}
                     className="text-gray-300 hover:text-cyan-400 transition-colors duration-300"
                   >
                     <CgProfile size={24} />
                   </Link>
+
                 </li>
                 <li title="Mark Attendance">
                   <Link to="/qr-scan" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300">

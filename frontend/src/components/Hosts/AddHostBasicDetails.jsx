@@ -261,6 +261,7 @@ const EventRegistrationForm = () => {
 
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) return
+const token = localStorage.getItem('token');
 
     try {
       setLoading(true)
@@ -271,12 +272,16 @@ const EventRegistrationForm = () => {
         teamMin: formData.participationType === "Individual" ? null : formData.teamMin,
         teamMax: formData.participationType === "Individual" ? null : formData.teamMax,
       }
-
       if (isEditing) {
         await axios.put(`http://localhost:3000/event/${eventId}`, payload, { withCredentials: true })
         alert("Event updated successfully!")
       } else {
-        await axios.post("http://localhost:3000/event", payload, { withCredentials: true })
+        await axios.post("http://localhost:3000/event", payload, {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+          , withCredentials: true
+        })
         alert("Event created successfully!")
       }
 
@@ -371,25 +376,23 @@ const EventRegistrationForm = () => {
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
                 <div
-                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${
-                    step <= currentStep
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-                      : isDarkMode
-                        ? "bg-gray-800 text-gray-400 border border-gray-700"
-                        : "bg-gray-200 text-gray-500 border border-gray-300"
-                  }`}
+                  className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${step <= currentStep
+                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+                    : isDarkMode
+                      ? "bg-gray-800 text-gray-400 border border-gray-700"
+                      : "bg-gray-200 text-gray-500 border border-gray-300"
+                    }`}
                 >
                   {step < currentStep ? <CheckCircle className="w-5 h-5" /> : step}
                 </div>
                 {step < 3 && (
                   <div
-                    className={`w-16 h-1 mx-2 transition-all duration-300 ${
-                      step < currentStep
-                        ? "bg-gradient-to-r from-indigo-600 to-purple-600"
-                        : isDarkMode
-                          ? "bg-gray-700"
-                          : "bg-gray-300"
-                    }`}
+                    className={`w-16 h-1 mx-2 transition-all duration-300 ${step < currentStep
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600"
+                      : isDarkMode
+                        ? "bg-gray-700"
+                        : "bg-gray-300"
+                      }`}
                   />
                 )}
               </div>
@@ -402,9 +405,8 @@ const EventRegistrationForm = () => {
               {["Basic Details", "Registration", "Additional Info"].map((label, index) => (
                 <div
                   key={label}
-                  className={`text-sm font-medium transition-colors ${
-                    index + 1 <= currentStep ? themeClasses.text : themeClasses.textMuted
-                  }`}
+                  className={`text-sm font-medium transition-colors ${index + 1 <= currentStep ? themeClasses.text : themeClasses.textMuted
+                    }`}
                 >
                   {label}
                 </div>
@@ -429,9 +431,8 @@ const EventRegistrationForm = () => {
                   Event Logo <span className="text-red-500">*</span>
                 </label>
                 <div
-                  className={`relative w-32 h-32 mx-auto border-2 border-dashed ${
-                    isDarkMode ? "border-gray-600" : "border-gray-300"
-                  } rounded-xl flex items-center justify-center cursor-pointer hover:border-indigo-500 transition-colors group`}
+                  className={`relative w-32 h-32 mx-auto border-2 border-dashed ${isDarkMode ? "border-gray-600" : "border-gray-300"
+                    } rounded-xl flex items-center justify-center cursor-pointer hover:border-indigo-500 transition-colors group`}
                 >
                   {logoPreview ? (
                     <div className="relative">
@@ -544,11 +545,10 @@ const EventRegistrationForm = () => {
                         key={mode}
                         type="button"
                         onClick={() => handleInputChange("mode", mode)}
-                        className={`flex-1 py-3 px-4 rounded-xl border font-medium transition-all ${
-                          formData.mode === mode
-                            ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
-                            : `${themeClasses.button} border`
-                        }`}
+                        className={`flex-1 py-3 px-4 rounded-xl border font-medium transition-all ${formData.mode === mode
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
+                          : `${themeClasses.button} border`
+                          }`}
                       >
                         <div className="flex items-center justify-center gap-2">
                           {mode === "online" && <Globe className="w-4 h-4" />}
@@ -571,9 +571,8 @@ const EventRegistrationForm = () => {
                     onChange={(e) => handleInputChange("venue", e.target.value)}
                     placeholder={formData.mode === "online" ? "Online platform (optional)" : "Enter venue location"}
                     disabled={formData.mode === "online"}
-                    className={`w-full px-4 py-3 ${themeClasses.input} border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${
-                      formData.mode === "online" ? "opacity-50 cursor-not-allowed" : ""
-                    }`}
+                    className={`w-full px-4 py-3 ${themeClasses.input} border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all ${formData.mode === "online" ? "opacity-50 cursor-not-allowed" : ""
+                      }`}
                   />
                 </div>
               </div>
@@ -591,11 +590,10 @@ const EventRegistrationForm = () => {
                       key={value}
                       type="button"
                       onClick={() => handleInputChange("visibility", value)}
-                      className={`flex-1 py-3 px-4 rounded-xl border font-medium transition-all ${
-                        formData.visibility === value
-                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
-                          : `${themeClasses.button} border`
-                      }`}
+                      className={`flex-1 py-3 px-4 rounded-xl border font-medium transition-all ${formData.visibility === value
+                        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
+                        : `${themeClasses.button} border`
+                        }`}
                     >
                       <div className="flex items-center justify-center gap-2">
                         <Icon className="w-4 h-4" />
@@ -657,11 +655,10 @@ const EventRegistrationForm = () => {
                       key={value}
                       type="button"
                       onClick={() => handleInputChange("participationType", value)}
-                      className={`p-6 rounded-xl border-2 transition-all text-left ${
-                        formData.participationType === value
-                          ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
-                          : `border-gray-300 dark:border-gray-600 hover:border-indigo-300`
-                      }`}
+                      className={`p-6 rounded-xl border-2 transition-all text-left ${formData.participationType === value
+                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
+                        : `border-gray-300 dark:border-gray-600 hover:border-indigo-300`
+                        }`}
                     >
                       <div className="flex items-center gap-3 mb-2">
                         <Icon
@@ -813,11 +810,10 @@ const EventRegistrationForm = () => {
                       key={category}
                       type="button"
                       onClick={() => handleCategoryToggle(category)}
-                      className={`px-4 py-2 rounded-full border font-medium transition-all ${
-                        formData.categories.includes(category)
-                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
-                          : `${themeClasses.button} border`
-                      }`}
+                      className={`px-4 py-2 rounded-full border font-medium transition-all ${formData.categories.includes(category)
+                        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
+                        : `${themeClasses.button} border`
+                        }`}
                     >
                       {category}
                     </button>
@@ -841,11 +837,10 @@ const EventRegistrationForm = () => {
                         key={skill}
                         type="button"
                         onClick={() => handleSkillToggle(skill)}
-                        className={`px-3 py-1 rounded-full text-sm border font-medium transition-all ${
-                          isSelected
-                            ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent shadow-lg"
-                            : `${themeClasses.button} border`
-                        }`}
+                        className={`px-3 py-1 rounded-full text-sm border font-medium transition-all ${isSelected
+                          ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent shadow-lg"
+                          : `${themeClasses.button} border`
+                          }`}
                       >
                         {skill}
                       </button>

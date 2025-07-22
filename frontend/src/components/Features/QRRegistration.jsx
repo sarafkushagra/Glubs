@@ -3,10 +3,10 @@ import React from 'react';
 
 export default function QRRegistration() {
   return (
-    <div className="w-full min-h-screen bg-[#0f0c29] text-white py-16 px-6">
-      <div className="max-w-7xl mx-auto">
+    <div className="pt-30 w-full min-h-screen bg-[#0f0c29] text-white py-16 px-6">
+      <div className="text-center max-w-7xl mx-auto">
         {/* Heading */}
-        <h1 className="text-5xl font-extrabold text-center mb-6 tracking-wide">
+        <h1 className="text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 text-transparent bg-clip-text drop-shadow-2xl mb-4 ">
           QR Check-In System
         </h1>
 

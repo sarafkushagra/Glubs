@@ -12,7 +12,7 @@ module.exports.showAllEvents = async (req, res) => {
 // 📌 Show Event Details with Feedback
 module.exports.showEvent = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id).populate('createdBy', 'username');
     if (!event) return res.status(404).json({ message: "Event not found" });
 
     const feedbacks = await Feedback.find({ event: event._id }).populate("user");
@@ -70,7 +70,7 @@ module.exports.createEvent = async (req, res) => {
       registrationEnd,
       registrationLimit,
       hideContact,
-      createdBy: req.user ? req.user._id : "687cd1a8b9b0a7fd9a92382f"
+      createdBy: req.user
     });
 
     const savedEvent = await event.save();

@@ -6,9 +6,6 @@ import LandingPage from "./Pages/Home";
 import About from "./Pages/About";
 import EventLanding from "./Events/EventLanding";
 import EventDetails from "./Events/EventDetails";
-import QRRegistration from "./Features/QRRegistration";
-import EventAnalytics from "./Features/EventAnalytics";
-import Organizers from "./Features/Organizers";
 import QRCodeGenerator from "./QR/QR_Generator";
 import QRScanner from "./QR/QR_Scanner";
 import MyProfile from "./Users/MyProfile";
@@ -36,6 +33,7 @@ import AddHostBasicDetails from "./Hosts/AddHostBasicDetails";
 import EditHostBasicDetails from "./Hosts/EditHostBasicDetails";
 import TeamRoomPage from "./Hosts/TeamRoomPage";
 import Notifications from "./Notifications";
+import DashboardPage from "./Features/Features";
 
 export default function Router() {
   return (
@@ -55,11 +53,9 @@ export default function Router() {
       <Route path="*" element={<NotFound />} />
       <Route path="/events" element={<EventLanding />} />
       <Route path="/clubs" element={<AllClubs />} />
-      <Route path="/features/qr-registration" element={<QRRegistration />} />
-      <Route path="/features/event-analytics" element={<EventAnalytics />} />
-      <Route path="/features/organizers" element={<Organizers />} />
-      <Route path="/events/:eventId/team-room" element={<TeamRoomPage/>} />
-              <Route path="/notifications" element={<Notifications />} />
+      <Route path="/features" element={<DashboardPage />} />
+      <Route path="/events/:eventId/team-room" element={<TeamRoomPage />} />
+      <Route path="/notifications" element={<Notifications />} />
 
 
       {/* All users allowed but after verification  */}

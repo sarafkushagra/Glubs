@@ -47,10 +47,10 @@ export default function LandingPage() {
               Explore Events
             </Link>
             <Link
-              to="/features/Organizers"
+              to="/features"
               className="border border-white text-white font-semibold rounded-full px-6 py-3 hover:bg-white hover:text-indigo-700 transition-all duration-300 shadow hover:scale-105"
             >
-              Features
+              ExploreFeatures
             </Link>
           </div>
         </div>

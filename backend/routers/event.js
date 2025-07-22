@@ -5,7 +5,7 @@ const {isAuthenticated} = require('../middlewares/auth');
 
 
 router.get('/', eventController.showAllEvents);
-router.post('/', eventController.createEvent);
+router.post('/', isAuthenticated,eventController.createEvent);
 router.get('/:id', eventController.showEvent);
 router.put('/:id', eventController.updateEvent);
 router.delete('/:id', eventController.deleteEvent);

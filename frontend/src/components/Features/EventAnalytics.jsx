@@ -13,10 +13,10 @@ import {
 
 const EventAnalytics = () => {
   return (
-    <div className="w-screen min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white overflow-x-hidden">
-      <div className="max-w-7xl mx-auto py-16 px-6">
+    <div className="pt-30 w-screen min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white overflow-x-hidden">
+      <div className="max-w-7xl text-center  mx-auto  px-6">
         {/* Heading */}
-        <h1 className="text-5xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-purple-400 to-indigo-500 mb-10 text-center drop-shadow-xl tracking-wide">
+        <h1 className="text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 text-transparent bg-clip-text drop-shadow-2xl mb-4">
           Unlock Real-Time Event Intelligence
         </h1>
 

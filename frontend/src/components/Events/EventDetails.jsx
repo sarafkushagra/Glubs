@@ -264,7 +264,7 @@ const EventDetails = () => {
   const IconComponent = config.icon
   const daysLeft = getDaysLeft(event.date)
   const isOwner = user && event.createdBy && event.createdBy._id === user._id
-
+  console.log(user, event.createdBy);
   return (
     <div className={`min-h-screen ${themeClasses.background}`}>
       <Navbar />
@@ -394,7 +394,9 @@ const EventDetails = () => {
                     </div>
                     <div>
                       <div className={`font-semibold ${themeClasses.text}`}>Organizer</div>
-                      <div className={`${themeClasses.textMuted} text-sm`}>{event.createdBy.name || "Unknown"}</div>
+                      <div className={`${themeClasses.textMuted} text-sm`}>
+                        {event.createdBy?.username.toUpperCase() || "Unknown"}
+                      </div>
                     </div>
                   </div>
                 )}
@@ -584,8 +586,7 @@ const EventDetails = () => {
               <button
                 onClick={handleRegister}
                 disabled={isUserRegistered() || registering || daysLeft < 0}
-                className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${
-                  isUserRegistered()
+                className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${isUserRegistered()
                     ? isDarkMode
                       ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
                       : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
@@ -598,7 +599,7 @@ const EventDetails = () => {
                           ? "bg-gray-800/30 border border-gray-600/30 text-gray-500 cursor-not-allowed"
                           : "bg-gray-200 border border-gray-300 text-gray-500 cursor-not-allowed"
                         : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
-                }`}
+                  }`}
               >
                 {isUserRegistered()
                   ? "✓ Already Registered"

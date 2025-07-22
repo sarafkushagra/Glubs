@@ -90,8 +90,8 @@ const features = [
 
 const Organizers = () => {
   return (
-    <div className="w-screen min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white overflow-x-hidden">
-      <div className="max-w-7xl mx-auto py-20 px-6">
+    <div className="pt-30 w-screen min-h-screen bg-gradient-to-b from-[#0f0c29] via-[#302b63] to-[#24243e] text-white overflow-x-hidden">
+      <div className="max-w-7xl mx-auto  px-6">
         {/* Hero Section */}
         <div className="text-center mb-16">
           <h1 className="text-6xl font-extrabold tracking-tight bg-gradient-to-r from-indigo-400 via-purple-400 to-pink-500 text-transparent bg-clip-text drop-shadow-2xl">
