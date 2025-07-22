@@ -291,27 +291,27 @@ export default function Navbar() {
 
         {isLoggedIn ? (
           <>
-
-            {/* Notification Icon */}
-            <li title="Notifications">
-              <Link
-                to="/notifications"
-                className="text-gray-300 hover:text-cyan-400 transition-colors duration-300 relative"
-              >
-                <Bell className="w-6 h-6" />
-                {notificationCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                    {notificationCount > 9 ? "9+" : notificationCount}
-                  </span>
-                )}
-              </Link>
-            </li>
-
-           </>
-
-            {/* Profile and QR Icons */}
             {isLoggedIn && (
               <>
+
+                {/* Notification Icon */}
+                <li title="Notifications">
+                  <Link
+                    to="/notifications"
+                    className="text-gray-300 hover:text-cyan-400 transition-colors duration-300 relative"
+                  >
+                    <Bell className="w-6 h-6" />
+                    {notificationCount > 0 && (
+                      <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                        {notificationCount > 9 ? "9+" : notificationCount}
+                      </span>
+                    )}
+                  </Link>
+                </li>
+
+
+
+
                 <li title="Profile">
                   <Link
                     to={localStorage.getItem("glubsUser") && JSON.parse(localStorage.getItem("glubsUser")).role === "admin" || "clubadmin" ? "/clubadmin/dash" : "/profile"}
@@ -363,11 +363,10 @@ export default function Navbar() {
                 <Link
                   to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
                   onClick={() => setMenuOpen(false)}
-                  className={`text-[16px] font-medium ${
-                    location.pathname === `/${item.toLowerCase()}` || (location.pathname === "/" && item === "Home")
-                      ? "text-cyan-400 font-semibold"
-                      : "text-gray-300 hover:text-white"
-                  }`}
+                  className={`text-[16px] font-medium ${location.pathname === `/${item.toLowerCase()}` || (location.pathname === "/" && item === "Home")
+                    ? "text-cyan-400 font-semibold"
+                    : "text-gray-300 hover:text-white"
+                    }`}
                 >
                   {item}
                 </Link>
