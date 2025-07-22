@@ -35,7 +35,9 @@ import {
   Mail,
   Shield,
   UserPlus,
+  Home,
 } from "lucide-react"
+import { Link } from "react-router-dom";
 
 // If you deploy the backend elsewhere (e.g. Render, Railway) set NEXT_PUBLIC_API_BASE_URL.
 const API_BASE_URL = "http://localhost:3000"
@@ -1827,6 +1829,7 @@ const fetchPendingRequests = async () => {
         <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
+              <Link to="/" ><Home className="w-6 h-6 "/></Link>
               <h2 className="text-2xl font-semibold text-gray-900">
                 {sidebarItems.find((item) => item.id === activeTab)?.label}
               </h2>
