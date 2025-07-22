@@ -17,7 +17,8 @@ import {
   Globe,
   PencilIcon,
   Trash,
-  MessageSquarePlus
+  MessageSquarePlus,
+  BrainCircuit, Hammer, BookOpen, HelpCircle, Users2, Award, Palette, Calendar as CalendarIcon
 } from 'lucide-react';
 
 const EventDetails = () => {
@@ -75,32 +76,51 @@ const EventDetails = () => {
   if (error) return <div className="text-center py-10 text-red-600">{error}</div>;
   if (!event) return <div className="text-center py-10 text-gray-600">No event found.</div>;
 
+  // Event type to icon mapping
+  const eventTypeIcons = {
+    Hackathon: <BrainCircuit className="text-indigo-500 w-7 h-7" title="Hackathon" />,
+    Workshop: <Hammer className="text-green-500 w-7 h-7" title="Workshop" />,
+    Seminar: <BookOpen className="text-blue-500 w-7 h-7" title="Seminar" />,
+    Quiz: <Award className="text-yellow-500 w-7 h-7" title="Quiz" />,
+    Conference: <Users2 className="text-purple-500 w-7 h-7" title="Conference" />,
+    "Case Study": <HelpCircle className="text-pink-500 w-7 h-7" title="Case Study" />,
+    "Creative Showcase": <Palette className="text-orange-500 w-7 h-7" title="Creative Showcase" />,
+    Other: <CalendarIcon className="text-gray-400 w-7 h-7" title="Other" />,
+  };
+
   return (
-    <div className="bg-gradient-to-b from-indigo-900 via-purple-50 to-white min-h-screen">
+    <div className="bg-gradient-to-br from-blue-100 via-white to-blue-200 min-h-screen font-[Poppins] relative overflow-x-hidden">
+      {/* Optional: Add a subtle background pattern overlay */}
+      <div className="absolute inset-0 pointer-events-none opacity-10 z-0" style={{background: 'radial-gradient(circle at 60% 40%, #a5b4fc 0%, transparent 70%)'}}></div>
       <Navbar />
-      <div className="max-w-4xl mx-auto pt-32 pb-10 px-4">
-        <div className="bg-white rounded-2xl shadow-xl border border-indigo-100 p-8 md:p-10 mb-10">
-          <div className="flex flex-col md:flex-row md:items-center md:justify-between mb-6">
-
-            <div><h1 className="text-3xl md:text-4xl font-extrabold mb-3 text-indigo-700 tracking-tight text-center">{event.title.toUpperCase()}</h1></div>
-            <div className="flex flex-wrap gap-3 justify-center mb-6">
-              <button onClick={handleEdit} className="bg-gradient-to-r from-indigo-600 to-purple-500 text-white font-semibold rounded-full px-2 py-2 shadow-lg hover:scale-105 transition"><PencilIcon /></button>
-              <button onClick={handleDelete} className="bg-gradient-to-r from-red-500 to-red-700 text-white font-semibold rounded-full px-2 py-2 shadow-lg hover:scale-105 transition"><Trash /></button>
-              <button onClick={() => navigate(`/events/${eventId}/add-feedback`)} className="bg-gradient-to-r from-green-500 to-green-700 text-white font-semibold rounded-full px-2 py-2 shadow-lg hover:scale-105 transition"><MessageSquarePlus /> </button>
+      <div className="max-w-4xl mx-auto pt-32 pb-10 px-4 relative z-10">
+        <div className="bg-white/95 border border-blue-100 rounded-3xl shadow-xl p-8 md:p-12 mb-10 relative overflow-hidden">
+          {/* Event type icon and accent */}
+          <div className="flex items-center gap-3 mb-6">
+            <div className="rounded-full bg-blue-100 p-3 shadow">
+              {eventTypeIcons[event.eventType] || eventTypeIcons.Other}
             </div>
-
+            <span className="text-base font-semibold uppercase tracking-wider text-indigo-700">
+              {event.eventType || 'Event'}
+            </span>
           </div>
-          <p className="text-gray-700 mb-6 italic max-w-xl">{event.description}</p>
+          <div><h1 className="text-4xl md:text-5xl font-extrabold mb-3 text-indigo-900 tracking-tight text-center drop-shadow-sm">{event.title}</h1></div>
+          <div className="flex flex-wrap gap-3 justify-center mb-6">
+            <button onClick={handleEdit} className="bg-indigo-600 hover:bg-indigo-700 text-white font-semibold rounded-full px-3 py-2 shadow-md transition text-lg"><PencilIcon /></button>
+            <button onClick={handleDelete} className="bg-red-500 hover:bg-red-600 text-white font-semibold rounded-full px-3 py-2 shadow-md transition text-lg"><Trash /></button>
+            <button onClick={() => navigate(`/events/${eventId}/add-feedback`)} className="bg-green-500 hover:bg-green-600 text-white font-semibold rounded-full px-3 py-2 shadow-md transition text-lg"><MessageSquarePlus /> </button>
+          </div>
+          <p className="text-gray-700 mb-6 italic max-w-xl mx-auto text-center text-lg">{event.description}</p>
 
           {/* Details Grid */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6 text-sm text-gray-700">
-            <div className="flex items-center gap-2"><CalendarDays size={18} className="text-purple-500" /> {new Date(event.date).toLocaleString()}</div>
-            {event.venue && <div className="flex items-center gap-2"><MapPin size={18} className="text-purple-500" /> {event.venue}</div>}
-            <div className="flex items-center gap-2"><UserCircle size={18} className="text-purple-500" /> {event.createdBy?.name || 'Unknown Creator'}</div>
-            <div className="flex items-center gap-2"><Users size={18} className="text-purple-500" /> {event.registeredUsers ? event.registeredUsers.length : 0} Participants</div>
-            {event.eventType && <div className="flex items-center gap-2"><Tag size={18} className="text-purple-500" /> {event.eventType}</div>}
-            {event.mode !== undefined && <div className="flex items-center gap-2"><Globe size={18} className="text-purple-500" /> {event.mode ? 'Online Event' : 'Offline Event'}</div>}
-            {event.registrationEnd && <div className="flex items-center gap-2"><CalendarDays size={18} className="text-purple-500" /> Reg. Deadline: {new Date(event.registrationEnd).toLocaleDateString()}</div>}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-6 mb-6 text-base text-gray-800">
+            <div className="flex items-center gap-3"><span className="bg-blue-100 p-2 rounded-full"><CalendarDays size={22} className="text-indigo-500" /></span> {new Date(event.date).toLocaleString()}</div>
+            {event.venue && <div className="flex items-center gap-3"><span className="bg-blue-100 p-2 rounded-full"><MapPin size={22} className="text-indigo-500" /></span> {event.venue}</div>}
+            <div className="flex items-center gap-3"><span className="bg-blue-100 p-2 rounded-full"><UserCircle size={22} className="text-indigo-500" /></span> {event.createdBy?.name || 'Unknown Creator'}</div>
+            <div className="flex items-center gap-3"><span className="bg-blue-100 p-2 rounded-full"><Users size={22} className="text-indigo-500" /></span> {event.registeredUsers ? event.registeredUsers.length : 0} Participants</div>
+            {event.eventType && <div className="flex items-center gap-3"><span className="bg-blue-100 p-2 rounded-full"><Tag size={22} className="text-indigo-500" /></span> {event.eventType}</div>}
+            {event.mode !== undefined && <div className="flex items-center gap-3"><span className="bg-blue-100 p-2 rounded-full"><Globe size={22} className="text-indigo-500" /></span> {event.mode ? 'Online Event' : 'Offline Event'}</div>}
+            {event.registrationEnd && <div className="flex items-center gap-3"><span className="bg-blue-100 p-2 rounded-full"><CalendarDays size={22} className="text-indigo-500" /></span> Reg. Deadline: {new Date(event.registrationEnd).toLocaleDateString()}</div>}
           </div>
 
           {/* Tags */}
@@ -109,13 +129,14 @@ const EventDetails = () => {
               <h2 className="text-lg font-semibold text-indigo-700 mb-2">Tags:</h2>
               <div className="flex flex-wrap gap-2">
                 {event.tags.map((tag, idx) => (
-                  <span key={idx} className="bg-purple-100 text-purple-800 px-3 py-1 rounded-full text-xs">{tag}</span>
+                  <span key={idx} className="bg-blue-100 text-indigo-800 px-3 py-1 rounded-full text-xs">{tag}</span>
                 ))}
               </div>
             </div>
           )}
 
           {/* Media */}
+          {/*
           <div className="mb-6">
             <h2 className="text-lg font-semibold text-indigo-700 mb-2">Media:</h2>
             <div className="flex flex-wrap gap-3">
@@ -136,23 +157,23 @@ const EventDetails = () => {
               )}
             </div>
           </div>
-
+          */}
 
           {/* Divider */}
-          <div className="border-t border-indigo-100 my-8"></div>
+          <div className="border-t border-blue-100 my-8"></div>
 
-          {/* Feedback Section (untouched as requested) */}
+          {/* Feedback Section */}
           <div className="mt-8">
-            <h2 className="text-xl font-bold mb-2 text-indigo-700">User Feedbacks</h2>
+            <h2 className="text-2xl font-bold mb-4 text-indigo-700 text-center">User Feedbacks</h2>
             {feedbacks.length ? (
-              <ul className="space-y-2">
+              <ul className="space-y-4">
                 {feedbacks.map(fb => (
-                  <li key={fb._id} className="p-3 bg-indigo-50 rounded-lg border border-indigo-100 shadow flex flex-col md:flex-row md:items-center md:justify-between">
+                  <li key={fb._id} className="p-4 bg-blue-50 rounded-xl border border-blue-100 shadow flex flex-col md:flex-row md:items-center md:justify-between">
                     <div>
                       <span className="font-semibold text-indigo-700">{fb.user?.username || 'Anonymous'}</span>
                       <span className="text-xs text-gray-500 ml-2">{new Date(fb.createdAt).toLocaleString()}</span>
                       <p className="text-gray-700 mt-1">{fb.review}</p>
-                      <p className="text-sm text-indigo-600">Rating: {fb.rating}/5</p>
+                      <p className="text-sm text-indigo-600 font-bold">Rating: <span className="text-yellow-500">{fb.rating}/5</span></p>
                     </div>
                     {user && fb.user && fb.user._id === user._id && (
                       <div className="flex gap-2 mt-2 md:mt-0">
@@ -163,7 +184,7 @@ const EventDetails = () => {
                 ))}
               </ul>
             ) : (
-              <div className="text-gray-500">No user feedback yet.</div>
+              <div className="text-gray-500 text-center">No user feedback yet.</div>
             )}
           </div>
         </div>
