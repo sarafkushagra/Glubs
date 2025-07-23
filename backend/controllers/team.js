@@ -3,30 +3,33 @@ const TeamRequest = require("../schema/teamRequest")
 const User = require("../schema/user")
 const Event = require("../schema/event")
 const mongoose = require("mongoose")
+const { nanoid } = require("nanoid")
 
-// Create a new team
 module.exports.createTeam = async (req, res) => {
   try {
-    const { name, description, eventId, leaderId } = req.body
+    const { name, description, eventId, leaderId } = req.body;
+
+    // Generate unique invite code
+    const inviteCode = nanoid(8); // e.g., 'a3K4mPzQ'
 
     // Validate event exists
-    const event = await Event.findById(eventId)
+    const event = await Event.findById(eventId);
     if (!event) {
-      return res.status(404).json({ message: "Event not found" })
+      return res.status(404).json({ message: "Event not found" });
     }
 
     // Check if event supports teams
     if (event.participationType !== "Team") {
-      return res.status(400).json({ message: "This event doesn't support team participation" })
+      return res.status(400).json({ message: "This event doesn't support team participation" });
     }
 
     // Check if user already has a team for this event
     const existingTeam = await Team.findOne({
       event: eventId,
       members: leaderId,
-    })
+    });
     if (existingTeam) {
-      return res.status(400).json({ message: "You are already in a team for this event" })
+      return res.status(400).json({ message: "You are already in a team for this event" });
     }
 
     // Create team
@@ -37,25 +40,27 @@ module.exports.createTeam = async (req, res) => {
       leader: leaderId,
       members: [leaderId],
       maxMembers: event.teamMax,
-    })
+      inviteCode, // ✅ include invite code
+    });
 
-    await team.save()
+    await team.save();
 
     // Populate the team with member details
     const populatedTeam = await Team.findById(team._id)
       .populate("leader", "username email yearOfStudy department")
       .populate("members", "username email yearOfStudy department")
-      .populate("event", "title teamMin teamMax")
+      .populate("event", "title teamMin teamMax");
 
     res.status(201).json({
       message: "Team created successfully!",
       team: populatedTeam,
-    })
+    });
   } catch (error) {
-    console.error("Error creating team:", error)
-    res.status(500).json({ message: "Error creating team", error: error.message })
+    console.error("Error creating team:", error);
+    res.status(500).json({ message: "Error creating team", error: error.message });
   }
-}
+};
+
 
 // Get user's team for a specific event
 module.exports.getUserTeam = async (req, res) => {

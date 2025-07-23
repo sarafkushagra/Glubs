@@ -306,7 +306,7 @@ exports.getAvailableUsers = async (req, res) => {
         $nin: [...event.registeredUsers, ...usersInTeams.map(id => new mongoose.Types.ObjectId(id))],
       },
       isVerified: true,
-      role: { $in: ["student", "club-admin"] },
+      role: { $in: ["student"] },
     }).select("username email yearOfStudy department age");
 
     res.json({ users: availableUsers });
