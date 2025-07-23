@@ -2268,7 +2268,7 @@ const TeamRoomPage = () => {
       const availableRes = await axios.get(`http://localhost:3000/users/available/${eventId}`, {
         withCredentials: true,
       })
-      
+      console.log(availableRes)
       setAvailableUsers(availableRes.data.users)
 
       // Fetch team requests (received)

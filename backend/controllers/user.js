@@ -292,6 +292,35 @@ exports.getUnregisteredUsers = async (req, res) => {
 };
 
 // Get users available for forming a team (not registered + not in any team)
+// exports.getAvailableUsers = async (req, res) => {
+//   try {
+//     const { eventId } = req.params;
+//     const event = await Event.findById(eventId);
+//     if (!event) return res.status(404).json({ message: "Event not found" });
+
+//     const teams = await Team.find({ event: eventId }).populate("members", "_id");
+//     const usersInTeams = teams.flatMap(team => team.members.map(m => m._id.toString()));
+
+//     const availableUsers = await User.find({
+//       _id: {
+//         $nin: [...event.registeredUsers, ...usersInTeams.map(id => new mongoose.Types.ObjectId(id))],
+//       },
+//       isVerified: true,
+//       role: { $in: ["student"] },
+//     }).select("username email yearOfStudy department age");
+
+//     res.json({ users: availableUsers });
+//   } catch (err) {
+//     console.error("Error fetching available users:", err);
+//     res.status(500).json({ message: "Error fetching available users", error: err.message });
+//   }
+// };
+
+
+
+
+
+
 exports.getAvailableUsers = async (req, res) => {
   try {
     const { eventId } = req.params;
@@ -303,7 +332,7 @@ exports.getAvailableUsers = async (req, res) => {
 
     const availableUsers = await User.find({
       _id: {
-        $nin: [...event.registeredUsers, ...usersInTeams.map(id => new mongoose.Types.ObjectId(id))],
+        $nin: usersInTeams.map(id => new mongoose.Types.ObjectId(id)),
       },
       isVerified: true,
       role: { $in: ["student"] },

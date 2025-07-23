@@ -425,7 +425,7 @@ const Notifications = () => {
 
                   <div className="flex flex-wrap items-center justify-between gap-4">
                     <button
-                      onClick={() => navigate(`/events/${request.event}/team-room`)}
+                      onClick={() => navigate(`/events/${request.event._id}/team-room`)}
                       className={`flex items-center gap-2 px-4 py-2 ${themeClasses.button} rounded-lg transition-all hover:scale-105`}
                     >
                       <ExternalLink className="w-4 h-4" />
