@@ -13,169 +13,232 @@ export default function MyProfile() {
   const [participatedEvents, setParticipatedEvents] = useState([]);
   const [upcomingEvents, setUpcomingEvents] = useState([]);
   const [completedEvents, setCompletedEvents] = useState([]);
-useEffect(() => {
-  const fetchUser = async () => {
-    try {
-      const res = await axios.get("http://localhost:3000/users/me", { withCredentials: true });
-      console.log("Fetched user:", res.data);
-      setUser(res.data.user);
-    } catch (error) {
-      console.error("Error fetching user:", error);
-      setError("Failed to fetch user details.");
-    } finally {
-      setLoading(false);
+  const [activeTab, setActiveTab] = useState("upcoming");
+
+  useEffect(() => {
+    const fetchUser = async () => {
+      try {
+        const res = await axios.get("http://localhost:3000/users/me", { withCredentials: true });
+        console.log("Fetched user:", res.data);
+        setUser(res.data.user);
+      } catch (error) {
+        console.error("Error fetching user:", error);
+        setError("Failed to fetch user details.");
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUser();
+  }, []);
+
+  useEffect(() => {
+    if (!user || !user._id) {
+      console.log("User or user._id not available, skipping fetchEvents");
+      return;
     }
-  };
 
-  fetchUser();
-}, []);
+    const fetchEvents = async () => {
+      try {
+        console.log("Fetching events for userId:", user._id);
+        const [participatedRes, upcomingRes, completedRes] = await Promise.all([
+          axios.get(`http://localhost:3000/event/participated/${user._id}`, { withCredentials: true }),
+          axios.get(`http://localhost:3000/event/upcoming/${user._id}`, { withCredentials: true }),
+          axios.get(`http://localhost:3000/event/completed/${user._id}`, { withCredentials: true }),
+        ]);
 
-useEffect(() => {
-  if (!user || !user._id) {
-    console.log("User or user._id not available, skipping fetchEvents");
-    return;
-  }
+        console.log("Participated Events:", participatedRes.data);
+        console.log("Upcoming Events:", upcomingRes.data);
+        console.log("Completed Events:", completedRes.data);
 
-  const fetchEvents = async () => {
-    try {
-      console.log("Fetching events for userId:", user._id);
-      const [participatedRes, upcomingRes, completedRes] = await Promise.all([
-        axios.get(`http://localhost:3000/event/participated/${user._id}`, { withCredentials: true }),
-        axios.get(`http://localhost:3000/event/upcoming/${user._id}`, { withCredentials: true }),
-        axios.get(`http://localhost:3000/event/completed/${user._id}`, { withCredentials: true }),
-      ]);
+        setParticipatedEvents(participatedRes.data || []);
+        setUpcomingEvents(upcomingRes.data || []);
+        setCompletedEvents(completedRes.data || []);
+      } catch (err) {
+        console.error("Error fetching events:", err);
+      }
+    };
 
-      console.log("Participated Events:", participatedRes.data);
-      console.log("Upcoming Events:", upcomingRes.data);
-      console.log("Completed Events:", completedRes.data);
+    fetchEvents();
+  }, [user]);
 
-      setParticipatedEvents(participatedRes.data || []);
-      setUpcomingEvents(upcomingRes.data || []);
-      setCompletedEvents(completedRes.data || []);
-    } catch (err) {
-      console.error("Error fetching events:", err);
-    }
-  };
-
-  fetchEvents();
-}, [user]);
-
-
-  if (loading) return <div>Loading...</div>;
-  if (error) return <div>{error}</div>;
-  if (!user) return <div>No user data found.</div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 text-gray-700">
+        <p className="text-xl animate-pulse">Loading profile data...</p>
+      </div>
+    );
+  if (error)
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 text-red-500">
+        <p className="text-xl">Error: {error}</p>
+      </div>
+    );
+  if (!user)
+    return (
+      <div className="flex items-center justify-center min-h-screen bg-gray-100 text-gray-700">
+        <p className="text-xl">No user data found.</p>
+      </div>
+    );
 
   return (
     <>
-    <Navbar/>
-    <div className="p-8 max-w-6xl pt-30 pb-10 mx-auto">
-      <div className="flex justify-between items-center mb-6">
-        <h1 className="text-3xl font-bold mb-6 text-indigo-700">My Profile</h1>
-        <Link to={`/users/edit/${user._id}`}>
-          <button className="bg-indigo-600 text-white px-4 py-2 rounded hover:bg-indigo-700 mb-4">
-            Edit Profile
-          </button>
-        </Link>
-      </div>
+      <Navbar />
+      <div className="relative min-h-screen bg-black pb-12">
+        {/* Indigo blurry light effect above header */}
+        <div className="absolute top-0 left-1/2 -translate-x-1/2 z-20 w-[2000px] h-[540px] bg-indigo-500/40 blur-3xl rounded-full opacity-60 pointer-events-none" style={{filter: 'blur(80px)', top: '-80px'}}></div>
+        {/* Profile Header Section */}
+        <div className="relative w-full bg-black shadow-sm border-b border-gray-800 px-4 sm:px-8 pt-20 pb-8 flex flex-col sm:flex-row items-center sm:items-end gap-8 z-10">
+          {/* Avatar */}
+          <div className="flex-shrink-0 pt-8 pl-16">
+            <img
+              src={img1}
+              alt="avatar"
+              className="w-36 h-36 rounded-3xl object-cover border-4 border-white bg-white"
+            />
+          </div>
+          {/* Info and Stats */}
+          <div className="flex-1 w-full flex flex-col sm:justify-between sm:flex-row">
+            {/* Name, Role, Department, Email - left, beside avatar */}
+            <div className="flex flex-col justify-center sm:justify-start sm:items-start items-center text-left min-w-[200px]">
+              <span className="text-2xl font-extrabold text-gray-100">piyush001</span>
+              <span className="text-base font-semibold text-indigo-200 bg-indigo-700/30 px-2 py-0.5 rounded mb-1 mt-1">student</span>
+              <span className="text-gray-400 text-base mb-0.5">b-tech</span>
+              <span className="text-gray-500 text-sm">piyushpratap0439@gmail.com</span>
+            </div>
+            {/* Stats Row - right */}
+            <div className="flex flex-row gap-10 mt-4 sm:mt-0 sm:justify-end items-end">
+              <div className="flex flex-col items-center min-w-[120px]">
+                <span className="text-gray-400 text-xs mb-1 text-center">Events Participated</span>
+                <span className="text-2xl font-bold text-gray-100 text-center">{participatedEvents.length}</span>
+              </div>
+              <div className="flex flex-col items-center min-w-[120px]">
+                <span className="text-gray-400 text-xs mb-1 text-center">Upcoming Events</span>
+                <span className="text-2xl font-bold text-gray-100 text-center">{upcomingEvents.length}</span>
+              </div>
+              <div className="flex flex-col items-center min-w-[120px]">
+                <span className="text-gray-400 text-xs mb-1 text-center">Completed Events</span>
+                <span className="text-2xl font-bold text-gray-100 text-center">{completedEvents.length}</span>
+              </div>
+              <div className="flex flex-col items-center min-w-[120px]">
+                <Link
+                  to={`/users/edit/${user._id}`}
+                  className="mb-10 w-full flex justify-end"
+                >
+                  <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-4 py-2 rounded transition w-full sm:w-auto ">Edit Profile</button>
+                </Link>
+                <span className="text-gray-400 text-xs mb-1 text-center">Payments Done</span>
+                <span className="text-2xl font-bold text-gray-100 text-center">{user.paymentsDone || 0}</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      {/* Profile Section */}
-      <div className="bg-white p-6 rounded-lg shadow mb-8 flex items-center gap-6">
-        <img src={img1} alt="avatar" className="w-20 h-20 rounded-full border" />
-        <div>
-          <h2 className="text-xl font-semibold">{user.username}</h2>
-          <p className="text-gray-500">{user.email}</p>
-          <p className="text-gray-500">{user.department || "Department not specified"}</p>
-          <p className="text-gray-500 capitalize">{user.role}</p>
+        {/* Tab Bar */}
+        <div className="max-w-5xl mx-auto mt-8 px-4">
+          <div className="flex flex-row gap-8 border-b border-gray-800 mb-8">
+            <button
+              className={`py-2 px-1 text-base font-semibold border-b-2 transition-all duration-150 ${activeTab === "upcoming" ? "border-white text-white" : "border-transparent text-gray-400 hover:text-gray-200"}`}
+              onClick={() => setActiveTab("upcoming")}
+            >
+              Upcoming Events
+            </button>
+            <button
+              className={`py-2 px-1 text-base font-semibold border-b-2 transition-all duration-150 ${activeTab === "completed" ? "border-white text-white" : "border-transparent text-gray-400 hover:text-gray-200"}`}
+              onClick={() => setActiveTab("completed")}
+            >
+              Completed Events
+            </button>
+            <button
+              className={`py-2 px-1 text-base font-semibold border-b-2 transition-all duration-150 ${activeTab === "participated" ? "border-white text-white" : "border-transparent text-gray-400 hover:text-gray-200"}`}
+              onClick={() => setActiveTab("participated")}
+            >
+              Events You Participated In
+            </button>
+          </div>
+
+          {/* Tab Content */}
+          {activeTab === "upcoming" && (
+            <div className="mb-10">
+              <h3 className="text-2xl font-extrabold text-gray-100 mb-6">Upcoming Events</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                {upcomingEvents.length === 0 ? (
+                  <div className="bg-[#18181b] p-8 rounded-2xl shadow text-gray-500 col-span-full">No upcoming events found.</div>
+                ) : (
+                  upcomingEvents.map((event, idx) => (
+                    <Link
+                      to={`/events/${event._id}`}
+                      key={idx}
+                      className="bg-[#18181b] text-gray-100 rounded-2xl p-8 shadow hover:shadow-lg transition duration-200 flex flex-col justify-between hover:scale-[1.03]"
+                    >
+                      <h4 className="font-bold text-lg mb-2">{event.title}</h4>
+                      <p className="text-gray-400 text-sm mb-1">
+                        <span className="font-semibold">Date:</span> {new Date(event.date).toLocaleDateString()}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        <span className="font-semibold">Venue:</span> {event.venue || "Venue TBA"}
+                      </p>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+          {activeTab === "completed" && (
+            <div className="mb-10">
+              <h3 className="text-2xl font-extrabold text-gray-100 mb-6">Completed Events</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                {completedEvents.length === 0 ? (
+                  <div className="bg-[#18181b] p-8 rounded-2xl shadow text-gray-500 col-span-full">No completed events found.</div>
+                ) : (
+                  completedEvents.map((event, idx) => (
+                    <Link
+                      to={`/events/details/${event._id}`}
+                      key={idx}
+                      className="bg-[#18181b] text-gray-100 rounded-2xl p-8 shadow hover:shadow-lg transition duration-200 flex flex-col justify-between hover:scale-[1.03]"
+                    >
+                      <h4 className="font-bold text-lg mb-2">{event.title}</h4>
+                      <p className="text-gray-400 text-sm mb-1">
+                        <span className="font-semibold">Date:</span> {new Date(event.date).toLocaleDateString()}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        <span className="font-semibold">Venue:</span> {event.venue || "Venue TBA"}
+                      </p>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
+          {activeTab === "participated" && (
+            <div className="mb-10">
+              <h3 className="text-2xl font-extrabold text-gray-100 mb-6">Events You Participated In</h3>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-8">
+                {participatedEvents.length === 0 ? (
+                  <div className="bg-[#18181b] p-8 rounded-2xl shadow text-gray-500 col-span-full">You haven't participated in any events yet.</div>
+                ) : (
+                  participatedEvents.map((event, idx) => (
+                    <Link
+                      to={`/events/${event._id}`}
+                      key={idx}
+                      className="bg-[#18181b] text-gray-100 rounded-2xl p-8 shadow hover:shadow-lg transition duration-200 flex flex-col justify-between hover:scale-[1.03]"
+                    >
+                      <h4 className="font-bold text-lg mb-2">{event.title}</h4>
+                      <p className="text-gray-400 text-sm mb-1">
+                        <span className="font-semibold">Date:</span> {new Date(event.date).toLocaleDateString()}
+                      </p>
+                      <p className="text-gray-400 text-sm">
+                        <span className="font-semibold">Venue:</span> {event.venue || "Venue TBA"}
+                      </p>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* Stats Grid */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-        <div className="bg-indigo-50 text-indigo-700 p-4 rounded-lg shadow text-center">
-          <h3 className="text-2xl font-bold">{participatedEvents.length}</h3>
-          <p className="text-sm mt-1">Events Participated</p>
-        </div>
-        <div className="bg-purple-50 text-purple-700 p-4 rounded-lg shadow text-center">
-          <h3 className="text-2xl font-bold">{upcomingEvents.length}</h3>
-          <p className="text-sm mt-1">Upcoming Events</p>
-        </div>
-        <div className="bg-green-50 text-green-700 p-4 rounded-lg shadow text-center">
-          <h3 className="text-2xl font-bold">{completedEvents.length}</h3>
-          <p className="text-sm mt-1">Completed Events</p>
-        </div>
-        <div className="bg-yellow-50 text-yellow-700 p-4 rounded-lg shadow text-center">
-          <h3 className="text-2xl font-bold">{user.paymentsDone || 0}</h3>
-          <p className="text-sm mt-1">Payments Done</p>
-        </div>
-      </div>
-
-           {/* Upcoming Events */}
-     <div className="bg-white p-6 rounded-lg shadow mb-8">
-       <h3 className="text-xl font-semibold mb-4 text-indigo-700">Upcoming Events</h3>
-       {upcomingEvents.length === 0 ? (
-         <p className="text-gray-500">No upcoming events.</p>
-       ) : (
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-           {upcomingEvents.map((event, idx) => (
-             <Link
-               to={`/events/${event._id}`}
-               key={idx}
-               className="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg p-4 shadow hover:shadow-md transition transform hover:-translate-y-1 cursor-pointer"
-             >
-               <h4 className="font-bold">{event.title}</h4>
-               <p className="text-sm">{new Date(event.date).toLocaleDateString()}</p>
-               <p className="text-sm">{event.venue || "Venue TBA"}</p>
-             </Link>
-           ))}
-         </div>
-       )}
-     </div>
-     
-     {/* Completed Events */}
-     <div className="bg-white p-6 rounded-lg shadow mb-8">
-       <h3 className="text-xl font-semibold mb-4 text-indigo-700">Completed Events</h3>
-       {completedEvents.length === 0 ? (
-         <p className="text-gray-500">No completed events.</p>
-       ) : (
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-           {completedEvents.map((event, idx) => (
-             <Link
-               to={`/events/details/${event._id}`}
-               key={idx}
-               className="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg p-4 shadow hover:shadow-md transition transform hover:-translate-y-1 cursor-pointer"
-             >
-               <h4 className="font-bold">{event.title}</h4>
-               <p className="text-sm">{new Date(event.date).toLocaleDateString()}</p>
-               <p className="text-sm">{event.venue || "Venue TBA"}</p>
-             </Link>
-           ))}
-         </div>
-       )}
-     </div>
-     
-     {/* Participated Events */}
-     <div className="bg-white p-6 rounded-lg shadow mb-10">
-       <h3 className="text-xl font-semibold mb-4 text-indigo-700">Events You Participated In</h3>
-       {participatedEvents.length === 0 ? (
-         <p className="text-gray-500">You have not participated in any events yet.</p>
-       ) : (
-         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-           {participatedEvents.map((event, idx) => (
-             <Link
-               to={`/events/${event._id}`}
-               key={idx}
-               className="bg-indigo-50 text-indigo-700 border border-indigo-200 rounded-lg p-4 shadow hover:shadow-md transition transform hover:-translate-y-1 cursor-pointer"
-             >
-               <h4 className="font-bold">{event.title}</h4>
-               <p className="text-sm">{new Date(event.date).toLocaleDateString()}</p>
-               <p className="text-sm">{event.venue || "Venue TBA"}</p>
-             </Link>
-           ))}
-         </div>
-       )}
-     </div>
-    </div>
-    <Footer/>
+      <Footer />
     </>
   );
 }
