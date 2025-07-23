@@ -4,7 +4,7 @@ const AppError = require("../utils/appError");
 const User = require("../schema/user");
 
 exports.isAuthenticated = catchAsync(async (req, res, next) => {
-  const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
+ try{ const token = req.cookies.token || req.headers.authorization?.split(" ")[1];
 
   if (!token) {
     return next(
@@ -29,6 +29,9 @@ exports.isAuthenticated = catchAsync(async (req, res, next) => {
   req.user = currentUser;
 
   next();
+} catch (err) {
+  return res.status(401).json({ message: "Invalid token, authorization denied" });
+}
 });
 
 

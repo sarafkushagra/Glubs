@@ -25,7 +25,7 @@ const SignInForm = ({ onSwitch }) => {
         formData,
         { withCredentials: true }
       );
-      console.log(res.data)
+      // console.log(res.data)
       const { data, token } = res.data;
 
       setAuth({ user : data.user, token });
@@ -33,8 +33,12 @@ const SignInForm = ({ onSwitch }) => {
       const redirectPath =
         localStorage.getItem("redirectAfterVerify") || "/events";
       localStorage.removeItem("redirectAfterVerify");
-      console.log(redirectPath)
-      navigate(redirectPath);
+      // console.log(redirectPath)
+      if (data.user.role === "student") {
+        navigate("/profile");
+      } else {
+        navigate("/clubadmin/dash");
+      }
     } catch (err) {
       const message =
         err.response?.data?.message || "Invalid credentials. Try again.";
