@@ -252,13 +252,13 @@ exports.requestClubAdmin = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized or email not verified" });
     }
 
-    if (requestedRole === "club-admin") {
+    // requestedRole === "club-admin") {
       user.role = "pending-club-admin";
-      await user.save();
-    } else {
-      user.role = "student";
-      await user.save();
-    }
+      await User.findByIdAndUpdate( req.user._id, {role: "pending-club-admin"} , {new: true})
+  //  } else {
+    //   user.role = "student";
+    //   await User.findByIdAndUpdate( req.user._id, {role: "student"} , {new: true})
+    // }
 
     res.status(200).json({ message: "Role request submitted successfully." });
   } catch (err) {

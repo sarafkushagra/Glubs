@@ -14,8 +14,6 @@ const EmailVerificationPage = () => {
   const navigate = useNavigate();
   const { updateUser, user } = useAuth();
 
-  //dialog box 
-  const [showDialog, setShowDialog] = useState(false);
 
 
   const handleChange = (e, index) => {
@@ -52,7 +50,7 @@ const EmailVerificationPage = () => {
         localStorage.getItem("redirectAfterVerify") || "/events";
       localStorage.removeItem("redirectAfterVerify");
       console.log(redirectPath)
-      setShowDialog(true);
+      navigate("/role-selection");
       // navigate(redirectPath);
     } catch (err) {
       toast.error(
@@ -159,16 +157,6 @@ return (
         </div>
       </motion.div>
     </div>
-        {/* Place the dialog here */}
-    <RoleSelectionDialog
-      isOpen={showDialog}
-      onClose={() => {
-        setShowDialog(false);
-        const redirectPath = localStorage.getItem("redirectAfterVerify") || "/events";
-        localStorage.removeItem("redirectAfterVerify");
-        navigate(redirectPath);
-      }}
-       />
   </div>
 );
 }

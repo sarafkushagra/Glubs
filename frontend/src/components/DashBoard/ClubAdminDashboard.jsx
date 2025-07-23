@@ -152,6 +152,7 @@ const fetchPendingRequests = async () => {
   try {
     const data = await apiRequest("/admin/club-admin-requests");
    setPendingRequests(Array.isArray(data.users) ? data.users : []);
+   console.log(data);
   } catch (error) {
     setErrors((prev) => ({ ...prev, requests: error.message }));
     setPendingRequests([]);

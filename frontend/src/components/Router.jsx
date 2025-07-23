@@ -45,6 +45,7 @@ import EventTimeline from "./Features/Explore_Features/EventTimeline";
 import LiveMetrics from "./Features/Explore_Features/LiveMetrics";
 import GrowthAnalysis from "./Features/Explore_Features/GrowthAnalysis";
 import UserDemographics from "./Features/Explore_Features/UserDemographics";
+import RoleSelectionDialog from "./AuthCard/RoleSelectionDialog";
 
 
 export default function Router() {
@@ -68,6 +69,7 @@ export default function Router() {
       <Route path="/features" element={<DashboardPage />} />
       <Route path="/events/:eventId/team-room" element={<TeamRoomPage />} />
       <Route path="/notifications" element={<Notifications />} />
+      <Route path="/role-selection" element={<RoleSelectionDialog />} />
 
 
       {/* All users allowed but after verification  */}

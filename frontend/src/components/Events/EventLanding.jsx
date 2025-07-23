@@ -642,13 +642,13 @@ const EventLanding = () => {
                     <Filter className="w-3 h-3" />
                     Filters
                   </button>
-                  <button
+                  {/* <button
                     onClick={() => navigate("/hosts")}
                     className={`flex items-center gap-2 ${themeClasses.primaryButton} px-3 py-2 rounded-lg transition-all duration-300 text-sm shadow-lg`}
                   >
                     <Plus className="w-3 h-3" />
                     Host
-                  </button>
+                  </button> */}
                 </div>
 
                 {/* Filter Panel */}
