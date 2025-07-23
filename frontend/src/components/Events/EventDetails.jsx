@@ -35,6 +35,8 @@ import {
   AlertCircle,
   Mail,
 } from "lucide-react"
+import ShareButtons from "./ShareModel"
+import ShareModal from "./ShareModel"
 
 const EventDetails = () => {
   // Custom styles for hiding scrollbars
@@ -64,6 +66,8 @@ const EventDetails = () => {
   const [error, setError] = useState(null)
   const [registering, setRegistering] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
+
+  const [showShareModal, setShowShareModal] = useState(false)
 
   const eventTypeConfig = {
     Hackathon: {
@@ -587,18 +591,18 @@ const EventDetails = () => {
                 onClick={handleRegister}
                 disabled={isUserRegistered() || registering || daysLeft < 0}
                 className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${isUserRegistered()
+                  ? isDarkMode
+                    ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
+                    : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
+                  : registering
                     ? isDarkMode
-                      ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
-                      : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
-                    : registering
+                      ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
+                      : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
+                    : daysLeft < 0
                       ? isDarkMode
-                        ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
-                        : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
-                      : daysLeft < 0
-                        ? isDarkMode
-                          ? "bg-gray-800/30 border border-gray-600/30 text-gray-500 cursor-not-allowed"
-                          : "bg-gray-200 border border-gray-300 text-gray-500 cursor-not-allowed"
-                        : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
+                        ? "bg-gray-800/30 border border-gray-600/30 text-gray-500 cursor-not-allowed"
+                        : "bg-gray-200 border border-gray-300 text-gray-500 cursor-not-allowed"
+                      : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
                   }`}
               >
                 {isUserRegistered()
@@ -622,12 +626,17 @@ const EventDetails = () => {
               )}
               <div className="flex gap-2 mt-4">
                 <button
-                  onClick={() => shareToWhatsApp(event)}
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
+                  onClick={() => setShowShareModal(true)}
+                  className="w-full py-2 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
                 >
-                  <Share2 className="w-4 h-4" />
-                  Share
+                  <Share2 className="w-4 h-4 inline mr-2" />
+                  Share Event
                 </button>
+
+                {showShareModal && (
+                  <ShareModal event={event} onClose={() => setShowShareModal(false)} />
+                )}
+
                 <button
                   className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
                 >

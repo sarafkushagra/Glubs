@@ -37,6 +37,7 @@ import {
   CalendarIcon,
   Trophy,
 } from "lucide-react"
+import ShareButtons from "./ShareModel"
 
 // Custom styles for hiding scrollbars
 const scrollbarHideStyles = `
@@ -540,8 +541,7 @@ const EventLanding = () => {
                             handleRegister(event._id)
                           }}
                           disabled={isUserRegistered(event) || registering[event._id]}
-                          className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${
-                            isUserRegistered(event)
+                          className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${isUserRegistered(event)
                               ? isDarkMode
                                 ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
                                 : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
@@ -550,7 +550,7 @@ const EventLanding = () => {
                                   ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
                                   : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
                                 : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
-                          }`}
+                            }`}
                         >
                           {isUserRegistered(event)
                             ? "✓ Registered"
@@ -572,16 +572,34 @@ const EventLanding = () => {
                             {isUserRegistered(event) ? "Team Room" : "Find Team"}
                           </button>
                         )}
-                        <button
+                        {/* <button
                           onClick={(e) => {
                             e.stopPropagation()
-                            shareToWhatsApp(event)
+                            
                           }}
                           className={`w-full py-2 rounded-lg font-semibold transition-all duration-300 text-sm ${themeClasses.button} mt-2`}
                         >
                           <Share2 className="w-4 h-4 inline mr-2" />
                           Share on WhatsApp
-                        </button>
+                        </button> */}
+                        <div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation()
+                              setShowShare((prev) => !prev)
+                            }}
+                            className={`w-full py-2 rounded-lg font-semibold transition-all duration-300 text-sm ${themeClasses.button} mt-2`}
+                          >
+                            <Share2 className="w-4 h-4 inline mr-2" />
+                            Share on WhatsApp
+                          </button>
+
+                          {showShare && (
+                            <div className="mt-2">
+                              <ShareButtons event={event} />
+                            </div>
+                          )}
+                        </div>
                       </div>
                     </div>
                   )
@@ -699,9 +717,8 @@ const EventLanding = () => {
                     <div
                       key={event._id}
                       onClick={() => handleEventClick(event)}
-                      className={`${themeClasses.card} border ${
-                        isSelected ? "border-indigo-500 ring-2 ring-indigo-500/30" : themeClasses.cardHover
-                      } rounded-lg transition-all duration-300 overflow-hidden cursor-pointer hover:shadow-lg`}
+                      className={`${themeClasses.card} border ${isSelected ? "border-indigo-500 ring-2 ring-indigo-500/30" : themeClasses.cardHover
+                        } rounded-lg transition-all duration-300 overflow-hidden cursor-pointer hover:shadow-lg`}
                     >
                       {/* Event Header */}
                       <div
@@ -757,15 +774,14 @@ const EventLanding = () => {
 
                         {/* Registration Status */}
                         <div
-                          className={`text-xs px-2 py-1 rounded text-center font-medium ${
-                            isUserRegistered(event)
+                          className={`text-xs px-2 py-1 rounded text-center font-medium ${isUserRegistered(event)
                               ? isDarkMode
                                 ? "bg-green-900/30 text-green-300"
                                 : "bg-green-100 text-green-700"
                               : isDarkMode
                                 ? "bg-indigo-900/30 text-indigo-300"
                                 : "bg-indigo-100 text-indigo-700"
-                          }`}
+                            }`}
                         >
                           {isUserRegistered(event) ? "✓ Registered" : "Click to Register"}
                         </div>
@@ -1074,8 +1090,7 @@ const EventLanding = () => {
                               registering[selectedEvent._id] ||
                               getDaysLeft(selectedEvent.date) < 0
                             }
-                            className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${
-                              isUserRegistered(selectedEvent)
+                            className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${isUserRegistered(selectedEvent)
                                 ? isDarkMode
                                   ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
                                   : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
@@ -1088,7 +1103,7 @@ const EventLanding = () => {
                                       ? "bg-gray-800/30 border border-gray-600/30 text-gray-500 cursor-not-allowed"
                                       : "bg-gray-200 border border-gray-300 text-gray-500 cursor-not-allowed"
                                     : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
-                            }`}
+                              }`}
                           >
                             {isUserRegistered(selectedEvent)
                               ? "✓ Already Registered"
