@@ -14,7 +14,6 @@ export default function EditProfile() {
     age: "",
     yearOfStudy: "",
     department: "",
-    role: "student",
     isClubMember: false,
   });
   const [loading, setLoading] = useState(true);
@@ -35,7 +34,6 @@ export default function EditProfile() {
           age: res.data.age || "",
           yearOfStudy: res.data.yearOfStudy || "",
           department: res.data.department || "",
-          role: res.data.role || "student",
           isClubMember: res.data.isClubMember || false,
         });
       } catch (err) {
@@ -141,19 +139,6 @@ export default function EditProfile() {
           />
         </div>
 
-        <div>
-          <label className="block text-purple-700 font-medium">Role</label>
-          <select
-            name="role"
-            value={user.role}
-            onChange={handleChange}
-            className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-purple-300"
-          >
-            <option value="student">Student</option>
-            <option value="club-admin">Club Admin</option>
-            <option value="admin">Admin</option>
-          </select>
-        </div>
 
         <div className="flex items-center">
           <input
