@@ -35,6 +35,18 @@ import TeamRoomPage from "./Hosts/TeamRoomPage";
 import Notifications from "./Notifications";
 import DashboardPage from "./Features/Features";
 
+{/*Explore Features */}
+import AttendancePage from "./Features/Explore_Features/AttendancePage";
+import EngagementPage from "./Features/Explore_Features/EngagementPage";
+import BehaviorPage from "./Features/Explore_Features/BehaviorPage";
+import ReachPage from "./Features/Explore_Features/ReachPage";
+import FeedbackInsights from "./Features/Explore_Features/FeedbackInsights";
+import EventTimeline from "./Features/Explore_Features/EventTimeline";
+import LiveMetrics from "./Features/Explore_Features/LiveMetrics";
+import GrowthAnalysis from "./Features/Explore_Features/GrowthAnalysis";
+import UserDemographics from "./Features/Explore_Features/UserDemographics";
+
+
 export default function Router() {
   return (
     <Routes>
@@ -91,6 +103,19 @@ export default function Router() {
         <Route path="/clubadmin/dash" element={<ClubAdminDashboard />} />
         <Route path="/users/details/:id" element={<UsersDetails />} />
       </Route>
+
+      {/* Explore Features */}
+      <Route path="/AttendancePage" element={<AttendancePage />} />
+      <Route path="/EngagementPage" element={<EngagementPage />} />
+      <Route path="/BehaviorPage" element={<BehaviorPage />} />
+      <Route path="/ReachPage" element={<ReachPage />} />
+      <Route path="/FeedbackInsights" element={<FeedbackInsights />} />
+      <Route path="/EventTimeline" element={<EventTimeline />} />
+      <Route path="/LiveMetrics" element={<LiveMetrics />} />
+      <Route path="/GrowthAnalysis" element={<GrowthAnalysis />} />
+      <Route path="/UserDemographics" element={<UserDemographics />} />
+
+      {/* For all users */}
 
     </Routes>
   );
