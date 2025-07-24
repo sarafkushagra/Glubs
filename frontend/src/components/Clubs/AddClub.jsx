@@ -19,7 +19,7 @@ const AddClub = () => {
     setLoading(true);
     setError(null);
     try {
-      const res = await axios.post('http://localhost:3000/clubs', form, {
+      const res = await axios.post(`${process.env.API_BASE_URL}/clubs`, form, {
         headers: { 'Content-Type': 'application/json' },
       });
       if (res.status === 201 || res.status === 200) {

@@ -1,5 +1,4 @@
 "use client"
-
 import React, { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import axios from "axios"
@@ -23,7 +22,7 @@ const Navbar = React.memo(function Navbar() {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/users/me", {
+        const res = await axios.get(`${process.env.API_BASE_URL}/users/me`, {
           withCredentials: true,
         })
         setIsLoggedIn(!!res.data.user)
@@ -45,7 +44,7 @@ const Navbar = React.memo(function Navbar() {
   const fetchNotificationCount = async () => {
     try {
       // Fetch all events
-      const eventsRes = await axios.get("http://localhost:3000/event", { withCredentials: true })
+      const eventsRes = await axios.get(`${process.env.API_BASE_URL}/event`, { withCredentials: true })
       const events = eventsRes.data
 
       // Count pending requests across all events
@@ -53,7 +52,7 @@ const Navbar = React.memo(function Navbar() {
 
       for (const event of events) {
         try {
-          const requestsRes = await axios.get(`http://localhost:3000/teams/requests/${event._id}`, {
+          const requestsRes = await axios.get(`${process.env.API_BASE_URL}/teams/requests/${event._id}`, {
             withCredentials: true,
           })
 
@@ -85,7 +84,7 @@ const Navbar = React.memo(function Navbar() {
   const handleLogout = async () => {
     try {
       await axios.post(
-        "http://localhost:3000/users/logout",
+        `${process.env.API_BASE_URL}/users/logout`,
         {},
         {
           withCredentials: true,

@@ -13,7 +13,7 @@ const ClubEvents = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/clubs/${clubId}/events`);
+        const res = await axios.get(`${process.env.API_BASE_URL}/clubs/${clubId}/events`);
         setEvents(res.data || []);
       } catch (err) {
         setError('Failed to fetch events');

@@ -40,7 +40,7 @@ import {
 import { Link } from "react-router-dom";
 
 // If you deploy the backend elsewhere (e.g. Render, Railway) set NEXT_PUBLIC_API_BASE_URL.
-const API_BASE_URL = "http://localhost:3000"
+const API_BASE_URL = import.meta.env.API_BASE_URL || "http://localhost:3000";
 
 const ClubAdminDashboard = () => {
   // State management

@@ -18,7 +18,7 @@ export default function MyProfile() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/users/me", { withCredentials: true });
+        const res = await axios.get(`${process.env.API_BASE_URL}/users/me`, { withCredentials: true });
         console.log("Fetched user:", res.data);
         setUser(res.data.user);
       } catch (error) {
@@ -42,9 +42,9 @@ export default function MyProfile() {
       try {
         console.log("Fetching events for userId:", user._id);
         const [participatedRes, upcomingRes, completedRes] = await Promise.all([
-          axios.get(`http://localhost:3000/event/participated/${user._id}`, { withCredentials: true }),
-          axios.get(`http://localhost:3000/event/upcoming/${user._id}`, { withCredentials: true }),
-          axios.get(`http://localhost:3000/event/completed/${user._id}`, { withCredentials: true }),
+          axios.get(`${process.env.API_BASE_URL}/event/participated/${user._id}`, { withCredentials: true }),
+          axios.get(`${process.env.API_BASE_URL}/event/upcoming/${user._id}`, { withCredentials: true }),
+          axios.get(`${process.env.API_BASE_URL}/event/completed/${user._id}`, { withCredentials: true }),
         ]);
 
         console.log("Participated Events:", participatedRes.data);

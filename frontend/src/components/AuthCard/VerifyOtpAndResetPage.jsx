@@ -32,7 +32,7 @@ const VerifyOTPAndReset = () => {
 
     setLoading(true);
     try {
-      await axios.post("http://localhost:3000/users/reset-password", {
+      await axios.post(`${process.env.API_BASE_URL}/users/reset-password`, {
         email,
         otp,
         password,

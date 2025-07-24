@@ -21,7 +21,7 @@ const RoleSelectionDialog = () => {
 
       await axios.post(
 
-        "http://localhost:3000/users/request-club-admin",
+        `${process.env.API_BASE_URL}/users/request-club-admin`,
         { requestedRole: selected },
         { withCredentials: true }
       );
