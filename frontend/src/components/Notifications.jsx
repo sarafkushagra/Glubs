@@ -21,6 +21,7 @@ import {
   Search,
   Trash2,
 } from "lucide-react"
+import { useTheme } from './Context/ThemeContext';
 
 const Notifications = () => {
   const navigate = useNavigate()
@@ -33,13 +34,15 @@ const Notifications = () => {
   const [successMessage, setSuccessMessage] = useState("")
   const [showErrorAlert, setShowErrorAlert] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const [isDarkMode, setIsDarkMode] = useState(true)
   const [filterStatus, setFilterStatus] = useState("pending")
   const [searchTerm, setSearchTerm] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [processingRequestId, setProcessingRequestId] = useState(null)
   const [allEvents, setAllEvents] = useState([])
   const [selectedEvent, setSelectedEvent] = useState("all")
+
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark';
 
   // Custom styles for hiding scrollbars
   useEffect(() => {

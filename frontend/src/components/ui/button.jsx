@@ -25,7 +25,7 @@ const Button = ({ children, onClick, className = "", type = "button", disabled =
       type={type}
       onClick={handleClick}
       disabled={disabled}
-      className={`relative overflow-hidden px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
+      className={`relative overflow-hidden px-4 py-2 rounded hover:bg-blue-700 transition disabled:opacity-50 disabled:cursor-not-allowed ${className}`}
     >
       {children}
       <style>{`
