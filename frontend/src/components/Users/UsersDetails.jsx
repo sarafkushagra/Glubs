@@ -17,7 +17,7 @@ export default function UsersDetails() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${process.env.API_BASE_URL}/users/details/${id}`, { withCredentials: true });
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/details/${id}`, { withCredentials: true });
         console.log(res.data);
         setUser(res.data);
       } catch (error) {
@@ -41,9 +41,9 @@ export default function UsersDetails() {
       try {
         console.log("Fetching events for userId:", id);
         const [participatedRes, upcomingRes, completedRes] = await Promise.all([
-          axios.get(`${process.env.API_BASE_URL}/event/participated/${id}`, { withCredentials: true }),
-          axios.get(`${process.env.API_BASE_URL}/event/upcoming/${id}`, { withCredentials: true }),
-          axios.get(`${process.env.API_BASE_URL}/event/completed/${id}`, { withCredentials: true }),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/participated/${id}`, { withCredentials: true }),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/upcoming/${id}`, { withCredentials: true }),
+          axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/completed/${id}`, { withCredentials: true }),
         ]);
 
         console.log("Participated Events:", participatedRes.data);

@@ -105,7 +105,7 @@ const AllClubs = () => {
   useEffect(() => {
     const fetchClubs = async () => {
       try {
-        const res = await axios.get(`${process.env.API_BASE_URL}/clubs`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/clubs`);
         setClubs(res.data || []);
       } catch (err) {
         setError('Failed to fetch clubs');

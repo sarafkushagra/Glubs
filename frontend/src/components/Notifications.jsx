@@ -99,11 +99,11 @@ const Notifications = () => {
       setLoading(true)
 
       // Fetch current user
-      const userRes = await axios.get(`${process.env.API_BASE_URL}/users/me`, { withCredentials: true })
+      const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true })
       setUser(userRes.data.user)
 
       // Fetch all events for filtering
-      const eventsRes = await axios.get(`${process.env.API_BASE_URL}/event`, { withCredentials: true })
+      const eventsRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event`, { withCredentials: true })
       setAllEvents(eventsRes.data)
 
       // Fetch all team requests across all events
@@ -112,7 +112,7 @@ const Notifications = () => {
       // For each event, fetch team requests
       for (const event of eventsRes.data) {
         try {
-          const requestsRes = await axios.get(`${process.env.API_BASE_URL}/teams/requests/${event._id}`, {
+          const requestsRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/requests/${event._id}`, {
             withCredentials: true,
           })
 
@@ -141,7 +141,7 @@ const Notifications = () => {
   const respondToRequest = async (requestId, action) => {
     try {
       setProcessingRequestId(requestId)
-      await axios.put(`${process.env.API_BASE_URL}/teams/request/${requestId}`, { action }, { withCredentials: true })
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/teams/request/${requestId}`, { action }, { withCredentials: true })
 
       // Update local state to reflect the change
       setTeamRequests((prevRequests) =>

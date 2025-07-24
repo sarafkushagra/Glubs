@@ -14,7 +14,7 @@ const EditClub = () => {
   useEffect(() => {
     const fetchClub = async () => {
       try {
-        const res = await axios.get(`${process.env.API_BASE_URL}/clubs/${clubId}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/clubs/${clubId}`);
         setForm({
           name: res.data.name || '',
           description: res.data.description || '',
@@ -35,7 +35,7 @@ const EditClub = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const res = await axios.put(`${process.env.API_BASE_URL}/clubs/${clubId}`, form, {
+      const res = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/clubs/${clubId}`, form, {
         headers: { 'Content-Type': 'application/json' },
       });
       if (res.status === 200) {

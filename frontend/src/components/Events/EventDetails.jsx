@@ -118,11 +118,11 @@ const EventDetails = () => {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`${process.env.API_BASE_URL}/event/${eventId}`, { withCredentials: true })
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       setEvent(res.data.event)
       setFeedbacks(res.data.feedbacks || [])
       try {
-        const userRes = await axios.get(`${process.env.API_BASE_URL}/users/me`, { withCredentials: true })
+        const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true })
         setUser(userRes.data.user)
       } catch {
         console.log("User not logged in")
@@ -145,7 +145,7 @@ const EventDetails = () => {
     // Existing individual registration logic
     try {
       setRegistering(true)
-      await axios.post(`${process.env.API_BASE_URL}/event/${eventId}/register`, {}, { withCredentials: true })
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register`, {}, { withCredentials: true })
       setEvent((prev) => ({
         ...prev,
         registeredUsers: [...(prev.registeredUsers || []), user._id],
@@ -162,7 +162,7 @@ const EventDetails = () => {
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this event?")) return
     try {
-      await axios.delete(`${process.env.API_BASE_URL}/event/${eventId}`, { withCredentials: true })
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       navigate("/events")
     } catch {
       alert("Failed to delete event.")
@@ -172,7 +172,7 @@ const EventDetails = () => {
   const handleDeleteFeedback = async (feedbackId) => {
     if (!window.confirm("Delete this feedback?")) return
     try {
-      await axios.delete(`${process.env.API_BASE_URL}/feedback/${feedbackId}`, { withCredentials: true })
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/feedback/${feedbackId}`, { withCredentials: true })
       setFeedbacks(feedbacks.filter((fb) => fb._id !== feedbackId))
     } catch {
       alert("Failed to delete feedback.")

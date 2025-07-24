@@ -12,7 +12,7 @@ const ForgotPasswordEmail = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.post(`${process.env.API_BASE_URL}/users/forget-password`, { email });
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/users/forget-password`, { email });
       toast.success("✅ OTP has been sent to your email");
       navigate("/verify-otp", { state: { email } });
     } catch (err) {

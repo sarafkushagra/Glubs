@@ -133,7 +133,7 @@ const EventRegistrationForm = () => {
   const fetchEventData = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`${process.env.API_BASE_URL}/event/${eventId}`, { withCredentials: true })
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       const event = res.data.event
 
       setFormData({
@@ -273,10 +273,10 @@ const token = localStorage.getItem('token');
         teamMax: formData.participationType === "Individual" ? null : formData.teamMax,
       }
       if (isEditing) {
-        await axios.put(`${process.env.API_BASE_URL}/event/${eventId}`, payload, { withCredentials: true })
+        await axios.put(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, payload, { withCredentials: true })
         alert("Event updated successfully!")
       } else {
-        await axios.post(`${process.env.API_BASE_URL}/event`, payload, {
+        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event`, payload, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -299,7 +299,7 @@ const token = localStorage.getItem('token');
 
     try {
       setLoading(true)
-      await axios.delete(`${process.env.API_BASE_URL}/event/${eventId}`, { withCredentials: true })
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       alert("Event deleted successfully!")
       navigate("/events")
     } catch (err) {

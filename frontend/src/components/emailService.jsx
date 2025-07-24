@@ -58,7 +58,7 @@ export const emailService = {
 
       // Send the email using the backend API
       const response = await axios.post(
-        `${process.env.API_BASE_URL}/api/send-email`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/send-email`,
         {
           email: recipientEmail,
           subject: `Team Invitation: ${teamName} for ${eventName}`,
@@ -135,7 +135,7 @@ export const emailService = {
 
       // Send the email using the backend API
       const response = await axios.post(
-        `${process.env.API_BASE_URL}/api/send-email`,
+        `${import.meta.env.VITE_API_BASE_URL}/api/send-email`,
         {
           email: recipientEmail,
           subject: `Team Invitation ${isAccepted ? "Accepted" : "Rejected"}: ${teamName}`,

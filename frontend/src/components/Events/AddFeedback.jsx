@@ -23,7 +23,7 @@ const AddFeedback = () => {
     setError(null);
     try {
       await axios.post(
-  `${process.env.API_BASE_URL}/event/${eventId}/add-feedback`,
+  `${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/add-feedback`,
   form,
   {
     headers: { 'Content-Type': 'application/json' },

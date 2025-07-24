@@ -73,7 +73,7 @@ const SignUpForm = ({ onSwitch }) => {
     console.log(formData);
 
     try {
-      const response = await axios.post(`${process.env.API_BASE_URL}/users/signup`, formData, {
+      const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/users/signup`, formData, {
         withCredentials: true,
       });
 

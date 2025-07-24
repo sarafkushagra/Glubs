@@ -55,7 +55,7 @@ const ClubDetails = () => {
   useEffect(() => {
     const fetchClub = async () => {
       try {
-        const res = await axios.get(`${process.env.API_BASE_URL}/clubs/${clubId}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/clubs/${clubId}`);
         setClub(res.data);
         setEvents(res.data.events || []);
       } catch (err) {
@@ -70,7 +70,7 @@ const ClubDetails = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get(`${process.env.API_BASE_URL}/clubs/${clubId}/events`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/clubs/${clubId}/events`);
         setEvents(res.data || []);
       } catch (err) {
         setError('Failed to fetch events');
@@ -88,7 +88,7 @@ const ClubDetails = () => {
   const handleDelete = async () => {
     if (!window.confirm('Are you sure you want to delete this club?')) return;
     try {
-      const res = await axios.delete(`${process.env.API_BASE_URL}/clubs/${clubId}`);
+      const res = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/clubs/${clubId}`);
       if (res.status === 200) {
         navigate('/clubs');
       } else {
@@ -169,7 +169,7 @@ const ClubDetails = () => {
                   }
                   setDeleting(true);
                   try {
-                    const res = await axios.delete(`${process.env.API_BASE_URL}/clubs/${clubId}`);
+                    const res = await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/clubs/${clubId}`);
                     if (res.status === 200) {
                       setShowDeleteModal(false);
                       navigate('/clubs');

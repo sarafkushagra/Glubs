@@ -21,7 +21,7 @@ const SignInForm = ({ onSwitch }) => {
     setLoading(true);
     try {
       const res = await axios.post(
-        `${process.env.API_BASE_URL}/users/login`,
+        `${import.meta.env.VITE_API_BASE_URL}/users/login`,
         formData,
         { withCredentials: true }
       );
@@ -110,3 +110,94 @@ const SignInForm = ({ onSwitch }) => {
 
 export default SignInForm;
 
+
+
+
+
+
+
+
+
+// import React, { useState } from "react";
+// import axios from "axios";
+// import { useNavigate } from "react-router-dom";
+// import { useAuth } from "../../Context/userStore";
+// import { toast } from "react-toastify";
+
+// const SignInForm = () => {
+//   const [formData, setFormData] = useState({ email: "", password: "" });
+//   const [loading, setLoading] = useState(false);
+//   const { setAuth } = useAuth();
+//   const navigate = useNavigate();
+
+//   const handleChange = (e) => {
+//     const { name, value } = e.target;
+//     setFormData((prev) => ({ ...prev, [name]: value }));
+//   };
+
+//   const submitHandler = async (e) => {
+//     e.preventDefault();
+//     setLoading(true);
+//     try {
+//       const res = await axios.post(
+//         "http://localhost:3000/users/signin",
+//         formData,
+//         { withCredentials: true }
+//       );
+
+//       const { user, token } = res.data.data;
+//       setAuth({ user, token });
+
+//       toast.success("Login successful");
+//       navigate("/dashboard"); // or wherever you want to go
+//     } catch (err) {
+//       const message =
+//         err.response?.data?.message || "Invalid credentials. Try again.";
+//       toast.error(message);
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+
+//   return (
+//     <div className="w-full max-w-md p-8 bg-white dark:bg-gray-800 rounded-lg shadow-lg">
+//       <h2 className="text-2xl font-bold text-center mb-6 text-black dark:text-white">
+//         Sign In
+//       </h2>
+
+//       <form onSubmit={submitHandler} className="space-y-4">
+//         <div>
+//           <input
+//             name="email"
+//             type="email"
+//             placeholder="Email"
+//             value={formData.email}
+//             onChange={handleChange}
+//             className="w-full px-4 py-2 border rounded bg-gray-100 dark:bg-gray-700 text-black dark:text-white"
+//           />
+//         </div>
+
+//         <div>
+//           <input
+//             name="password"
+//             type="password"
+//             placeholder="Password"
+//             value={formData.password}
+//             onChange={handleChange}
+//             className="w-full px-4 py-2 border rounded bg-gray-100 dark:bg-gray-700 text-black dark:text-white"
+//           />
+//         </div>
+
+//         <button
+//           type="submit"
+//           disabled={loading}
+//           className="w-full py-2 px-4 bg-black text-white rounded hover:bg-gray-800"
+//         >
+//           {loading ? "Logging in..." : "Sign In"}
+//         </button>
+//       </form>
+//     </div>
+//   );
+// };
+
+// export default SignInForm;
