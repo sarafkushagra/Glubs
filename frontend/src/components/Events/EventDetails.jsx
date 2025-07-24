@@ -627,7 +627,7 @@ const EventDetails = () => {
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={() => setShowShareModal(true)}
-                  className="w-full py-2 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
+                  className="w-60 py-2 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
                 >
                   <Share2 className="w-4 h-4 inline mr-2" />
                   Share Event

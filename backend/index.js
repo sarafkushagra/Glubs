@@ -37,6 +37,7 @@ const clubRouter = require("./routers/club");
 const feedbackRouter = require("./routers/feedback");
 const adminRouter = require("./routers/admin")
 const teamRouter = require("./routers/team");
+const globalErrorHandler = require("./utils/globalErrorHandler");
 
 app.use("/users", userRouter);
 app.use("/event", eventRouter);
@@ -46,10 +47,8 @@ app.use("/admin", adminRouter);
 app.use("/teams", teamRouter);
 
 // Global Error Handler
-app.use((err, req, res, next) => {
-    console.error(err.stack);
-    res.status(500).json({ error: "Something went wrong on the server." });
-});
+app.use(globalErrorHandler);
+
 
 // Start Server
 const PORT = process.env.PORT || 3000;

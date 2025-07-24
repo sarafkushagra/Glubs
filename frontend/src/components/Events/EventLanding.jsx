@@ -81,6 +81,8 @@ const EventLanding = () => {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
 
+  const [showShare, setShowShare] = useState(false);
+
   // Event type configurations
   const eventTypeConfig = {
     Hackathon: {

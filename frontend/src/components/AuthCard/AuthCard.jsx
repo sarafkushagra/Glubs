@@ -16,8 +16,8 @@ const AuthCard = () => {
           </h2>
           <p className="mb-6 text-lg text-center">
             {isSignIn
-              ? "Enter your personal details and start your journey with us"
-              : "To keep connected with us please login with your personal info"}
+              ?   "To keep connected with us please login with your personal info"  
+              :   "Enter your personal details and start your journey with us"}
           </p>
           <button
             onClick={() => setIsSignIn(!isSignIn)}

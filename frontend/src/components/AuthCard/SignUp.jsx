@@ -86,10 +86,13 @@ const SignUpForm = ({ onSwitch }) => {
         navigate("/verify");
       }
     } catch (error) {
+      if(error.response === "Please verify your email before logging in." && error.response.status === 401) {
+          navigate("/verify");
+          return;
+      }
       const errMsg = error?.response?.data?.message || "Something went wrong.";
       toast.error(errMsg);
       setServerError(errMsg);
-      console.log
     } finally {
       setLoading(false);
     }
