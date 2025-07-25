@@ -1,5 +1,4 @@
 "use client"
-
 import { useEffect, useState } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
@@ -13,7 +12,6 @@ import {
   Users,
   Clock,
   ChevronDown,
-  Plus,
   BrainCircuit,
   Hammer,
   BookOpen,
@@ -38,7 +36,7 @@ import {
   Trophy,
 } from "lucide-react"
 import ShareButtons from "./ShareModel"
-import { useTheme } from '../Context/ThemeContext';
+import { useTheme } from "../Context/ThemeContext"
 
 // Custom styles for hiding scrollbars
 const scrollbarHideStyles = `
@@ -78,10 +76,9 @@ const EventLanding = () => {
   })
   const [showFilters, setShowFilters] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const { theme } = useTheme();
-  const isDarkMode = theme === 'dark';
-
-  const [showShare, setShowShare] = useState(false);
+  const { theme } = useTheme()
+  const isDarkMode = theme === "dark"
+  const [showShare, setShowShare] = useState(false)
 
   // Event type configurations
   const eventTypeConfig = {
@@ -195,7 +192,6 @@ const EventLanding = () => {
           return eventDate >= currentDate
         })
         setEvents(activeEvents)
-
         if (eventId && !isMobile) {
           const event = activeEvents.find((e) => e._id === eventId)
           if (event) {
@@ -239,7 +235,6 @@ const EventLanding = () => {
 
   const handleRegister = async (eventId) => {
     const event = events.find((e) => e._id === eventId) || selectedEvent
-
     // If it's a team event, redirect to team room instead of direct registration
     if (event.participationType === "Team") {
       navigate(`/events/${eventId}/team-room`)
@@ -317,7 +312,6 @@ const EventLanding = () => {
   const shareToWhatsApp = (event) => {
     const eventUrl = `${window.location.origin}/events/${event._id}`
     const message = `🎉 Check out this amazing event: *${event.title}*\n\n📅 Date: ${new Date(event.date).toLocaleDateString()}\n📍 Mode: ${event.mode || "Online"}\n${event.prizePool ? `💰 Prize Pool: ₹${event.prizePool.toLocaleString()}\n` : ""}👥 ${event.registeredUsers?.length || 0} people registered\n\n${event.description ? event.description.substring(0, 100) + "...\n\n" : ""}Register now: ${eventUrl}\n\n#Glubs #Events #${event.eventType || "Competition"}`
-
     const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
     window.open(whatsappUrl, "_blank")
   }
@@ -396,7 +390,6 @@ const EventLanding = () => {
                 Explore amazing opportunities and level up your skills through premium events.
               </p>
             </div>
-
             {/* Search */}
             <div className="relative mb-4">
               <Search
@@ -410,7 +403,6 @@ const EventLanding = () => {
                 className={`w-full pl-12 pr-4 py-3 ${themeClasses.input} rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
               />
             </div>
-
             {/* Filter Button */}
             <button
               onClick={() => setShowFilters(!showFilters)}
@@ -420,7 +412,6 @@ const EventLanding = () => {
               Filters
               <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
             </button>
-
             {/* Filter Panel */}
             {showFilters && (
               <div className={`${themeClasses.card} rounded-xl p-4 mt-4 border`}>
@@ -455,8 +446,11 @@ const EventLanding = () => {
                 </div>
               </div>
             )}
+            {/* In mobile view, update the <hr> to span the full width: */}
+            {(!showFilters || true) && (
+              <hr className="my-4 border-t border-gray-300 dark:border-gray-700 w-[100vw] relative left-1/2 right-1/2 -translate-x-1/2" style={{marginLeft:0, marginRight:0}} />
+            )}
           </div>
-
           {/* Events Grid */}
           <div className="px-4">
             {filteredEvents.length === 0 ? (
@@ -473,7 +467,6 @@ const EventLanding = () => {
                   const config = eventTypeConfig[event.eventType] || eventTypeConfig.Other
                   const IconComponent = config.icon
                   const daysLeft = getDaysLeft(event.date)
-
                   return (
                     <div
                       key={event._id}
@@ -505,7 +498,6 @@ const EventLanding = () => {
                           {event.description || "No description available"}
                         </p>
                       </div>
-
                       {/* Event Details */}
                       <div className="p-4">
                         <div className="space-y-2 mb-4">
@@ -527,7 +519,6 @@ const EventLanding = () => {
                             {event.registeredUsers?.length || 0} registered
                           </div>
                         </div>
-
                         {/* Prize Pool */}
                         {event.prizePool && (
                           <div className="mb-4">
@@ -537,7 +528,6 @@ const EventLanding = () => {
                             <div className="text-indigo-500 text-sm">Prize Pool</div>
                           </div>
                         )}
-
                         {/* Registration Button */}
                         <button
                           onClick={(e) => {
@@ -545,7 +535,8 @@ const EventLanding = () => {
                             handleRegister(event._id)
                           }}
                           disabled={isUserRegistered(event) || registering[event._id]}
-                          className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${isUserRegistered(event)
+                          className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${
+                            isUserRegistered(event)
                               ? isDarkMode
                                 ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
                                 : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
@@ -554,7 +545,7 @@ const EventLanding = () => {
                                   ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
                                   : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
                                 : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
-                            }`}
+                          }`}
                         >
                           {isUserRegistered(event)
                             ? "✓ Registered"
@@ -576,16 +567,6 @@ const EventLanding = () => {
                             {isUserRegistered(event) ? "Team Room" : "Find Team"}
                           </button>
                         )}
-                        {/* <button
-                          onClick={(e) => {
-                            e.stopPropagation()
-                            
-                          }}
-                          className={`w-full py-2 rounded-lg font-semibold transition-all duration-300 text-sm ${themeClasses.button} mt-2`}
-                        >
-                          <Share2 className="w-4 h-4 inline mr-2" />
-                          Share on WhatsApp
-                        </button> */}
                         <div>
                           <button
                             onClick={(e) => {
@@ -597,7 +578,6 @@ const EventLanding = () => {
                             <Share2 className="w-4 h-4 inline mr-2" />
                             Share on WhatsApp
                           </button>
-
                           {showShare && (
                             <div className="mt-2">
                               <ShareButtons event={event} />
@@ -613,594 +593,613 @@ const EventLanding = () => {
           </div>
         </div>
       ) : (
-        /* Desktop View - Split Screen */
-        <div className="flex h-screen pt-16">
-          {/* Left Panel - Events List (30%) */}
-          <div className="w-[30%] border-r border-gray-700/50 overflow-y-auto hide-scrollbar">
-            <div className="p-6">
+        /* Desktop View - Centered Header + Split Screen */
+        <div className="pt-16">
+          {/* Centered Header Section */}
+          <div className="flex justify-center py-8 px-6">
+            <div className="w-full max-w-4xl">
               {/* Header */}
-              <div className="mb-6">
-                <div className="flex items-center gap-3 mb-4">
-                  <div className="p-2 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-lg">
-                    <Sparkles className="w-5 h-5 text-white" />
+              <div className="text-center mb-8">
+                <div className="flex items-center justify-center gap-3 mb-4">
+                  <div className="p-3 bg-gradient-to-r from-indigo-600 to-purple-600 rounded-full">
+                    <Sparkles className="w-6 h-6 text-white" />
                   </div>
-                  <h1 className={`text-2xl font-bold ${themeClasses.text}`}>Events</h1>
+                  <h1
+                    className={`text-4xl font-bold bg-gradient-to-r from-indigo-600 to-purple-600 bg-clip-text text-transparent`}
+                  >
+                    Discover Events
+                  </h1>
                 </div>
+                <p className={`text-xl ${themeClasses.textSecondary} max-w-3xl mx-auto mb-8`}>
+                  Explore amazing opportunities and level up your skills through premium events.
+                </p>
 
                 {/* Stats */}
-                <div className="flex gap-4 mb-4">
+                <div className="flex justify-center gap-8 mb-8">
                   <div className="text-center">
-                    <div className={`text-lg font-bold ${themeClasses.text}`}>{events.length}</div>
-                    <div className={`text-indigo-500 text-xs`}>Active</div>
+                    <div className={`text-3xl font-bold ${themeClasses.text}`}>{events.length}</div>
+                    <div className={`text-indigo-500 text-sm`}>Active Events</div>
                   </div>
                   <div className="text-center">
-                    <div className={`text-lg font-bold ${themeClasses.text}`}>
+                    <div className={`text-3xl font-bold ${themeClasses.text}`}>
                       {events.reduce((acc, e) => acc + (e.registeredUsers?.length || 0), 0)}
                     </div>
-                    <div className={`text-indigo-500 text-xs`}>Registered</div>
+                    <div className={`text-indigo-500 text-sm`}>Total Registered</div>
                   </div>
                 </div>
+              </div>
 
+              {/* Search and Filters */}
+              <div className="flex flex-col lg:flex-row gap-4 items-center justify-center mb-6">
                 {/* Search */}
-                <div className="relative mb-4">
+                <div className="relative w-full max-w-md">
                   <Search
-                    className={`absolute left-3 top-1/2 transform -translate-y-1/2 ${themeClasses.textMuted} w-4 h-4`}
+                    className={`absolute left-4 top-1/2 transform -translate-y-1/2 ${themeClasses.textMuted} w-5 h-5`}
                   />
                   <input
                     type="text"
                     placeholder="Search events..."
                     value={search}
                     onChange={(e) => setSearch(e.target.value)}
-                    className={`w-full pl-10 pr-4 py-2 ${themeClasses.input} rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-sm`}
+                    className={`w-full pl-12 pr-4 py-3 ${themeClasses.input} rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent`}
                   />
                 </div>
 
-                {/* Filters */}
-                <div className="flex gap-2 mb-4">
-                  <button
-                    onClick={() => setShowFilters(!showFilters)}
-                    className={`flex items-center gap-2 px-3 py-2 ${themeClasses.button} rounded-lg transition-all duration-300 text-sm`}
-                  >
-                    <Filter className="w-3 h-3" />
-                    Filters
-                  </button>
-                  {/* <button
-                    onClick={() => navigate("/hosts")}
-                    className={`flex items-center gap-2 ${themeClasses.primaryButton} px-3 py-2 rounded-lg transition-all duration-300 text-sm shadow-lg`}
-                  >
-                    <Plus className="w-3 h-3" />
-                    Host
-                  </button> */}
-                </div>
+                {/* Filter Button */}
+                <button
+                  onClick={() => setShowFilters(!showFilters)}
+                  className={`flex items-center gap-2 px-6 py-3 ${themeClasses.button} rounded-xl transition-all duration-300 whitespace-nowrap`}
+                >
+                  <Filter className="w-4 h-4" />
+                  Filters
+                  <ChevronDown className={`w-4 h-4 transition-transform ${showFilters ? "rotate-180" : ""}`} />
+                </button>
+              </div>
 
-                {/* Filter Panel */}
-                {showFilters && (
-                  <div className={`${themeClasses.card} border rounded-lg p-3 mb-4`}>
-                    <div className="space-y-3">
-                      <div>
-                        <label className={`block text-xs font-medium ${themeClasses.textSecondary} mb-1`}>Type</label>
-                        <select
-                          value={filters.eventType}
-                          onChange={(e) => setFilters((prev) => ({ ...prev, eventType: e.target.value }))}
-                          className={`w-full p-2 ${themeClasses.input} rounded text-xs focus:ring-2 focus:ring-indigo-500`}
-                        >
-                          {eventTypes.map((type) => (
-                            <option key={type} value={type}>
-                              {type}
-                            </option>
-                          ))}
-                        </select>
-                      </div>
-                      <div>
-                        <label className={`block text-xs font-medium ${themeClasses.textSecondary} mb-1`}>Mode</label>
-                        <select
-                          value={filters.mode}
-                          onChange={(e) => setFilters((prev) => ({ ...prev, mode: e.target.value }))}
-                          className={`w-full p-2 ${themeClasses.input} rounded text-xs focus:ring-2 focus:ring-indigo-500`}
-                        >
-                          <option value="All">All</option>
-                          <option value="online">Online</option>
-                          <option value="offline">Offline</option>
-                          <option value="hybrid">Hybrid</option>
-                        </select>
-                      </div>
+              {/* Filter Panel */}
+              {showFilters && (
+                <div className={`${themeClasses.card} border rounded-xl p-6 mb-6 max-w-2xl mx-auto`}>
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <div>
+                      <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>
+                        Event Type
+                      </label>
+                      <select
+                        value={filters.eventType}
+                        onChange={(e) => setFilters((prev) => ({ ...prev, eventType: e.target.value }))}
+                        className={`w-full p-3 ${themeClasses.input} rounded-lg focus:ring-2 focus:ring-indigo-500`}
+                      >
+                        {eventTypes.map((type) => (
+                          <option key={type} value={type}>
+                            {type}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div>
+                      <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>Mode</label>
+                      <select
+                        value={filters.mode}
+                        onChange={(e) => setFilters((prev) => ({ ...prev, mode: e.target.value }))}
+                        className={`w-full p-3 ${themeClasses.input} rounded-lg focus:ring-2 focus:ring-indigo-500`}
+                      >
+                        <option value="All">All</option>
+                        <option value="online">Online</option>
+                        <option value="offline">Offline</option>
+                        <option value="hybrid">Hybrid</option>
+                      </select>
                     </div>
                   </div>
-                )}
-              </div>
-
-              {/* Events List */}
-              <div className="space-y-3">
-                {filteredEvents.map((event) => {
-                  const config = eventTypeConfig[event.eventType] || eventTypeConfig.Other
-                  const IconComponent = config.icon
-                  const daysLeft = getDaysLeft(event.date)
-                  const isSelected = selectedEvent && selectedEvent._id === event._id
-
-                  return (
-                    <div
-                      key={event._id}
-                      onClick={() => handleEventClick(event)}
-                      className={`${themeClasses.card} border ${isSelected ? "border-indigo-500 ring-2 ring-indigo-500/30" : themeClasses.cardHover
-                        } rounded-lg transition-all duration-300 overflow-hidden cursor-pointer hover:shadow-lg`}
-                    >
-                      {/* Event Header */}
-                      <div
-                        className={`${isDarkMode ? config.bgColorDark : config.bgColor} border-b ${isDarkMode ? "border-gray-700/50" : "border-gray-200"} p-3`}
-                      >
-                        <div className="flex items-center justify-between mb-2">
-                          <div
-                            className={`flex items-center gap-1 px-2 py-1 rounded-full border ${isDarkMode ? config.colorDark : config.color} text-xs font-medium`}
-                          >
-                            <IconComponent className="w-2 h-2" />
-                            {event.eventType || "Event"}
-                          </div>
-                          {daysLeft <= 7 && daysLeft > 0 && (
-                            <div
-                              className={`flex items-center gap-1 ${isDarkMode ? "bg-red-900/30 border-red-500/30 text-red-300" : "bg-red-100 border-red-300 text-red-700"} px-2 py-1 rounded-full text-xs font-medium border`}
-                            >
-                              <Clock className="w-2 h-2" />
-                              {daysLeft}d
-                            </div>
-                          )}
-                        </div>
-                        <h3 className={`text-sm font-bold ${themeClasses.text} line-clamp-2 mb-1`}>{event.title}</h3>
-                        <p className={`${themeClasses.textMuted} text-xs line-clamp-1`}>
-                          {event.description || "No description available"}
-                        </p>
-                      </div>
-
-                      {/* Event Details */}
-                      <div className="p-3">
-                        <div className="space-y-1 mb-3">
-                          <div className={`flex items-center gap-2 text-xs ${themeClasses.textSecondary}`}>
-                            <Calendar className="w-2 h-2 text-indigo-500" />
-                            {new Date(event.date).toLocaleDateString("en-US", {
-                              month: "short",
-                              day: "numeric",
-                            })}
-                          </div>
-                          <div className={`flex items-center gap-2 text-xs ${themeClasses.textSecondary}`}>
-                            <Users className="w-2 h-2 text-blue-500" />
-                            {event.registeredUsers?.length || 0} registered
-                          </div>
-                        </div>
-
-                        {/* Prize Pool */}
-                        {event.prizePool && (
-                          <div className="mb-3">
-                            <div className={`text-lg font-bold ${themeClasses.text}`}>
-                              ₹ {event.prizePool.toLocaleString()}
-                            </div>
-                            <div className="text-indigo-500 text-xs">Prize Pool</div>
-                          </div>
-                        )}
-
-                        {/* Registration Status */}
-                        <div
-                          className={`text-xs px-2 py-1 rounded text-center font-medium ${isUserRegistered(event)
-                              ? isDarkMode
-                                ? "bg-green-900/30 text-green-300"
-                                : "bg-green-100 text-green-700"
-                              : isDarkMode
-                                ? "bg-indigo-900/30 text-indigo-300"
-                                : "bg-indigo-100 text-indigo-700"
-                            }`}
-                        >
-                          {isUserRegistered(event) ? "✓ Registered" : "Click to Register"}
-                        </div>
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
+                </div>
+              )}
+              {/* In desktop view, update the <hr> to span the full width: */}
+              {(!showFilters || true) && (
+                <hr className="my-6 border-t border-gray-300 dark:border-gray-700 w-[100vw] relative left-1/2 right-1/2 -translate-x-1/2" style={{marginLeft:0, marginRight:0}} />
+              )}
             </div>
           </div>
 
-          {/* Right Panel - Event Details (70%) */}
-          <div className="w-[70%] overflow-y-auto hide-scrollbar">
-            {selectedEvent ? (
-              <div className="p-8">
-                {detailsLoading ? (
-                  <div className="flex justify-center items-center py-20">
-                    <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
-                  </div>
-                ) : (
-                  <div className="space-y-8">
-                    {/* Event Header */}
-                    <div
-                      className={`bg-gradient-to-r ${eventTypeConfig[selectedEvent.eventType]?.gradient || eventTypeConfig.Other.gradient} rounded-2xl p-8 relative overflow-hidden`}
-                    >
-                      <div className="absolute inset-0 opacity-10">
-                        <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
-                        <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
-                      </div>
-                      <div className="relative z-10">
-                        <div className="flex items-center justify-between mb-6">
-                          <div className="flex items-center gap-4">
-                            <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
-                              {(() => {
-                                const IconComponent =
-                                  eventTypeConfig[selectedEvent.eventType]?.icon || eventTypeConfig.Other.icon
-                                return <IconComponent className="w-8 h-8 text-white" />
-                              })()}
-                            </div>
-                            <div>
-                              <span className="text-white/80 text-lg font-medium">
-                                {selectedEvent.eventType || "Event"}
-                              </span>
-                              <div className="flex items-center gap-4 mt-1">
-                                <div className="flex items-center gap-1 text-white/70 text-sm">
-                                  <Eye className="w-4 h-4" />
-                                  {selectedEvent.views || 0}
-                                </div>
-                                <div className="flex items-center gap-1 text-white/70 text-sm">
-                                  <Users className="w-4 h-4" />
-                                  {selectedEvent.registeredUsers?.length || 0}
-                                </div>
-                              </div>
-                            </div>
-                          </div>
-                          <button
-                            onClick={() => {
-                              setSelectedEvent(null)
-                              window.history.pushState(null, "", "/events")
-                            }}
-                            className="text-white/60 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
-                          >
-                            <X className="w-5 h-5" />
-                          </button>
-                        </div>
-                        <h1 className="text-4xl font-bold text-white mb-4 leading-tight">{selectedEvent.title}</h1>
-                        <p className="text-white/90 text-lg mb-6">
-                          {selectedEvent.description || "No description available"}
-                        </p>
-                        <div className="flex flex-wrap gap-3">
-                          <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                            <Calendar className="w-4 h-4" />
-                            <span className="font-medium">
-                              {new Date(selectedEvent.date).toLocaleDateString("en-US", {
-                                weekday: "long",
-                                year: "numeric",
-                                month: "long",
-                                day: "numeric",
-                              })}
-                            </span>
-                          </div>
-                          {selectedEvent.prizePool && (
-                            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                              <Trophy className="w-4 h-4" />
-                              <span className="font-medium">₹ {selectedEvent.prizePool.toLocaleString()}</span>
-                            </div>
-                          )}
-                        </div>
+          {/* Split Screen Content */}
+          <div className="flex min-h-screen">
+            {/* Left Panel - Events List (30%) */}
+            <div className="w-[30%] border-r border-gray-700/50 overflow-y-auto hide-scrollbar">
+              <div className="p-6">
+                {/* Events List */}
+                <div className="space-y-3">
+                  {filteredEvents.length === 0 ? (
+                    <div className="text-center py-20">
+                      <div className={`${themeClasses.card} border rounded-xl p-12`}>
+                        <Calendar className={`w-16 h-16 ${themeClasses.textMuted} mx-auto mb-4`} />
+                        <h3 className={`text-xl font-semibold ${themeClasses.textSecondary} mb-2`}>No events found</h3>
+                        <p className={themeClasses.textMuted}>Try adjusting your search or filters</p>
                       </div>
                     </div>
-
-                    {/* Content Grid */}
-                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-                      {/* Main Content */}
-                      <div className="lg:col-span-2 space-y-6">
-                        {/* Event Details */}
-                        <div className={`${themeClasses.card} border rounded-2xl p-6`}>
-                          <div className="flex items-center gap-3 mb-6">
-                            <Sparkles className="w-6 h-6 text-indigo-500" />
-                            <h2 className={`text-2xl font-bold ${themeClasses.text}`}>Event Details</h2>
-                          </div>
-                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <div
-                              className={`flex items-center gap-4 p-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"}`}
-                            >
-                              <div className={`p-2 ${isDarkMode ? "bg-indigo-900/30" : "bg-indigo-100"} rounded-lg`}>
-                                <Calendar className="w-5 h-5 text-indigo-500" />
+                  ) : (
+                    filteredEvents.map((event) => {
+                      const config = eventTypeConfig[event.eventType] || eventTypeConfig.Other
+                      const IconComponent = config.icon
+                      const daysLeft = getDaysLeft(event.date)
+                      const isSelected = selectedEvent && selectedEvent._id === event._id
+                      return (
+                        <div
+                          key={event._id}
+                          onClick={() => handleEventClick(event)}
+                          className={`${themeClasses.card} border ${
+                            isSelected ? "border-indigo-500 ring-2 ring-indigo-500/30" : themeClasses.cardHover
+                          } rounded-lg transition-all duration-300 overflow-hidden cursor-pointer hover:shadow-lg`}
+                        >
+                          {/* Event Header */}
+                          <div
+                            className={`${isDarkMode ? config.bgColorDark : config.bgColor} border-b ${isDarkMode ? "border-gray-700/50" : "border-gray-200"} p-3`}
+                          >
+                            <div className="flex items-center justify-between mb-2">
+                              <div
+                                className={`flex items-center gap-1 px-2 py-1 rounded-full border ${isDarkMode ? config.colorDark : config.color} text-xs font-medium`}
+                              >
+                                <IconComponent className="w-2 h-2" />
+                                {event.eventType || "Event"}
                               </div>
-                              <div>
-                                <div className={`font-semibold ${themeClasses.text}`}>Date & Time</div>
-                                <div className={`${themeClasses.textMuted} text-sm`}>
-                                  {new Date(selectedEvent.date).toLocaleString()}
+                              {daysLeft <= 7 && daysLeft > 0 && (
+                                <div
+                                  className={`flex items-center gap-1 ${isDarkMode ? "bg-red-900/30 border-red-500/30 text-red-300" : "bg-red-100 border-red-300 text-red-700"} px-2 py-1 rounded-full text-xs font-medium border`}
+                                >
+                                  <Clock className="w-2 h-2" />
+                                  {daysLeft}d
                                 </div>
+                              )}
+                            </div>
+                            <h3 className={`text-sm font-bold ${themeClasses.text} line-clamp-2 mb-1`}>
+                              {event.title}
+                            </h3>
+                            <p className={`${themeClasses.textMuted} text-xs line-clamp-1`}>
+                              {event.description || "No description available"}
+                            </p>
+                          </div>
+                          {/* Event Details */}
+                          <div className="p-3">
+                            <div className="space-y-1 mb-3">
+                              <div className={`flex items-center gap-2 text-xs ${themeClasses.textSecondary}`}>
+                                <Calendar className="w-2 h-2 text-indigo-500" />
+                                {new Date(event.date).toLocaleDateString("en-US", {
+                                  month: "short",
+                                  day: "numeric",
+                                })}
+                              </div>
+                              <div className={`flex items-center gap-2 text-xs ${themeClasses.textSecondary}`}>
+                                <Users className="w-2 h-2 text-blue-500" />
+                                {event.registeredUsers?.length || 0} registered
                               </div>
                             </div>
-                            {selectedEvent.venue && (
-                              <div
-                                className={`flex items-center gap-4 p-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"}`}
-                              >
-                                <div
-                                  className={`p-2 ${isDarkMode ? "bg-emerald-900/30" : "bg-emerald-100"} rounded-lg`}
-                                >
-                                  <MapPin className="w-5 h-5 text-emerald-500" />
+                            {/* Prize Pool */}
+                            {event.prizePool && (
+                              <div className="mb-3">
+                                <div className={`text-lg font-bold ${themeClasses.text}`}>
+                                  ₹ {event.prizePool.toLocaleString()}
                                 </div>
-                                <div>
-                                  <div className={`font-semibold ${themeClasses.text}`}>Venue</div>
-                                  <div className={`${themeClasses.textMuted} text-sm`}>{selectedEvent.venue}</div>
-                                </div>
+                                <div className="text-indigo-500 text-xs">Prize Pool</div>
                               </div>
                             )}
+                            {/* Registration Status */}
                             <div
-                              className={`flex items-center gap-4 p-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"}`}
+                              className={`text-xs px-2 py-1 rounded text-center font-medium ${
+                                isUserRegistered(event)
+                                  ? isDarkMode
+                                    ? "bg-green-900/30 text-green-300"
+                                    : "bg-green-100 text-green-700"
+                                  : isDarkMode
+                                    ? "bg-indigo-900/30 text-indigo-300"
+                                    : "bg-indigo-100 text-indigo-700"
+                              }`}
                             >
-                              <div className={`p-2 ${isDarkMode ? "bg-purple-900/30" : "bg-purple-100"} rounded-lg`}>
-                                <Globe className="w-5 h-5 text-purple-500" />
+                              {isUserRegistered(event) ? "✓ Registered" : "Click to Register"}
+                            </div>
+                          </div>
+                        </div>
+                      )
+                    })
+                  )}
+                </div>
+              </div>
+            </div>
+
+            {/* Right Panel - Event Details (70%) */}
+            <div className="w-[70%] overflow-y-auto hide-scrollbar">
+              {selectedEvent ? (
+                <div className="p-8">
+                  {detailsLoading ? (
+                    <div className="flex justify-center items-center py-20">
+                      <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
+                    </div>
+                  ) : (
+                    <div className="space-y-8">
+                      {/* Event Header */}
+                      <div
+                        className={`bg-gradient-to-r ${eventTypeConfig[selectedEvent.eventType]?.gradient || eventTypeConfig.Other.gradient} rounded-2xl p-8 relative overflow-hidden`}
+                      >
+                        <div className="absolute inset-0 opacity-10">
+                          <div className="absolute top-0 right-0 w-32 h-32 bg-white rounded-full -translate-y-16 translate-x-16"></div>
+                          <div className="absolute bottom-0 left-0 w-24 h-24 bg-white rounded-full translate-y-12 -translate-x-12"></div>
+                        </div>
+                        <div className="relative z-10">
+                          <div className="flex items-center justify-between mb-6">
+                            <div className="flex items-center gap-4">
+                              <div className="bg-white/20 p-3 rounded-xl backdrop-blur-sm">
+                                {(() => {
+                                  const IconComponent =
+                                    eventTypeConfig[selectedEvent.eventType]?.icon || eventTypeConfig.Other.icon
+                                  return <IconComponent className="w-8 h-8 text-white" />
+                                })()}
                               </div>
                               <div>
-                                <div className={`font-semibold ${themeClasses.text}`}>Mode</div>
-                                <div className={`${themeClasses.textMuted} text-sm capitalize`}>
-                                  {selectedEvent.mode || "Online"}
-                                </div>
-                              </div>
-                            </div>
-                            {selectedEvent.createdBy && (
-                              <div
-                                className={`flex items-center gap-4 p-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"}`}
-                              >
-                                <div className={`p-2 ${isDarkMode ? "bg-orange-900/30" : "bg-orange-100"} rounded-lg`}>
-                                  <User className="w-5 h-5 text-orange-500" />
-                                </div>
-                                <div>
-                                  <div className={`font-semibold ${themeClasses.text}`}>Organizer</div>
-                                  <div className={`${themeClasses.textMuted} text-sm`}>
-                                    {selectedEvent.createdBy.name || "Unknown"}
-                                  </div>
-                                </div>
-                              </div>
-                            )}
-                          </div>
-                          {selectedEvent.eligibility && (
-                            <div className={`mt-6 pt-6 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}>
-                              <h4 className={`font-semibold ${themeClasses.text} mb-2`}>Eligibility</h4>
-                              <p className={`${themeClasses.textSecondary} text-sm`}>{selectedEvent.eligibility}</p>
-                            </div>
-                          )}
-
-                          {selectedEvent.rules && (
-                            <div className={`mt-4`}>
-                              <h4 className={`font-semibold ${themeClasses.text} mb-2`}>Rules & Guidelines</h4>
-                              <p className={`${themeClasses.textSecondary} text-sm`}>{selectedEvent.rules}</p>
-                            </div>
-                          )}
-
-                          {/* Owner Actions */}
-                          {user && selectedEvent.createdBy && selectedEvent.createdBy._id === user._id && (
-                            <div className={`mt-6 pt-6 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}>
-                              <div className="flex flex-wrap gap-3">
-                                <button
-                                  onClick={() => navigate(`/events/edit/${selectedEvent._id}`)}
-                                  className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
-                                >
-                                  <Edit3 className="w-4 h-4" />
-                                  Edit Event
-                                </button>
-                                <button
-                                  onClick={() => handleDelete(selectedEvent._id)}
-                                  className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
-                                >
-                                  <Trash2 className="w-4 h-4" />
-                                  Delete Event
-                                </button>
-                                <button
-                                  onClick={() => navigate(`/events/${selectedEvent._id}/add-feedback`)}
-                                  className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
-                                >
-                                  <MessageSquare className="w-4 h-4" />
-                                  Add Feedback
-                                </button>
-                              </div>
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Feedback Section */}
-                        <div className={`${themeClasses.card} border rounded-2xl p-6`}>
-                          <div className="flex items-center gap-3 mb-6">
-                            <MessageSquare className="w-6 h-6 text-indigo-500" />
-                            <h2 className={`text-2xl font-bold ${themeClasses.text}`}>User Feedback</h2>
-                          </div>
-                          {feedbacks.length > 0 ? (
-                            <div className="space-y-4 max-h-96 overflow-y-auto hide-scrollbar">
-                              {feedbacks.map((feedback) => (
-                                <div
-                                  key={feedback._id}
-                                  className={`p-4 ${isDarkMode ? "bg-gray-800/30 border-gray-700/50" : "bg-gray-50 border-gray-200"} border rounded-xl`}
-                                >
-                                  <div className="flex items-start justify-between mb-3">
-                                    <div>
-                                      <div className={`font-semibold ${themeClasses.text}`}>
-                                        {feedback.user?.username || "Anonymous"}
-                                      </div>
-                                      <div className={`text-sm ${themeClasses.textMuted}`}>
-                                        {new Date(feedback.createdAt).toLocaleDateString()}
-                                      </div>
-                                    </div>
-                                    <div className="flex items-center gap-1">
-                                      {renderStars(feedback.rating)}
-                                      <span className={`ml-2 text-sm font-medium ${themeClasses.textSecondary}`}>
-                                        {feedback.rating}/5
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <p className={`${themeClasses.textSecondary} mb-3`}>{feedback.review}</p>
-                                  {user && feedback.user && feedback.user._id === user._id && (
-                                    <button
-                                      onClick={() => handleDeleteFeedback(feedback._id)}
-                                      className="text-red-500 hover:text-red-400 hover:underline text-sm transition-colors"
-                                    >
-                                      Delete
-                                    </button>
-                                  )}
-                                </div>
-                              ))}
-                            </div>
-                          ) : (
-                            <div className="text-center py-12">
-                              <MessageSquare className={`w-16 h-16 mx-auto mb-4 ${themeClasses.textMuted}`} />
-                              <p className={`${themeClasses.textMuted} text-lg`}>No feedback yet</p>
-                              <p className={`${themeClasses.textMuted} text-sm`}>
-                                Be the first to share your thoughts!
-                              </p>
-                            </div>
-                          )}
-                        </div>
-                      </div>
-
-                      {/* Sidebar */}
-                      <div className="space-y-6">
-                        {/* Registration Card */}
-                        <div className={`${themeClasses.card} border rounded-2xl p-6 shadow-2xl`}>
-                          <div className="text-center mb-6">
-                            <div className={`text-4xl font-bold ${themeClasses.text} mb-2`}>
-                              {selectedEvent.prizePool ? `₹ ${selectedEvent.prizePool.toLocaleString()}` : "Free"}
-                            </div>
-                            {selectedEvent.prizePool && <div className="text-indigo-500">Prize Pool</div>}
-                          </div>
-                          <div className="space-y-4 mb-6">
-                            <div
-                              className={`flex justify-between items-center p-3 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-lg`}
-                            >
-                              <span className={themeClasses.textMuted}>Registered</span>
-                              <div className="flex items-center gap-2">
-                                <span className={`font-semibold ${themeClasses.text}`}>
-                                  {selectedEvent.registeredUsers?.length || 0}
+                                <span className="text-white/80 text-lg font-medium">
+                                  {selectedEvent.eventType || "Event"}
                                 </span>
-                                {(selectedEvent.registeredUsers?.length || 0) > 50 && (
-                                  <TrendingUp className="w-4 h-4 text-green-500" />
-                                )}
+                                <div className="flex items-center gap-4 mt-1">
+                                  <div className="flex items-center gap-1 text-white/70 text-sm">
+                                    <Eye className="w-4 h-4" />
+                                    {selectedEvent.views || 0}
+                                  </div>
+                                  <div className="flex items-center gap-1 text-white/70 text-sm">
+                                    <Users className="w-4 h-4" />
+                                    {selectedEvent.registeredUsers?.length || 0}
+                                  </div>
+                                </div>
                               </div>
                             </div>
-                            <div
-                              className={`flex justify-between items-center p-3 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-lg`}
+                            <button
+                              onClick={() => {
+                                setSelectedEvent(null)
+                                window.history.pushState(null, "", "/events")
+                              }}
+                              className="text-white/60 hover:text-white transition-colors p-2 hover:bg-white/10 rounded-lg"
                             >
-                              <span className={themeClasses.textMuted}>Deadline</span>
-                              <span className={`font-semibold ${themeClasses.text} text-sm`}>
-                                {selectedEvent.registrationEnd
-                                  ? new Date(selectedEvent.registrationEnd).toLocaleDateString()
-                                  : "Open"}
+                              <X className="w-5 h-5" />
+                            </button>
+                          </div>
+                          <h1 className="text-4xl font-bold text-white mb-4 leading-tight">{selectedEvent.title}</h1>
+                          <p className="text-white/90 text-lg mb-6">
+                            {selectedEvent.description || "No description available"}
+                          </p>
+                          <div className="flex flex-wrap gap-3">
+                            <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                              <Calendar className="w-4 h-4" />
+                              <span className="font-medium">
+                                {new Date(selectedEvent.date).toLocaleDateString("en-US", {
+                                  weekday: "long",
+                                  year: "numeric",
+                                  month: "long",
+                                  day: "numeric",
+                                })}
                               </span>
                             </div>
-                            {selectedEvent.teamMin && selectedEvent.teamMax && (
+                            {selectedEvent.prizePool && (
+                              <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
+                                <Trophy className="w-4 h-4" />
+                                <span className="font-medium">₹ {selectedEvent.prizePool.toLocaleString()}</span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                      {/* Content Grid */}
+                      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Main Content */}
+                        <div className="lg:col-span-2 space-y-6">
+                          {/* Event Details */}
+                          <div className={`${themeClasses.card} border rounded-2xl p-6`}>
+                            <div className="flex items-center gap-3 mb-6">
+                              <Sparkles className="w-6 h-6 text-indigo-500" />
+                              <h2 className={`text-2xl font-bold ${themeClasses.text}`}>Event Details</h2>
+                            </div>
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                              <div
+                                className={`flex items-center gap-4 p-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"}`}
+                              >
+                                <div className={`p-2 ${isDarkMode ? "bg-indigo-900/30" : "bg-indigo-100"} rounded-lg`}>
+                                  <Calendar className="w-5 h-5 text-indigo-500" />
+                                </div>
+                                <div>
+                                  <div className={`font-semibold ${themeClasses.text}`}>Date & Time</div>
+                                  <div className={`${themeClasses.textMuted} text-sm`}>
+                                    {new Date(selectedEvent.date).toLocaleString()}
+                                  </div>
+                                </div>
+                              </div>
+                              {selectedEvent.venue && (
+                                <div
+                                  className={`flex items-center gap-4 p-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"}`}
+                                >
+                                  <div
+                                    className={`p-2 ${isDarkMode ? "bg-emerald-900/30" : "bg-emerald-100"} rounded-lg`}
+                                  >
+                                    <MapPin className="w-5 h-5 text-emerald-500" />
+                                  </div>
+                                  <div>
+                                    <div className={`font-semibold ${themeClasses.text}`}>Venue</div>
+                                    <div className={`${themeClasses.textMuted} text-sm`}>{selectedEvent.venue}</div>
+                                  </div>
+                                </div>
+                              )}
+                              <div
+                                className={`flex items-center gap-4 p-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"}`}
+                              >
+                                <div className={`p-2 ${isDarkMode ? "bg-purple-900/30" : "bg-purple-100"} rounded-lg`}>
+                                  <Globe className="w-5 h-5 text-purple-500" />
+                                </div>
+                                <div>
+                                  <div className={`font-semibold ${themeClasses.text}`}>Mode</div>
+                                  <div className={`${themeClasses.textMuted} text-sm capitalize`}>
+                                    {selectedEvent.mode || "Online"}
+                                  </div>
+                                </div>
+                              </div>
+                              {selectedEvent.createdBy && (
+                                <div
+                                  className={`flex items-center gap-4 p-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"}`}
+                                >
+                                  <div
+                                    className={`p-2 ${isDarkMode ? "bg-orange-900/30" : "bg-orange-100"} rounded-lg`}
+                                  >
+                                    <User className="w-5 h-5 text-orange-500" />
+                                  </div>
+                                  <div>
+                                    <div className={`font-semibold ${themeClasses.text}`}>Organizer</div>
+                                    <div className={`${themeClasses.textMuted} text-sm`}>
+                                      {selectedEvent.createdBy.name || "Unknown"}
+                                    </div>
+                                  </div>
+                                </div>
+                              )}
+                            </div>
+                            {selectedEvent.eligibility && (
+                              <div
+                                className={`mt-6 pt-6 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+                              >
+                                <h4 className={`font-semibold ${themeClasses.text} mb-2`}>Eligibility</h4>
+                                <p className={`${themeClasses.textSecondary} text-sm`}>{selectedEvent.eligibility}</p>
+                              </div>
+                            )}
+                            {selectedEvent.rules && (
+                              <div className={`mt-4`}>
+                                <h4 className={`font-semibold ${themeClasses.text} mb-2`}>Rules & Guidelines</h4>
+                                <p className={`${themeClasses.textSecondary} text-sm`}>{selectedEvent.rules}</p>
+                              </div>
+                            )}
+                            {/* Owner Actions */}
+                            {user && selectedEvent.createdBy && selectedEvent.createdBy._id === user._id && (
+                              <div
+                                className={`mt-6 pt-6 border-t ${isDarkMode ? "border-gray-700" : "border-gray-200"}`}
+                              >
+                                <div className="flex flex-wrap gap-3">
+                                  <button
+                                    onClick={() => navigate(`/events/edit/${selectedEvent._id}`)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-lg transition-colors"
+                                  >
+                                    <Edit3 className="w-4 h-4" />
+                                    Edit Event
+                                  </button>
+                                  <button
+                                    onClick={() => handleDelete(selectedEvent._id)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors"
+                                  >
+                                    <Trash2 className="w-4 h-4" />
+                                    Delete Event
+                                  </button>
+                                  <button
+                                    onClick={() => navigate(`/events/${selectedEvent._id}/add-feedback`)}
+                                    className="flex items-center gap-2 px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors"
+                                  >
+                                    <MessageSquare className="w-4 h-4" />
+                                    Add Feedback
+                                  </button>
+                                </div>
+                              </div>
+                            )}
+                          </div>
+                          {/* Feedback Section */}
+                          <div className={`${themeClasses.card} border rounded-2xl p-6`}>
+                            <div className="flex items-center gap-3 mb-6">
+                              <MessageSquare className="w-6 h-6 text-indigo-500" />
+                              <h2 className={`text-2xl font-bold ${themeClasses.text}`}>User Feedback</h2>
+                            </div>
+                            {feedbacks.length > 0 ? (
+                              <div className="space-y-4 max-h-96 overflow-y-auto hide-scrollbar">
+                                {feedbacks.map((feedback) => (
+                                  <div
+                                    key={feedback._id}
+                                    className={`p-4 ${isDarkMode ? "bg-gray-800/30 border-gray-700/50" : "bg-gray-50 border-gray-200"} border rounded-xl`}
+                                  >
+                                    <div className="flex items-start justify-between mb-3">
+                                      <div>
+                                        <div className={`font-semibold ${themeClasses.text}`}>
+                                          {feedback.user?.username || "Anonymous"}
+                                        </div>
+                                        <div className={`text-sm ${themeClasses.textMuted}`}>
+                                          {new Date(feedback.createdAt).toLocaleDateString()}
+                                        </div>
+                                      </div>
+                                      <div className="flex items-center gap-1">
+                                        {renderStars(feedback.rating)}
+                                        <span className={`ml-2 text-sm font-medium ${themeClasses.textSecondary}`}>
+                                          {feedback.rating}/5
+                                        </span>
+                                      </div>
+                                    </div>
+                                    <p className={`${themeClasses.textSecondary} mb-3`}>{feedback.review}</p>
+                                    {user && feedback.user && feedback.user._id === user._id && (
+                                      <button
+                                        onClick={() => handleDeleteFeedback(feedback._id)}
+                                        className="text-red-500 hover:text-red-400 hover:underline text-sm transition-colors"
+                                      >
+                                        Delete
+                                      </button>
+                                    )}
+                                  </div>
+                                ))}
+                              </div>
+                            ) : (
+                              <div className="text-center py-12">
+                                <MessageSquare className={`w-16 h-16 mx-auto mb-4 ${themeClasses.textMuted}`} />
+                                <p className={`${themeClasses.textMuted} text-lg`}>No feedback yet</p>
+                                <p className={`${themeClasses.textMuted} text-sm`}>
+                                  Be the first to share your thoughts!
+                                </p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                        {/* Sidebar */}
+                        <div className="space-y-6">
+                          {/* Registration Card */}
+                          <div className={`${themeClasses.card} border rounded-2xl p-6 shadow-2xl`}>
+                            <div className="text-center mb-6">
+                              <div className={`text-4xl font-bold ${themeClasses.text} mb-2`}>
+                                {selectedEvent.prizePool ? `₹ ${selectedEvent.prizePool.toLocaleString()}` : "Free"}
+                              </div>
+                              {selectedEvent.prizePool && <div className="text-indigo-500">Prize Pool</div>}
+                            </div>
+                            <div className="space-y-4 mb-6">
                               <div
                                 className={`flex justify-between items-center p-3 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-lg`}
                               >
-                                <span className={themeClasses.textMuted}>Team Size</span>
-                                <span className={`font-semibold ${themeClasses.text}`}>
-                                  {selectedEvent.teamMin} - {selectedEvent.teamMax}
+                                <span className={themeClasses.textMuted}>Registered</span>
+                                <div className="flex items-center gap-2">
+                                  <span className={`font-semibold ${themeClasses.text}`}>
+                                    {selectedEvent.registeredUsers?.length || 0}
+                                  </span>
+                                  {(selectedEvent.registeredUsers?.length || 0) > 50 && (
+                                    <TrendingUp className="w-4 h-4 text-green-500" />
+                                  )}
+                                </div>
+                              </div>
+                              <div
+                                className={`flex justify-between items-center p-3 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-lg`}
+                              >
+                                <span className={themeClasses.textMuted}>Deadline</span>
+                                <span className={`font-semibold ${themeClasses.text} text-sm`}>
+                                  {selectedEvent.registrationEnd
+                                    ? new Date(selectedEvent.registrationEnd).toLocaleDateString()
+                                    : "Open"}
                                 </span>
                               </div>
-                            )}
-                          </div>
-                          <button
-                            onClick={() => handleRegister(selectedEvent._id)}
-                            disabled={
-                              isUserRegistered(selectedEvent) ||
-                              registering[selectedEvent._id] ||
-                              getDaysLeft(selectedEvent.date) < 0
-                            }
-                            className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${isUserRegistered(selectedEvent)
-                                ? isDarkMode
-                                  ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
-                                  : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
-                                : registering[selectedEvent._id]
+                              {selectedEvent.teamMin && selectedEvent.teamMax && (
+                                <div
+                                  className={`flex justify-between items-center p-3 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-lg`}
+                                >
+                                  <span className={themeClasses.textMuted}>Team Size</span>
+                                  <span className={`font-semibold ${themeClasses.text}`}>
+                                    {selectedEvent.teamMin} - {selectedEvent.teamMax}
+                                  </span>
+                                </div>
+                              )}
+                            </div>
+                            <button
+                              onClick={() => handleRegister(selectedEvent._id)}
+                              disabled={
+                                isUserRegistered(selectedEvent) ||
+                                registering[selectedEvent._id] ||
+                                getDaysLeft(selectedEvent.date) < 0
+                              }
+                              className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${
+                                isUserRegistered(selectedEvent)
                                   ? isDarkMode
-                                    ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
-                                    : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
-                                  : getDaysLeft(selectedEvent.date) < 0
+                                    ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
+                                    : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
+                                  : registering[selectedEvent._id]
                                     ? isDarkMode
-                                      ? "bg-gray-800/30 border border-gray-600/30 text-gray-500 cursor-not-allowed"
-                                      : "bg-gray-200 border border-gray-300 text-gray-500 cursor-not-allowed"
-                                    : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
+                                      ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
+                                      : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
+                                    : getDaysLeft(selectedEvent.date) < 0
+                                      ? isDarkMode
+                                        ? "bg-gray-800/30 border border-gray-600/30 text-gray-500 cursor-not-allowed"
+                                        : "bg-gray-200 border border-gray-300 text-gray-500 cursor-not-allowed"
+                                      : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
                               }`}
-                          >
-                            {isUserRegistered(selectedEvent)
-                              ? "✓ Already Registered"
-                              : registering[selectedEvent._id]
-                                ? "Registering..."
-                                : getDaysLeft(selectedEvent.date) < 0
-                                  ? "Registration Closed"
-                                  : selectedEvent.participationType === "Team"
-                                    ? "Find Team"
-                                    : "Register Now"}
-                          </button>
-                          {selectedEvent.participationType === "Team" && (
-                            <button
-                              onClick={() => {
-                                navigate(`/events/${selectedEvent._id}/team-room`)
-                              }}
-                              className={`w-full py-2 rounded-lg font-semibold transition-all duration-300 ${themeClasses.button} mt-2`}
                             >
-                              <Users className="w-4 h-4" />
-                              {isUserRegistered(selectedEvent) ? "Team Room" : "Find Team"}
+                              {isUserRegistered(selectedEvent)
+                                ? "✓ Already Registered"
+                                : registering[selectedEvent._id]
+                                  ? "Registering..."
+                                  : getDaysLeft(selectedEvent.date) < 0
+                                    ? "Registration Closed"
+                                    : selectedEvent.participationType === "Team"
+                                      ? "Find Team"
+                                      : "Register Now"}
                             </button>
-                          )}
-                          <div className="flex gap-2 mt-4">
-                            <button
-                              onClick={() => shareToWhatsApp(selectedEvent)}
-                              className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
-                            >
-                              <Share2 className="w-4 h-4" />
-                              Share
-                            </button>
-                            <button
-                              className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
-                            >
-                              <Bookmark className="w-4 h-4" />
-                              Save
-                            </button>
+                            {selectedEvent.participationType === "Team" && (
+                              <button
+                                onClick={() => {
+                                  navigate(`/events/${selectedEvent._id}/team-room`)
+                                }}
+                                className={`w-full py-2 rounded-lg font-semibold transition-all duration-300 ${themeClasses.button} mt-2`}
+                              >
+                                <Users className="w-4 h-4" />
+                                {isUserRegistered(selectedEvent) ? "Team Room" : "Find Team"}
+                              </button>
+                            )}
+                            <div className="flex gap-2 mt-4">
+                              <button
+                                onClick={() => shareToWhatsApp(selectedEvent)}
+                                className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
+                              >
+                                <Share2 className="w-4 h-4" />
+                                Share
+                              </button>
+                              <button
+                                className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
+                              >
+                                <Bookmark className="w-4 h-4" />
+                                Save
+                              </button>
+                            </div>
                           </div>
-                        </div>
-
-                        {/* Quick Stats */}
-                        <div className={`${themeClasses.card} border rounded-2xl p-6`}>
-                          <h3 className={`font-bold ${themeClasses.text} mb-4 flex items-center gap-2`}>
-                            <TrendingUp className="w-5 h-5 text-indigo-500" />
-                            Quick Stats
-                          </h3>
-                          <div className="space-y-3">
-                            <div className="flex justify-between items-center">
-                              <span className={themeClasses.textMuted}>Views</span>
-                              <span className={`font-semibold ${themeClasses.text}`}>{selectedEvent.views || 0}</span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className={themeClasses.textMuted}>Registrations</span>
-                              <span className={`font-semibold ${themeClasses.text}`}>
-                                {selectedEvent.registrations || 0}
-                              </span>
-                            </div>
-                            <div className="flex justify-between items-center">
-                              <span className={themeClasses.textMuted}>Comments</span>
-                              <span className={`font-semibold ${themeClasses.text}`}>
-                                {selectedEvent.commentsCount || 0}
-                              </span>
+                          {/* Quick Stats */}
+                          <div className={`${themeClasses.card} border rounded-2xl p-6`}>
+                            <h3 className={`font-bold ${themeClasses.text} mb-4 flex items-center gap-2`}>
+                              <TrendingUp className="w-5 h-5 text-indigo-500" />
+                              Quick Stats
+                            </h3>
+                            <div className="space-y-3">
+                              <div className="flex justify-between items-center">
+                                <span className={themeClasses.textMuted}>Views</span>
+                                <span className={`font-semibold ${themeClasses.text}`}>{selectedEvent.views || 0}</span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className={themeClasses.textMuted}>Registrations</span>
+                                <span className={`font-semibold ${themeClasses.text}`}>
+                                  {selectedEvent.registrations || 0}
+                                </span>
+                              </div>
+                              <div className="flex justify-between items-center">
+                                <span className={themeClasses.textMuted}>Comments</span>
+                                <span className={`font-semibold ${themeClasses.text}`}>
+                                  {selectedEvent.commentsCount || 0}
+                                </span>
+                              </div>
                             </div>
                           </div>
                         </div>
                       </div>
                     </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              /* No Event Selected */
-              <div className="flex items-center justify-center h-full">
-                <div className="text-center">
-                  <div
-                    className={`w-24 h-24 mx-auto mb-6 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-100"} rounded-full flex items-center justify-center`}
-                  >
+                  )}
+                </div>
+              ) : (
+                /* No Event Selected */
+                <div className="pt-8 px-8 text-center flex flex-col items-center">
+                  <div className={`w-24 h-24 mb-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-100"} rounded-full flex items-center justify-center`}>
                     <Sparkles className={`w-12 h-12 ${themeClasses.textMuted}`} />
                   </div>
                   <h3 className={`text-2xl font-bold ${themeClasses.text} mb-2`}>Select an Event</h3>
-                  <p className={`${themeClasses.textMuted} max-w-md`}>
-                    Choose an event from the list to view detailed information, register, and see feedback from other
-                    participants.
-                  </p>
+                  <p className={`${themeClasses.textMuted} mt-2 max-w-xl`}>Choose an event from the list to view detailed information, register, and see feedback from other participants.</p>
                 </div>
-              </div>
-            )}
+              )}
+            </div>
           </div>
         </div>
       )}
-
       {isMobile && <Footer />}
     </div>
   )
 }
 
-export default EventLanding;
+export default EventLanding
