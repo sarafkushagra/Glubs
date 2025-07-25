@@ -35,13 +35,14 @@ const SignInForm = ({ onSwitch }) => {
       localStorage.removeItem("redirectAfterVerify");
       // console.log(redirectPath)
       if (data.user.role === "student") {
-        navigate("/profile");
+        navigate("/events");
       } else {
         navigate("/clubadmin/dash");
       }
     } catch (err) {
       const message =
         err.response?.data?.message || "Invalid credentials. Try again.";
+        
       toast.error(message);
     } finally {
       setLoading(false);

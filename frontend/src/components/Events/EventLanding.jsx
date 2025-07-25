@@ -37,6 +37,7 @@ import {
 } from "lucide-react"
 import ShareButtons from "./ShareModel"
 import { useTheme } from "../Context/ThemeContext"
+import ShareModal from "./ShareModel"
 
 // Custom styles for hiding scrollbars
 const scrollbarHideStyles = `
@@ -79,6 +80,8 @@ const EventLanding = () => {
   const { theme } = useTheme()
   const isDarkMode = theme === "dark"
   const [showShare, setShowShare] = useState(false)
+
+  const [showShareModal, setShowShareModal] = useState(false);
 
   // Event type configurations
   const eventTypeConfig = {
@@ -309,12 +312,12 @@ const EventLanding = () => {
     ))
   }
 
-  const shareToWhatsApp = (event) => {
-    const eventUrl = `${window.location.origin}/events/${event._id}`
-    const message = `🎉 Check out this amazing event: *${event.title}*\n\n📅 Date: ${new Date(event.date).toLocaleDateString()}\n📍 Mode: ${event.mode || "Online"}\n${event.prizePool ? `💰 Prize Pool: ₹${event.prizePool.toLocaleString()}\n` : ""}👥 ${event.registeredUsers?.length || 0} people registered\n\n${event.description ? event.description.substring(0, 100) + "...\n\n" : ""}Register now: ${eventUrl}\n\n#Glubs #Events #${event.eventType || "Competition"}`
-    const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
-    window.open(whatsappUrl, "_blank")
-  }
+  // const shareToWhatsApp = (event) => {
+  //   const eventUrl = `${window.location.origin}/events/${event._id}`
+  //   const message = `🎉 Check out this amazing event: *${event.title}*\n\n📅 Date: ${new Date(event.date).toLocaleDateString()}\n📍 Mode: ${event.mode || "Online"}\n${event.prizePool ? `💰 Prize Pool: ₹${event.prizePool.toLocaleString()}\n` : ""}👥 ${event.registeredUsers?.length || 0} people registered\n\n${event.description ? event.description.substring(0, 100) + "...\n\n" : ""}Register now: ${eventUrl}\n\n#Glubs #Events #${event.eventType || "Competition"}`
+  //   const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
+  //   window.open(whatsappUrl, "_blank")
+  // }
 
   const filteredEvents = events
     .filter((event) => {
@@ -780,7 +783,7 @@ const EventLanding = () => {
                               </div>
                             )}
                             {/* Registration Status */}
-                            <div
+                            {/* <div
                               className={`text-xs px-2 py-1 rounded text-center font-medium ${
                                 isUserRegistered(event)
                                   ? isDarkMode
@@ -792,7 +795,7 @@ const EventLanding = () => {
                               }`}
                             >
                               {isUserRegistered(event) ? "✓ Registered" : "Click to Register"}
-                            </div>
+                            </div> */}
                           </div>
                         </div>
                       )
@@ -1137,21 +1140,27 @@ const EventLanding = () => {
                                 {isUserRegistered(selectedEvent) ? "Team Room" : "Find Team"}
                               </button>
                             )}
-                            <div className="flex gap-2 mt-4">
-                              <button
-                                onClick={() => shareToWhatsApp(selectedEvent)}
-                                className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
-                              >
-                                <Share2 className="w-4 h-4" />
-                                Share
-                              </button>
-                              <button
-                                className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
-                              >
-                                <Bookmark className="w-4 h-4" />
-                                Save
-                              </button>
-                            </div>
+              <div className="flex gap-2 mt-4">
+                <button
+                  onClick={() => setShowShareModal(true)}
+
+                  className="w-35 py-2 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
+                >
+                  <Share2 className="w-4 h-4 inline mr-2" />
+                  Share Event
+                </button>
+
+                {showShareModal && (
+                  <ShareModal event={event} onClose={() => setShowShareModal(false)} />
+                )}
+
+                <button
+                  className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
+                >
+                  <Bookmark className="w-4 h-4" />
+                  Save
+                </button>
+              </div>
                           </div>
                           {/* Quick Stats */}
                           <div className={`${themeClasses.card} border rounded-2xl p-6`}>

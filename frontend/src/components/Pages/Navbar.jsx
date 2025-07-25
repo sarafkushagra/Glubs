@@ -120,7 +120,7 @@ const Navbar = React.memo(function Navbar() {
     <>
       {/* Main Navbar - Overlay Style */}
       <nav
-        className={`max-w-5xl mx-auto mt-3 w-[97%] flex items-center px-3 lg:px-4 fixed left-1/2 -translate-x-1/2 z-[10000] transition-all duration-500 ease-out border-b border-none rounded-xl shadow-lg bg-white/80 backdrop-blur-xl font-dm-sans ${scrolled ? "py-1.5" : "py-2"}`}
+        className={`max-w-5xl mx-auto mt-3 w-[97%] flex items-center px-3 lg:px-4 fixed left-1/2 -translate-x-1/2 z-[100] transition-all duration-500 ease-out border-b border-none rounded-xl shadow-lg bg-white/80 backdrop-blur-xl font-dm-sans ${scrolled ? "py-1.5" : "py-2"}`}
         style={{
           top: 0,
           boxShadow: "0 4px 16px 0 rgba(31, 38, 135, 0.13)", // Softer, smaller shadow
@@ -245,17 +245,21 @@ const Navbar = React.memo(function Navbar() {
               </Link>
 
               {/* QR Scan */}
-              <Link
-                to="/qr-scan"
-                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
-                  ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-green-400 border border-gray-700/50 hover:border-green-500/30"
-                  : "bg-gray-100/50 hover:bg-gray-200/50 text-gray-600 hover:text-green-600 border border-gray-200/50 hover:border-green-300/50"
-                  } hover:scale-110 hover:shadow-lg hover:shadow-green-500/20`}
-                title="QR Scan"
-              >
-                <QrCode className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" />
-                <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
-              </Link>
+              {
+                user?.role !== "student" &&
+
+                <Link
+                  to="/qr-scan"
+                  className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
+                    ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-green-400 border border-gray-700/50 hover:border-green-500/30"
+                    : "bg-gray-100/50 hover:bg-gray-200/50 text-gray-600 hover:text-green-600 border border-gray-200/50 hover:border-green-300/50"
+                    } hover:scale-110 hover:shadow-lg hover:shadow-green-500/20`}
+                  title="QR Scan"
+                >
+                  <QrCode className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+                </Link>
+              }
 
               {/* Logout */}
               <button
@@ -360,7 +364,8 @@ const Navbar = React.memo(function Navbar() {
                     <CgProfile className="w-5 h-5" /> Profile
                   </Link>
                 </li>
-                <li>
+                <li>{
+                  user?.role !== "student" &&
                   <Link
                     to="/qr-scan"
                     onClick={() => setMenuOpen(false)}
@@ -368,6 +373,8 @@ const Navbar = React.memo(function Navbar() {
                   >
                     <QrCode className="w-5 h-5" /> QR Scan
                   </Link>
+                }
+
                 </li>
                 <li>
                   <button

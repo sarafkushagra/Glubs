@@ -1,7 +1,6 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Navigate, Outlet, useLocation } from "react-router-dom";
 import { toast } from "react-toastify";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const getCookie = (name) => {
   const value = `; ${document.cookie}`;
@@ -15,32 +14,37 @@ const ProtectedRoute = ({ allowedRoles }) => {
   const token = localStorage.getItem("glubsToken") || getCookie("glubsToken");
   const userData = JSON.parse(localStorage.getItem("glubsUser") || "null");
 
-  // Clear previous redirection
-  if (localStorage.getItem("redirectAfterVerify")) {
-    localStorage.removeItem("redirectAfterVerify");
-  }
+  const [redirectPath, setRedirectPath] = useState(null); // null = allow route
 
-  if (allowedRoles && !allowedRoles.includes(userData?.role)) {
-    toast.error("You are not authorized to access this page");
-    return <Navigate to="/unauthorized" replace />;
-  }
+  useEffect(() => {
+    if (!userData && !token) {
+      setRedirectPath("/");
+      return;
+    }
 
-  // check for is user previously signup ot not 
-  if (!userData && !token) {
-    return <Navigate to="/" replace />;
-  }
+    if (!token) {
+      setRedirectPath("/auth");
+      return;
+    }
 
-  // check if there is no token means user comes firsst time here
-  if (!token) {
-    return <Navigate to="/auth" replace />;
-  }
+    if (!userData?.isVerified) {
+      localStorage.setItem("redirectAfterVerify", location.pathname);
+      setRedirectPath("/verify");
+      return;
+    }
 
-  localStorage.setItem("redirectAfterVerify", location.pathname);
+    if (allowedRoles && !allowedRoles.includes(userData?.role)) {
+      toast.error("You are not authorized to access this page");
+      setRedirectPath("/unauthorized");
+      return;
+    }
 
-  // check is email verification is done for current user
-  if (!userData?.isVerified) {
+    // if verified and authorized, store path just in case
     localStorage.setItem("redirectAfterVerify", location.pathname);
-    return <Navigate to="/verify" replace />;
+  }, [userData, token, allowedRoles, location.pathname]);
+
+  if (redirectPath) {
+    return <Navigate to={redirectPath} replace />;
   }
 
   return <Outlet />;

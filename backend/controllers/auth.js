@@ -72,17 +72,17 @@ exports.signup = catchAsync(async (req, res, next) => {
       subject: "Glubs Email Verification - Your OTP Code",
       html: `
             <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; background-color: #f9f9f9; color: #333; border: 1px solid #ddd;">
-              <h2 style="color: #4F46E5;">🎉 Welcome to Glubs!</h2>
+              <h2 style="color: #569c9fff;">🎉 Welcome to Glubs!</h2>
               <p>Hello there 👋,</p>
               <p>Thank you for signing up on <strong>Glubs</strong>, your gateway to discovering and managing college events.</p>
               <p>To complete your registration, please use the OTP below to verify your email address:</p>
-              <h1 style="color: #4F46E5; font-size: 2.5em; letter-spacing: 4px; margin: 20px 0;">${otp}</h1>
+              <h1 style="color: #528b83ff; font-size: 2.5em; letter-spacing: 4px; margin: 20px 0;">${otp}</h1>
               <p>This OTP is valid for <strong>10 minutes</strong>.</p>
               <hr style="margin: 30px 0;" />
               <p style="font-size: 0.9em; color: #666;">
                 If you did not initiate this request, please ignore this email. Your data is safe with us.
               </p>
-              <p style="font-size: 0.9em; color: #888;">— The Glubs Team 💜</p>
+              <p style="font-size: 0.9em; color: #888;">— The Glubs Team </p>
             </div>
           `
     });
@@ -160,17 +160,17 @@ exports.resentOTP = catchAsync(async (req, res, next) => {
       subject: "Glubs - Your Resend OTP Code",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; background-color: #f9f9f9; color: #333; border: 1px solid #ddd;">
-          <h2 style="color: #4F46E5;">🔄 Resend OTP - Glubs Verification</h2>
+          <h2 style="color: #569c9fff ;">🔄 Resend OTP - Glubs Verification</h2>
           <p>Hello again 👋,</p>
           <p>It looks like you requested a new OTP for verifying your email on <strong>Glubs</strong>.</p>
           <p>Your new One-Time Password (OTP) is:</p>
-          <h1 style="color: #4F46E5; font-size: 2.5em; letter-spacing: 4px; margin: 20px 0;">${newOtp}</h1>
+          <h1 style="color: #528b83ff; font-size: 2.5em; letter-spacing: 4px; margin: 20px 0;">${newOtp}</h1>
           <p>This OTP is valid for <strong>10 minutes</strong>. Please do not share it with anyone.</p>
           <hr style="margin: 30px 0;" />
           <p style="font-size: 0.9em; color: #666;">
             Didn't request this? You can safely ignore this email. No action will be taken unless the OTP is used.
           </p>
-          <p style="font-size: 0.9em; color: #888;">— The Glubs Team 💜</p>
+          <p style="font-size: 0.9em; color: #888;">— The Glubs Team </p>
         </div>
       `
     });
@@ -256,11 +256,11 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
       subject: "Glubs - Password Reset OTP",
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; background-color: #f9f9f9; color: #333; border: 1px solid #ddd;">
-          <h2 style="color: #4F46E5;">🔐 Password Reset Request</h2>
+          <h2 style="color: #569c9fff;">🔐 Password Reset Request</h2>
           <p>Hello,</p>
           <p>We received a request to reset your password for your <strong>Glubs</strong> account.</p>
           <p>Please use the OTP below to continue with your password reset:</p>
-          <h1 style="color: #4F46E5; font-size: 2.5em; letter-spacing: 4px; margin: 20px 0;">${otp}</h1>
+          <h1 style="color: #528b83ff; font-size: 2.5em; letter-spacing: 4px; margin: 20px 0;">${otp}</h1>
           <p>This OTP is valid for <strong>5 minutes</strong>. Please do not share it with anyone.</p>
           <hr style="margin: 30px 0;" />
           <p style="font-size: 0.9em; color: #666;">

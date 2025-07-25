@@ -8,12 +8,18 @@ import { ToastContainer } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 
 createRoot(document.getElementById('root')).render(
-  <StrictMode>
-    <BrowserRouter>
-      <AuthProvider>
-        <App />
-        <ToastContainer position="top-right" autoClose={3000} />
-      </AuthProvider>
-    </BrowserRouter>
-  </StrictMode>,
+  <BrowserRouter>
+    <AuthProvider>
+      <App />
+
+      <ToastContainer
+        position="top-right"
+        autoClose={3000}
+        style={{ zIndex: 9999 }}
+        toastClassName="!bg-white !text-black dark:!bg-gray-800 dark:!text-white !rounded-md !shadow-lg !w-[300px]"
+        bodyClassName="!text-sm"
+      />
+
+    </AuthProvider>
+  </BrowserRouter>
 )

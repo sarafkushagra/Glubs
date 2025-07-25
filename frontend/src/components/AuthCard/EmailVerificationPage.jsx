@@ -63,12 +63,13 @@ const EmailVerificationPage = () => {
 
   const resendHandler = async () => {
     try {
+       toast.info("OTP sent again to your email!");
       await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/users/resend-otp`,
         { email: user.email },
         { withCredentials: true }
       );
-      toast.info("OTP sent again to your email!");
+     
     } catch (err) {
       toast.error("This accound is already verified");
     }

@@ -73,7 +73,7 @@ export default function Router() {
 
 
       {/* All users allowed but after verification  */}
-      <Route element={<ProtectedRoute />}>
+      <Route element={<ProtectedRoute allowedRoles={["student","club-admin","admin","pending-club-admin"]} />}>
         <Route path="/qr-gen" element={<QRCodeGenerator />} />
         <Route path="/qr-scan" element={<QRScanner />} />
         <Route path="/events/:eventId" element={<EventDetails />} />
