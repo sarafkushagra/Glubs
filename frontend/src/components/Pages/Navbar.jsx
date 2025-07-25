@@ -33,6 +33,12 @@ const Navbar = React.memo(function Navbar() {
   // Check login status via cookies
   useEffect(() => {
     const checkAuth = async () => {
+      const token = localStorage.getItem("glubsToken");
+      if (!token) {
+        setIsLoggedIn(false);
+        setUser(null);
+        return;
+      }
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, {
           withCredentials: true,
@@ -81,22 +87,23 @@ const Navbar = React.memo(function Navbar() {
       if (role === "student") return "/profile"
       if (role === "admin" || role === "clubadmin") return "/clubadmin/dash"
     }
-    return "/home"
+    return "/"
   }
 
   const handleLogout = async () => {
     try {
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/users/logout`, {}, { withCredentials: true })
-      setIsLoggedIn(false)
-      setUser(null)
-      localStorage.removeItem("glubsUser")
-      localStorage.removeItem("glubsToken")
-      navigate("/")
-      window.location.reload()
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/users/logout`, {}, { withCredentials: true });
+      setIsLoggedIn(false);
+      setUser(null);
+      localStorage.removeItem("glubsUser");
+      localStorage.removeItem("glubsToken");
+      navigate("/");
+      window.location.reload();
     } catch (err) {
-      console.error("Logout failed", err)
+      console.error("Logout failed", err);
     }
-  }
+  };
+
 
   // Enhanced navbar styling with better overlay effect
   const navbarBg = scrolled
@@ -139,9 +146,8 @@ const Navbar = React.memo(function Navbar() {
               <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/20 to-cyan-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
             </div>
             <div
-              className={`font-bold text-2xl tracking-tight transition-all duration-300 ${
-                theme === "dark" ? "text-white group-hover:text-cyan-400" : "text-gray-900 group-hover:text-cyan-600"
-              }`}
+              className={`font-bold text-2xl tracking-tight transition-all duration-300 ${theme === "dark" ? "text-white group-hover:text-cyan-400" : "text-gray-900 group-hover:text-cyan-600"
+                }`}
             >
               GLUBS
             </div>
@@ -177,9 +183,8 @@ const Navbar = React.memo(function Navbar() {
 
                   {/* Bottom border effect */}
                   <div
-                    className={`absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 ease-out ${
-                      isActive ? "w-full" : "w-0 group-hover:w-full"
-                    }`}
+                    className={`absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 ease-out ${isActive ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
                   />
                 </Link>
               )
@@ -192,11 +197,10 @@ const Navbar = React.memo(function Navbar() {
           {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
-              theme === "dark"
-                ? "bg-gradient-to-r from-yellow-900/20 to-orange-900/20 hover:from-yellow-800/30 hover:to-orange-800/30 text-yellow-400 hover:text-yellow-300 border border-yellow-500/20 hover:border-yellow-400/40"
-                : "bg-gradient-to-r from-blue-100/50 to-purple-100/50 hover:from-blue-200/50 hover:to-purple-200/50 text-blue-600 hover:text-purple-600 border border-blue-200/50 hover:border-purple-300/50"
-            } hover:scale-110 hover:shadow-lg hover:shadow-yellow-500/20`}
+            className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
+              ? "bg-gradient-to-r from-yellow-900/20 to-orange-900/20 hover:from-yellow-800/30 hover:to-orange-800/30 text-yellow-400 hover:text-yellow-300 border border-yellow-500/20 hover:border-yellow-400/40"
+              : "bg-gradient-to-r from-blue-100/50 to-purple-100/50 hover:from-blue-200/50 hover:to-purple-200/50 text-blue-600 hover:text-purple-600 border border-blue-200/50 hover:border-purple-300/50"
+              } hover:scale-110 hover:shadow-lg hover:shadow-yellow-500/20`}
             title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
           >
             {theme === "dark" ? (
@@ -212,11 +216,10 @@ const Navbar = React.memo(function Navbar() {
               {/* Notifications */}
               <Link
                 to="/notifications"
-                className={`relative p-3 rounded-2xl transition-all duration-300 group overflow-hidden ${
-                  theme === "dark"
-                    ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-cyan-400 border border-gray-700/50 hover:border-cyan-500/30"
-                    : "bg-gray-100/50 hover:bg-gray-200/50 text-gray-600 hover:text-cyan-600 border border-gray-200/50 hover:border-cyan-300/50"
-                } hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20`}
+                className={`relative p-3 rounded-2xl transition-all duration-300 group overflow-hidden ${theme === "dark"
+                  ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-cyan-400 border border-gray-700/50 hover:border-cyan-500/30"
+                  : "bg-gray-100/50 hover:bg-gray-200/50 text-gray-600 hover:text-cyan-600 border border-gray-200/50 hover:border-cyan-300/50"
+                  } hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20`}
                 title="Notifications"
               >
                 <Bell className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
@@ -231,11 +234,10 @@ const Navbar = React.memo(function Navbar() {
               {/* Profile */}
               <Link
                 to={getProfileLink()}
-                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
-                  theme === "dark"
-                    ? "bg-gradient-to-r from-cyan-900/30 to-blue-900/30 hover:from-cyan-800/40 hover:to-blue-800/40 text-cyan-400 hover:text-cyan-300 border border-cyan-500/30 hover:border-cyan-400/50"
-                    : "bg-gradient-to-r from-cyan-100/50 to-blue-100/50 hover:from-cyan-200/50 hover:to-blue-200/50 text-cyan-600 hover:text-blue-600 border border-cyan-200/50 hover:border-blue-300/50"
-                } hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20`}
+                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
+                  ? "bg-gradient-to-r from-cyan-900/30 to-blue-900/30 hover:from-cyan-800/40 hover:to-blue-800/40 text-cyan-400 hover:text-cyan-300 border border-cyan-500/30 hover:border-cyan-400/50"
+                  : "bg-gradient-to-r from-cyan-100/50 to-blue-100/50 hover:from-cyan-200/50 hover:to-blue-200/50 text-cyan-600 hover:text-blue-600 border border-cyan-200/50 hover:border-blue-300/50"
+                  } hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20`}
                 title="Profile"
               >
                 <CgProfile className="w-5 h-5 transition-all duration-300 group-hover:scale-110" />
@@ -245,11 +247,10 @@ const Navbar = React.memo(function Navbar() {
               {/* QR Scan */}
               <Link
                 to="/qr-scan"
-                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
-                  theme === "dark"
-                    ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-green-400 border border-gray-700/50 hover:border-green-500/30"
-                    : "bg-gray-100/50 hover:bg-gray-200/50 text-gray-600 hover:text-green-600 border border-gray-200/50 hover:border-green-300/50"
-                } hover:scale-110 hover:shadow-lg hover:shadow-green-500/20`}
+                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
+                  ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-green-400 border border-gray-700/50 hover:border-green-500/30"
+                  : "bg-gray-100/50 hover:bg-gray-200/50 text-gray-600 hover:text-green-600 border border-gray-200/50 hover:border-green-300/50"
+                  } hover:scale-110 hover:shadow-lg hover:shadow-green-500/20`}
                 title="QR Scan"
               >
                 <QrCode className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" />
@@ -259,11 +260,10 @@ const Navbar = React.memo(function Navbar() {
               {/* Logout */}
               <button
                 onClick={handleLogout}
-                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
-                  theme === "dark"
-                    ? "bg-gradient-to-r from-red-900/30 to-pink-900/30 hover:from-red-800/40 hover:to-pink-800/40 text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-400/50"
-                    : "bg-gradient-to-r from-red-100/50 to-pink-100/50 hover:from-red-200/50 hover:to-pink-200/50 text-red-600 hover:text-red-700 border border-red-200/50 hover:border-red-300/50"
-                } hover:scale-110 hover:shadow-lg hover:shadow-red-500/20`}
+                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
+                  ? "bg-gradient-to-r from-red-900/30 to-pink-900/30 hover:from-red-800/40 hover:to-pink-800/40 text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-400/50"
+                  : "bg-gradient-to-r from-red-100/50 to-pink-100/50 hover:from-red-200/50 hover:to-pink-200/50 text-red-600 hover:text-red-700 border border-red-200/50 hover:border-red-300/50"
+                  } hover:scale-110 hover:shadow-lg hover:shadow-red-500/20`}
                 title="Logout"
               >
                 <RiLogoutCircleLine className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
@@ -273,11 +273,10 @@ const Navbar = React.memo(function Navbar() {
           ) : (
             <Link
               to="/auth"
-              className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 group relative overflow-hidden ${
-                theme === "dark"
-                  ? "bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/40"
-                  : "bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40"
-              } hover:scale-105 border border-white/20`}
+              className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 group relative overflow-hidden ${theme === "dark"
+                ? "bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/40"
+                : "bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40"
+                } hover:scale-105 border border-white/20`}
               title="Login"
             >
               <span className="relative z-10 flex items-center gap-2">
@@ -293,11 +292,10 @@ const Navbar = React.memo(function Navbar() {
         <div className="lg:hidden flex items-center ml-auto">
           <button
             onClick={() => setMenuOpen(!menuOpen)}
-            className={`p-2 rounded-lg transition-all duration-300 ${
-              theme === "dark"
-                ? "text-gray-300 hover:text-white hover:bg-gray-800/50"
-                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/50"
-            } hover:scale-105 active:scale-95`}
+            className={`p-2 rounded-lg transition-all duration-300 ${theme === "dark"
+              ? "text-gray-300 hover:text-white hover:bg-gray-800/50"
+              : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/50"
+              } hover:scale-105 active:scale-95`}
             aria-label="Toggle menu"
           >
             {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
@@ -314,11 +312,10 @@ const Navbar = React.memo(function Navbar() {
                 <Link
                   to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
                   onClick={() => setMenuOpen(false)}
-                  className={`text-[16px] font-medium ${
-                    location.pathname === `/${item.toLowerCase()}` || (location.pathname === "/" && item === "Home")
-                      ? "text-cyan-400 font-semibold"
-                      : "text-gray-300 hover:text-white"
-                  }`}
+                  className={`text-[16px] font-medium ${location.pathname === `/${item.toLowerCase()}` || (location.pathname === "/" && item === "Home")
+                    ? "text-cyan-400 font-semibold"
+                    : "text-gray-300 hover:text-white"
+                    }`}
                 >
                   {item}
                 </Link>
