@@ -21,8 +21,8 @@ const createSendToken = (user, statusCode, res, message) => {
     ),
 
     httpOnly: true,
-    secure: false, //only secure in production
-    sameSite: "Lax", //process.env.NODE_ENV === "production" ? "none" :
+    secure: true, //only secure in production
+    sameSite: "None", //process.env.NODE_ENV === "production" ? "none" :
   };
 
   res.cookie("token", token, cookieOptions);

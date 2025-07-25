@@ -3,11 +3,12 @@ const router = express.Router();
 const userController = require('../controllers/user');
 const { signup, verifyAccount, resentOTP, login, logout, forgetPassword, resetPassword } = require('../controllers/auth');
 const { isAuthenticated, restrictTo } = require('../middlewares/auth');
+const catchAsync = require('../utils/catchAsync');
 
 
 router.get('/', userController.showAllUsers);
 router.get('/details/:id', userController.showUser);
-router.get('/me', isAuthenticated, userController.getMe); // ✅ fixed
+router.get('/me', isAuthenticated, catchAsync( userController.getMe)); // ✅ fixed
 router.put('/:id', isAuthenticated, userController.updateUser);
 router.delete('/:id', isAuthenticated, userController.deleteUser);
 router.post("/request-club-admin", isAuthenticated , restrictTo("student"),userController.requestClubAdmin);
