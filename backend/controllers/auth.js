@@ -17,7 +17,7 @@ const createSendToken = (user, statusCode, res, message) => {
   const cookieOptions = {
     expires: new Date(
       Date.now() +
-        Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
+      Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
     ),
 
     httpOnly: true,
@@ -69,21 +69,22 @@ exports.signup = catchAsync(async (req, res, next) => {
   try {
     await sendEmail({
       email: newUser.email,
-      subject: "Nodemailer Test: OTP Verification for Your Email",
+      subject: "Glubs Email Verification - Your OTP Code",
       html: `
-                <div style="font-family: Arial, sans-serif; color: #333;">
-                <h2>🔐 Email Verification</h2>
-                <p>Hey there! 👋</p>
-                <p>You're seeing this message because I'm testing <strong>Nodemailer</strong> for sending emails via Node.js.</p>
-                <p>Your One-Time Password (OTP) is:</p>
-                <h1 style="color: #007BFF; font-size: 2em;">${otp}</h1>
-                <p>This OTP is valid for 10 minutes.</p>
-                <hr style="margin: 20px 0;" />
-                <p style="font-size: 0.9em; color: #888;">
-                    If you didn’t expect this email, you can ignore it. This is just a test 😉
-                </p>
-                </div>
-            `,
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; background-color: #f9f9f9; color: #333; border: 1px solid #ddd;">
+              <h2 style="color: #4F46E5;">🎉 Welcome to Glubs!</h2>
+              <p>Hello there 👋,</p>
+              <p>Thank you for signing up on <strong>Glubs</strong>, your gateway to discovering and managing college events.</p>
+              <p>To complete your registration, please use the OTP below to verify your email address:</p>
+              <h1 style="color: #4F46E5; font-size: 2.5em; letter-spacing: 4px; margin: 20px 0;">${otp}</h1>
+              <p>This OTP is valid for <strong>10 minutes</strong>.</p>
+              <hr style="margin: 30px 0;" />
+              <p style="font-size: 0.9em; color: #666;">
+                If you did not initiate this request, please ignore this email. Your data is safe with us.
+              </p>
+              <p style="font-size: 0.9em; color: #888;">— The Glubs Team 💜</p>
+            </div>
+          `
     });
 
     createSendToken(newUser, 200, res, "Registration successful");
@@ -155,21 +156,22 @@ exports.resentOTP = catchAsync(async (req, res, next) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: "Nodemailer Test: OTP Verification for Your Email",
+      subject: "Glubs - Your Resend OTP Code",
       html: `
-                <div style="font-family: Arial, sans-serif; color: #333;">
-                <h2>🔐 Email Verification</h2>
-                <p>Hey there! 👋</p>
-                <p>You're seeing this message because I'm testing <strong>Nodemailer</strong> for sending emails via Node.js.</p>
-                <p>Your One-Time Password (OTP) is:</p>
-                <h1 style="color: #007BFF; font-size: 2em;">${newOtp}</h1>
-                <p>This OTP is valid for 10 minutes.</p>
-                <hr style="margin: 20px 0;" />
-                <p style="font-size: 0.9em; color: #888;">
-                    If you didn’t expect this email, you can ignore it. This is just a test 😉
-                </p>
-                </div>
-            `,
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; background-color: #f9f9f9; color: #333; border: 1px solid #ddd;">
+          <h2 style="color: #4F46E5;">🔄 Resend OTP - Glubs Verification</h2>
+          <p>Hello again 👋,</p>
+          <p>It looks like you requested a new OTP for verifying your email on <strong>Glubs</strong>.</p>
+          <p>Your new One-Time Password (OTP) is:</p>
+          <h1 style="color: #4F46E5; font-size: 2.5em; letter-spacing: 4px; margin: 20px 0;">${newOtp}</h1>
+          <p>This OTP is valid for <strong>10 minutes</strong>. Please do not share it with anyone.</p>
+          <hr style="margin: 30px 0;" />
+          <p style="font-size: 0.9em; color: #666;">
+            Didn't request this? You can safely ignore this email. No action will be taken unless the OTP is used.
+          </p>
+          <p style="font-size: 0.9em; color: #888;">— The Glubs Team 💜</p>
+        </div>
+      `
     });
 
     res.status(200).json({
@@ -200,12 +202,12 @@ exports.login = catchAsync(async (req, res, next) => {
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {
-    return next(new AppError("Incorrect Email or Password", 401));
+    return next(new AppError("Incorrect Email or Password or Please Signp again", 401));
   }
 
   if (!user.isVerified) {
     return next(
-      new AppError("Please verify your email before logging in.", 401)
+      new AppError("Please verify your email before logging in", 401)
     );
   }
 
@@ -250,21 +252,22 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   try {
     await sendEmail({
       email: user.email,
-      subject: "Nodemailer Test: OTP Verification for Your Email",
+      subject: "Glubs - Password Reset OTP",
       html: `
-                <div style="font-family: Arial, sans-serif; color: #333;">
-                <h2>🔐 Email Verification</h2>
-                <p>Hey there! 👋</p>
-                <p>You're seeing this message because I'm testing <strong>Nodemailer</strong> for sending emails via Node.js.</p>
-                <p>Your One-Time Password (OTP) is:</p>
-                <h1 style="color: #007BFF; font-size: 2em;">${otp}</h1>
-                <p>This OTP is valid for 10 minutes.</p>
-                <hr style="margin: 20px 0;" />
-                <p style="font-size: 0.9em; color: #888;">
-                    If you didn’t expect this email, you can ignore it. This is just a test 😉
-                </p>
-                </div>
-            `,
+        <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border-radius: 8px; background-color: #f9f9f9; color: #333; border: 1px solid #ddd;">
+          <h2 style="color: #4F46E5;">🔐 Password Reset Request</h2>
+          <p>Hello,</p>
+          <p>We received a request to reset your password for your <strong>Glubs</strong> account.</p>
+          <p>Please use the OTP below to continue with your password reset:</p>
+          <h1 style="color: #4F46E5; font-size: 2.5em; letter-spacing: 4px; margin: 20px 0;">${otp}</h1>
+          <p>This OTP is valid for <strong>5 minutes</strong>. Please do not share it with anyone.</p>
+          <hr style="margin: 30px 0;" />
+          <p style="font-size: 0.9em; color: #666;">
+            Didn't request this? You can safely ignore this email. Your password will remain unchanged.
+          </p>
+          <p style="font-size: 0.9em; color: #888;">— The Glubs Team 💜</p>
+        </div>
+      `,
     });
 
     res.status(200).json({

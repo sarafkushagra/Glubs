@@ -23,7 +23,7 @@ export default function EditProfile() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/users/details/${id}`, {
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/details/${id}`, {
           withCredentials: true,
         });
         console.log(res.data);
@@ -58,7 +58,7 @@ export default function EditProfile() {
     setError("");
     setSuccess("");
     try {
-      await axios.put(`http://localhost:3000/users/${id}`, user, {
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/users/${id}`, user, {
         withCredentials: true,
       });
       setSuccess("Profile updated successfully!");

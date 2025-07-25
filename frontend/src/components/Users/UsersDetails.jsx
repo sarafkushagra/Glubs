@@ -5,6 +5,7 @@ import { Link } from "react-router-dom";
 import img1 from "../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp";
 import Footer from "../Pages/Footer";
 import Navbar from "../Pages/Navbar";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export default function UsersDetails() {
   const { id } = useParams();
@@ -17,7 +18,7 @@ export default function UsersDetails() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/users/details/${id}`, { withCredentials: true });
+        const res = await axios.get(`${process.env.API_BASE_URL}/users/details/${id}`, { withCredentials: true });
         console.log(res.data);
         setUser(res.data);
       } catch (error) {
@@ -41,9 +42,9 @@ export default function UsersDetails() {
       try {
         console.log("Fetching events for userId:", id);
         const [participatedRes, upcomingRes, completedRes] = await Promise.all([
-          axios.get(`http://localhost:3000/event/participated/${id}`, { withCredentials: true }),
-          axios.get(`http://localhost:3000/event/upcoming/${id}`, { withCredentials: true }),
-          axios.get(`http://localhost:3000/event/completed/${id}`, { withCredentials: true }),
+          axios.get(`${process.env.API_BASE_URL}/event/participated/${id}`, { withCredentials: true }),
+          axios.get(`${process.env.API_BASE_URL}/event/upcoming/${id}`, { withCredentials: true }),
+          axios.get(`${process.env.API_BASE_URL}/event/completed/${id}`, { withCredentials: true }),
         ]);
 
         console.log("Participated Events:", participatedRes.data);

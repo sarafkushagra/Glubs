@@ -1,4 +1,5 @@
 import axios from "axios"
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 /**
  * Service for sending email notifications
@@ -58,7 +59,7 @@ export const emailService = {
 
       // Send the email using the backend API
       const response = await axios.post(
-        "http://localhost:3000/api/send-email",
+        `${process.env.API_BASE_URL}/api/send-email`,
         {
           email: recipientEmail,
           subject: `Team Invitation: ${teamName} for ${eventName}`,
@@ -135,7 +136,7 @@ export const emailService = {
 
       // Send the email using the backend API
       const response = await axios.post(
-        "http://localhost:3000/api/send-email",
+        `${process.env.API_BASE_URL}/api/send-email`,
         {
           email: recipientEmail,
           subject: `Team Invitation ${isAccepted ? "Accepted" : "Rejected"}: ${teamName}`,

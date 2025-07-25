@@ -21,6 +21,8 @@ import {
   Search,
   Trash2,
 } from "lucide-react"
+import { useTheme } from './Context/ThemeContext';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const Notifications = () => {
   const navigate = useNavigate()
@@ -33,13 +35,15 @@ const Notifications = () => {
   const [successMessage, setSuccessMessage] = useState("")
   const [showErrorAlert, setShowErrorAlert] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const [isDarkMode, setIsDarkMode] = useState(true)
   const [filterStatus, setFilterStatus] = useState("pending")
   const [searchTerm, setSearchTerm] = useState("")
   const [showFilters, setShowFilters] = useState(false)
   const [processingRequestId, setProcessingRequestId] = useState(null)
   const [allEvents, setAllEvents] = useState([])
   const [selectedEvent, setSelectedEvent] = useState("all")
+
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark';
 
   // Custom styles for hiding scrollbars
   useEffect(() => {
@@ -96,11 +100,11 @@ const Notifications = () => {
       setLoading(true)
 
       // Fetch current user
-      const userRes = await axios.get("http://localhost:3000/users/me", { withCredentials: true })
+      const userRes = await axios.get(`${API_BASE_URL}/users/me`, { withCredentials: true })
       setUser(userRes.data.user)
 
       // Fetch all events for filtering
-      const eventsRes = await axios.get("http://localhost:3000/event", { withCredentials: true })
+      const eventsRes = await axios.get(`${API_BASE_URL}/event`, { withCredentials: true })
       setAllEvents(eventsRes.data)
 
       // Fetch all team requests across all events
@@ -109,7 +113,7 @@ const Notifications = () => {
       // For each event, fetch team requests
       for (const event of eventsRes.data) {
         try {
-          const requestsRes = await axios.get(`http://localhost:3000/teams/requests/${event._id}`, {
+          const requestsRes = await axios.get(`${API_BASE_URL}/teams/requests/${event._id}`, {
             withCredentials: true,
           })
 
@@ -138,7 +142,7 @@ const Notifications = () => {
   const respondToRequest = async (requestId, action) => {
     try {
       setProcessingRequestId(requestId)
-      await axios.put(`http://localhost:3000/teams/request/${requestId}`, { action }, { withCredentials: true })
+      await axios.put(`${API_BASE_URL}/teams/request/${requestId}`, { action }, { withCredentials: true })
 
       // Update local state to reflect the change
       setTeamRequests((prevRequests) =>

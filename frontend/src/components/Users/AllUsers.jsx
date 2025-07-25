@@ -14,7 +14,7 @@ export default function AllUsers() {
   useEffect(() => {
     const fetchUsers = async () => {
     try {
-      const res = await axios.get("http://localhost:3000/users", { withCredentials: true });
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users`, { withCredentials: true });
       setUsers(Array.isArray(res.data) ? res.data : []);
     } catch (err) {
       console.error("Error fetching users:", err);
@@ -34,7 +34,7 @@ export default function AllUsers() {
     }
 
     try {
-      await axios.delete(`http://localhost:3000/users/${userId}`, { withCredentials: true });
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/users/${userId}`, { withCredentials: true });
       setUsers(prev => prev.filter(user => user._id !== userId));
       setConfirmDeleteId(null);
       setConfirmUsername("");

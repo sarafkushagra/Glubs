@@ -119,11 +119,11 @@ const EventDetails = () => {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/event/${eventId}`, { withCredentials: true })
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       setEvent(res.data.event)
       setFeedbacks(res.data.feedbacks || [])
       try {
-        const userRes = await axios.get("http://localhost:3000/users/me", { withCredentials: true })
+        const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true })
         setUser(userRes.data.user)
       } catch {
         console.log("User not logged in")
@@ -158,7 +158,7 @@ const EventDetails = () => {
     // Existing individual registration logic
     try {
       setRegistering(true)
-      await axios.post(`http://localhost:3000/event/${eventId}/register`, {}, { withCredentials: true })
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register`, {}, { withCredentials: true })
       setEvent((prev) => ({
         ...prev,
         registeredUsers: [...(prev.registeredUsers || []), user._id],
@@ -175,7 +175,7 @@ const EventDetails = () => {
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this event?")) return
     try {
-      await axios.delete(`http://localhost:3000/event/${eventId}`, { withCredentials: true })
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       navigate("/events")
     } catch {
       alert("Failed to delete event.")
@@ -185,7 +185,7 @@ const EventDetails = () => {
   const handleDeleteFeedback = async (feedbackId) => {
     if (!window.confirm("Delete this feedback?")) return
     try {
-      await axios.delete(`http://localhost:3000/feedback/${feedbackId}`, { withCredentials: true })
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/feedback/${feedbackId}`, { withCredentials: true })
       setFeedbacks(feedbacks.filter((fb) => fb._id !== feedbackId))
     } catch {
       alert("Failed to delete feedback.")
@@ -660,7 +660,8 @@ const EventDetails = () => {
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={() => setShowShareModal(true)}
-                   className="w-40 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
+
+                  className="w-60 py-2 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
                 >
                   <Share2 className="w-4 h-4 inline mr-2" />
                   Share Event

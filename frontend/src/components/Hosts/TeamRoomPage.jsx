@@ -142,16 +142,16 @@ const TeamRoomPage = () => {
       setLoading(true)
 
       // Fetch current user
-      const userRes = await axios.get("http://localhost:3000/users/me", { withCredentials: true })
+      const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true })
       setUser(userRes.data.user)
 
       // Fetch event details
-      const eventRes = await axios.get(`http://localhost:3000/event/${eventId}`, { withCredentials: true })
+      const eventRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       setEvent(eventRes.data.event)
 
       // Fetch user's team if exists
       try {
-        const teamRes = await axios.get(`http://localhost:3000/teams/user/${userRes.data.user._id}/event/${eventId}`, {
+        const teamRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/user/${userRes.data.user._id}/event/${eventId}`, {
           withCredentials: true,
         })
         setUserTeam(teamRes.data.team)
@@ -162,20 +162,20 @@ const TeamRoomPage = () => {
       }
 
       // Fetch available users
-      const availableRes = await axios.get(`http://localhost:3000/users/available/${eventId}`, {
+      const availableRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/available/${eventId}`, {
         withCredentials: true,
       })
       console.log(availableRes)
       setAvailableUsers(availableRes.data.users)
 
       // Fetch team requests (received)
-      const requestsRes = await axios.get(`http://localhost:3000/teams/requests/${eventId}`, {
+      const requestsRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/requests/${eventId}`, {
         withCredentials: true,
       })
       setTeamRequests(requestsRes.data.requests)
 
       // Fetch sent requests
-      const sentRes = await axios.get(`http://localhost:3000/teams/sent-requests/${eventId}`, {
+      const sentRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/sent-requests/${eventId}`, {
         withCredentials: true,
       })
       setSentRequests(sentRes.data.requests)
@@ -196,7 +196,7 @@ const TeamRoomPage = () => {
 
     try {
       const res = await axios.post(
-        `http://localhost:3000/teams`,
+        `${import.meta.env.VITE_API_BASE_URL}/teams`,
         {
           name: teamName,
           description: teamDescription,
@@ -225,7 +225,7 @@ const TeamRoomPage = () => {
 
     try {
       await axios.put(
-        `http://localhost:3000/teams/${userTeam._id}`,
+        `${import.meta.env.VITE_API_BASE_URL}/teams/${userTeam._id}`,
         {
           name: teamName,
           description: teamDescription,
@@ -262,7 +262,7 @@ const TeamRoomPage = () => {
     try {
       setSendingRequest(true)
       await axios.post(
-        `http://localhost:3000/teams/request`,
+        `${import.meta.env.VITE_API_BASE_URL}/teams/request`,
         {
           teamId: userTeam._id,
           targetUserId,
@@ -287,7 +287,7 @@ const TeamRoomPage = () => {
   // Respond to team request
   const respondToRequest = async (requestId, action) => {
     try {
-      await axios.put(`http://localhost:3000/teams/request/${requestId}`, { action }, { withCredentials: true })
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/teams/request/${requestId}`, { action }, { withCredentials: true })
 
       showSuccess(`Request ${action === "accept" ? "accepted" : "rejected"} successfully!`)
       fetchData()
@@ -302,7 +302,7 @@ const TeamRoomPage = () => {
     if (!window.confirm("Are you sure you want to leave this team?")) return
 
     try {
-      await axios.delete(`http://localhost:3000/teams/${userTeam._id}/member/${user._id}`, {
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/teams/${userTeam._id}/member/${user._id}`, {
         withCredentials: true,
       })
 
@@ -320,7 +320,7 @@ const TeamRoomPage = () => {
     if (!window.confirm("Are you sure you want to remove this member?")) return
 
     try {
-      await axios.delete(`http://localhost:3000/teams/${userTeam._id}/member/${memberId}`, {
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/teams/${userTeam._id}/member/${memberId}`, {
         withCredentials: true,
       })
 
@@ -352,7 +352,7 @@ const TeamRoomPage = () => {
     try {
       setIsRegistering(true)
       await axios.post(
-        `http://localhost:3000/event/${eventId}/register-team`,
+        `${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register-team`,
         { teamId: userTeam._id },
         { withCredentials: true },
       )

@@ -16,7 +16,7 @@ const EditFeedback = () => {
   useEffect(() => {
     const fetchFeedback = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/feedback/${feedbackId}`, { withCredentials: true });
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/feedback/${feedbackId}`, { withCredentials: true });
         setForm({ review: res.data.review, rating: res.data.rating });
       } catch (err) {
         console.error(err);
@@ -36,7 +36,7 @@ const EditFeedback = () => {
     e.preventDefault();
     setLoading(true);
     try {
-      await axios.put(`http://localhost:3000/feedback/${feedbackId}`, form, { withCredentials: true });
+      await axios.put(`${import.meta.env.VITE_API_BASE_URL}/feedback/${feedbackId}`, form, { withCredentials: true });
       navigate(`/events/${eventId}`);
     } catch (err) {
       console.error(err);

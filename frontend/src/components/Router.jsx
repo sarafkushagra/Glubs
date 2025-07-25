@@ -19,7 +19,7 @@ import EditClub from "./Clubs/EditClub";
 import AddClub from "./Clubs/AddClub";
 import AllUsers from "./Users/AllUsers";
 import NotFound from "./Pages/NotFound";
-import EmailVerificationPage from "./AuthCard/EmailVarificationPage";
+import EmailVerificationPage from "./AuthCard/EmailVerificationPage";
 import AddFeedback from "./Events/AddFeedback";
 import UsersDetails from "./Users/UsersDetails";
 import EditUser from "./Users/EditUser";

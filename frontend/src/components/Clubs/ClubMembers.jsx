@@ -13,7 +13,7 @@ const ClubMembers = () => {
   useEffect(() => {
     const fetchMembers = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/clubs/${clubId}/members`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/clubs/${clubId}/members`);
         console.log("Fetched members:", res.data);
         setMembers(res.data || []);
       } catch (err) {

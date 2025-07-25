@@ -40,7 +40,7 @@ const EmailVerificationPage = () => {
     setLoading(true);
     try {
       const res = await axios.post(
-        "http://localhost:3000/users/verify",
+        `${import.meta.env.VITE_API_BASE_URL}/users/verify`,
         { otp: fullOtp },
         { withCredentials: true }
       );
@@ -64,7 +64,7 @@ const EmailVerificationPage = () => {
   const resendHandler = async () => {
     try {
       await axios.post(
-        "http://localhost:3000/users/resend-otp",
+        `${import.meta.env.VITE_API_BASE_URL}/users/resend-otp`,
         { email: user.email },
         { withCredentials: true }
       );

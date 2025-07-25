@@ -38,6 +38,7 @@ import {
   Trophy,
 } from "lucide-react"
 import ShareButtons from "./ShareModel"
+import { useTheme } from '../Context/ThemeContext';
 
 // Custom styles for hiding scrollbars
 const scrollbarHideStyles = `
@@ -77,7 +78,10 @@ const EventLanding = () => {
   })
   const [showFilters, setShowFilters] = useState(false)
   const [isMobile, setIsMobile] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const { theme } = useTheme();
+  const isDarkMode = theme === 'dark';
+
+  const [showShare, setShowShare] = useState(false);
 
   // Event type configurations
   const eventTypeConfig = {
@@ -169,7 +173,7 @@ const EventLanding = () => {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/users/me", { withCredentials: true })
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true })
         setCurrentUserId(res.data.user._id)
         setUser(res.data.user)
       } catch {
@@ -183,7 +187,7 @@ const EventLanding = () => {
   useEffect(() => {
     const fetchEvents = async () => {
       try {
-        const res = await axios.get("http://localhost:3000/event", { withCredentials: true })
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event`, { withCredentials: true })
         const eventsData = Array.isArray(res.data) ? res.data : []
         const currentDate = new Date()
         const activeEvents = eventsData.filter((event) => {
@@ -213,7 +217,7 @@ const EventLanding = () => {
   const fetchEventDetails = async (id) => {
     try {
       setDetailsLoading(true)
-      const res = await axios.get(`http://localhost:3000/event/${id}`, { withCredentials: true })
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${id}`, { withCredentials: true })
       setSelectedEvent(res.data.event)
       setFeedbacks(res.data.feedbacks || [])
     } catch (err) {
@@ -245,7 +249,7 @@ const EventLanding = () => {
     // Existing individual registration logic
     try {
       setRegistering((prev) => ({ ...prev, [eventId]: true }))
-      await axios.post(`http://localhost:3000/event/${eventId}/register`, {}, { withCredentials: true })
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register`, {}, { withCredentials: true })
       setEvents((prev) =>
         prev.map((e) =>
           e._id === eventId ? { ...e, registeredUsers: [...(e.registeredUsers || []), currentUserId] } : e,
@@ -269,7 +273,7 @@ const EventLanding = () => {
   const handleDelete = async (eventId) => {
     if (!window.confirm("Are you sure you want to delete this event?")) return
     try {
-      await axios.delete(`http://localhost:3000/event/${eventId}`, { withCredentials: true })
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       setEvents((prev) => prev.filter((e) => e._id !== eventId))
       if (selectedEvent && selectedEvent._id === eventId) {
         setSelectedEvent(null)
@@ -283,7 +287,7 @@ const EventLanding = () => {
   const handleDeleteFeedback = async (feedbackId) => {
     if (!window.confirm("Delete this feedback?")) return
     try {
-      await axios.delete(`http://localhost:3000/feedback/${feedbackId}`, { withCredentials: true })
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/feedback/${feedbackId}`, { withCredentials: true })
       setFeedbacks(feedbacks.filter((fb) => fb._id !== feedbackId))
     } catch {
       alert("Failed to delete feedback.")
@@ -1200,5 +1204,3 @@ const EventLanding = () => {
 }
 
 export default EventLanding;
-
-

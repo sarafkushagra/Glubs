@@ -46,7 +46,7 @@ export default function EditHostBasicDetails() {
   useEffect(() => {
     const fetchEvent = async () => {
       try {
-        const res = await axios.get(`http://localhost:3000/event/${id}`);
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${id}`);
         const e = res.data.event || res.data; // adjust based on your response structure
         setVisibility(e.visibility || "public");
         setMode(e.mode || "online");
@@ -104,7 +104,7 @@ export default function EditHostBasicDetails() {
     };
 
     try {
-      const res = await axios.put(`http://localhost:3000/event/${id}`, payload);
+      const res = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/event/${id}`, payload);
       alert("Event updated successfully!");
       console.log(res.data);
       navigate("/events"); // adjust to your desired redirect page
