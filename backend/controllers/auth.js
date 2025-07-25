@@ -89,7 +89,6 @@ exports.signup = catchAsync(async (req, res, next) => {
 
     createSendToken(newUser, 200, res, "Registration successful");
   } catch (error) {
-     console.error("Email sending error:", error);
     await User.findByIdAndDelete(newUser.id);
     return next(
       new AppError("There is an error sending the email, Try Again", 500)
