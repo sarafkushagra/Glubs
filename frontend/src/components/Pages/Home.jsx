@@ -104,18 +104,18 @@ export default function LandingPage() {
       >
         <div className="flex-1 flex flex-col justify-center items-start h-full md:min-h-screen">
           <h1
-            className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 animate-fade-in-down pl-2 md:pl-4 text-center md:text-left w-full"
+            className="text-4xl sm:text-5xl md:text-6xl font-extrabold mb-4 pl-2 md:pl-4 text-center md:text-left w-full"
             style={{ color: theme === "dark" ? "#ffffff" : "#111827" }}
           >
             Gateway to Campus Opportunities
           </h1>
           <p
-            className="text-lg sm:text-xl md:text-2xl mb-8 max-w-xl animate-fade-in animate-delay-0_3s pl-2 md:pl-4 text-center md:text-left w-full"
+            className="text-lg sm:text-xl md:text-2xl mb-8 max-w-xl pl-2 md:pl-4 text-center md:text-left w-full"
             style={{ color: theme === "dark" ? "#d1d5db" : "#6b7280" }}
           >
             Discover, register, and attend university events, hackathons, and workshops to level up your campus journey.
           </p>
-          <div className="flex gap-4 flex-wrap justify-center md:justify-start animate-fade-in animate-delay-0_5s w-full px-2 md:px-4">
+          <div className="flex gap-4 flex-wrap justify-center md:justify-start w-full px-2 md:px-4">
             <Link
               to="/events"
               className="font-semibold rounded-full px-6 py-3 transition-all duration-300 shadow hover:scale-105 flex-grow sm:flex-grow-0 text-center"
@@ -139,7 +139,7 @@ export default function LandingPage() {
             </Link>
           </div>
         </div>
-        <div className="flex-1 flex justify-center items-center mt-8 md:mt-0 px-4 md:px-0 animate-fade-in animate-delay-0_5s">
+        <div className="flex-1 flex justify-center items-center mt-8 md:mt-0 px-4 md:px-0">
           <img
             src={backgroundhero || "/placeholder.svg"}
             alt="Hero"
