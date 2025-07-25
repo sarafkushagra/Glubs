@@ -221,7 +221,7 @@ const Navbar = React.memo(function Navbar() {
               >
                 <Bell className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
                 {notificationCount > 0 && (
-                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 via-pink-500 to-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-bounce border-2 border-white dark:border-gray-900">
+                  <span className="mt-2 mr-2 absolute -top-1 -right-1 bg-gradient-to-r from-red-500 via-pink-500 to-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-bounce border-2 border-white dark:border-gray-900">
                     {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 )}
