@@ -1,22 +1,34 @@
 "use client"
+
 import React, { useState, useEffect } from "react"
 import { Link, useLocation, useNavigate } from "react-router-dom"
 import axios from "axios"
 import img1 from "../images/Adobe Express - file (1).png"
 import { CgProfile } from "react-icons/cg"
 import { BiLogIn } from "react-icons/bi"
-import { QrCode, Bell, Moon, Sun } from "lucide-react"
+import { QrCode, Bell, Moon, Sun, Menu, X } from "lucide-react"
 import { RiLogoutCircleLine } from "react-icons/ri"
 import { useTheme } from "../Context/ThemeContext"
 
+// Uses DM Sans Thin for a modern, thin navbar font
 const Navbar = React.memo(function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [user, setUser] = useState(null)
   const [notificationCount, setNotificationCount] = useState(0)
+  const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
+
+  // Handle scroll effect
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrolled(window.scrollY > 20)
+    }
+    window.addEventListener("scroll", handleScroll)
+    return () => window.removeEventListener("scroll", handleScroll)
+  }, [])
 
   // Check login status via cookies
   useEffect(() => {
@@ -27,8 +39,6 @@ const Navbar = React.memo(function Navbar() {
         })
         setIsLoggedIn(!!res.data.user)
         setUser(res.data.user)
-
-        // If logged in, fetch notification count
         if (res.data.user) {
           fetchNotificationCount()
         }
@@ -38,32 +48,26 @@ const Navbar = React.memo(function Navbar() {
       }
     }
     checkAuth()
-  }, [location.pathname]) // Re-check when path changes
+  }, [location.pathname])
 
   // Fetch notification count
   const fetchNotificationCount = async () => {
     try {
-      // Fetch all events
       const eventsRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event`, { withCredentials: true })
       const events = eventsRes.data
 
-      // Count pending requests across all events
       let totalCount = 0
-
       for (const event of events) {
         try {
           const requestsRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/requests/${event._id}`, {
             withCredentials: true,
           })
-
-          // Only count pending requests
           const pendingRequests = requestsRes.data.requests.filter((req) => req.status === "pending")
           totalCount += pendingRequests.length
         } catch (err) {
           // Ignore errors for events with no requests
         }
       }
-
       setNotificationCount(totalCount)
     } catch (err) {
       console.error("Error fetching notifications:", err)
@@ -77,146 +81,233 @@ const Navbar = React.memo(function Navbar() {
       if (role === "student") return "/profile"
       if (role === "admin" || role === "clubadmin") return "/clubadmin/dash"
     }
-    console.log(userData)
     return "/home"
   }
 
   const handleLogout = async () => {
     try {
-      await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/users/logout`,
-        {},
-        {
-          withCredentials: true,
-        },
-      )
+      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/users/logout`, {}, { withCredentials: true })
       setIsLoggedIn(false)
       setUser(null)
       localStorage.removeItem("glubsUser")
       localStorage.removeItem("glubsToken")
       navigate("/")
-      window.location.reload() // force UI refresh after logout
+      window.location.reload()
     } catch (err) {
       console.error("Logout failed", err)
     }
   }
 
-  // Navbar background: seamless, no shadow
-  const navbarBg = theme === "dark"
-    ? "bg-black/20 backdrop-blur-lg border-b border-transparent"
-    : "bg-white/90 border-b border-gray-200"
+  // Enhanced navbar styling with better overlay effect
+  const navbarBg = scrolled
+    ? theme === "dark"
+      ? "bg-gray-900/95 backdrop-blur-2xl border-gray-700/40 shadow-2xl shadow-black/30"
+      : "bg-white/95 backdrop-blur-2xl border-gray-200/40 shadow-2xl shadow-black/10"
+    : theme === "dark"
+      ? "bg-gray-900/80 backdrop-blur-xl border-gray-800/30"
+      : "bg-white/80 backdrop-blur-xl border-gray-200/30"
 
-  const linkStyle = theme === "dark"
-    ? "relative text-gray-200 hover:text-white transition-colors duration-300"
-    : "relative text-gray-800 hover:text-cyan-700 transition-colors duration-300"
-  const activeLinkStyle = theme === "dark" ? "text-cyan-400" : "text-cyan-700"
-  // Icon color matches text color, force with !important and opacity-100
-  const iconColor = theme === "dark"
-    ? "!text-gray-200 opacity-100 hover:!text-white"
-    : "!text-gray-800 opacity-100 hover:!text-cyan-700"
+  const navItems = ["Home", "About", "Events", "Clubs"]
 
   return (
-    <nav className={`w-full flex py-4 px-8 justify-between items-center ${navbarBg} fixed top-0 z-50 font-poppins transition-all duration-300`}>
-      <Link to="/">
-        <img
-          src={img1 || "/placeholder.svg"}
-          alt="logo"
-          className="w-32 h-10 object-contain hover:opacity-80 transition-opacity"
-        />
-      </Link>
-
-      {/* Desktop Menu */}
-      <ul className="hidden sm:flex justify-end items-center flex-1 space-x-8">
-        {["Home", "About", "Events", "Clubs"].map((item) => (
-          <li key={item} className={`${linkStyle} group`}>
-            <Link
-              to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
-              className={
-                location.pathname === `/${item.toLowerCase()}` || (location.pathname === "/" && item === "Home")
-                  ? activeLinkStyle
-                  : ""
-              }
+    <>
+      {/* Main Navbar - Overlay Style */}
+      <nav
+        className={`max-w-5xl mx-auto mt-3 w-[97%] flex items-center px-3 lg:px-4 fixed left-1/2 -translate-x-1/2 z-[10000] transition-all duration-500 ease-out border-b border-none rounded-xl shadow-lg bg-white/80 backdrop-blur-xl font-dm-sans ${scrolled ? "py-1.5" : "py-2"}`}
+        style={{
+          top: 0,
+          boxShadow: "0 4px 16px 0 rgba(31, 38, 135, 0.13)", // Softer, smaller shadow
+          borderRadius: "16px",
+          background: theme === "dark"
+            ? "rgba(24, 24, 27, 0.85)"
+            : "rgba(255, 255, 255, 0.85)",
+          backdropFilter: "blur(32px)",
+          WebkitBackdropFilter: "blur(32px)",
+          fontFamily: "'DM Sans', Arial, sans-serif",
+          fontWeight: 400,
+        }}
+      >
+        {/* Logo Section with Company Name */}
+        <div className="flex-shrink-0 flex items-center gap-3">
+          <Link to="/" className="group relative flex items-center gap-3">
+            <div className="relative overflow-hidden rounded-xl p-2 transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-cyan-500/10 group-hover:to-blue-500/10">
+              <img
+                src={img1 || "/placeholder.svg"}
+                alt="logo"
+                className="w-8 h-8 object-contain transition-all duration-500 group-hover:scale-110 group-hover:brightness-110"
+              />
+              <div className="absolute inset-0 bg-gradient-to-r from-cyan-400/0 via-cyan-400/20 to-cyan-400/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700 ease-out" />
+            </div>
+            <div
+              className={`font-bold text-2xl tracking-tight transition-all duration-300 ${
+                theme === "dark" ? "text-white group-hover:text-cyan-400" : "text-gray-900 group-hover:text-cyan-600"
+              }`}
             >
-              {item}
-            </Link>
-            {/* Animated underline effect */}
-            <span className="absolute left-0 -bottom-1 w-0 h-0.5 bg-cyan-400 group-hover:w-full transition-all duration-300 ease-in-out"></span>
-          </li>
-        ))}
+              GLUBS
+            </div>
+          </Link>
+        </div>
 
-        {/* THEME TOGGLE BUTTON - This is the new addition */}
-        <li className="theme-toggle-container">
+        {/* Desktop Navigation - Absolutely Centered */}
+        <div className="hidden lg:block absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
+          <div className="flex items-center space-x-4">
+            {navItems.map((item, index) => {
+              const isActive =
+                location.pathname === `/${item.toLowerCase()}` || (location.pathname === "/" && item === "Home")
+              return (
+                <Link
+                  key={item}
+                  to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
+                  className={`relative px-4 py-2 text-base tracking-wide transition-all duration-300 group font-normal` +
+                    (isActive
+                      ? theme === "dark"
+                        ? " text-cyan-400"
+                        : " text-cyan-600"
+                      : theme === "dark"
+                        ? " text-gray-300 hover:text-white"
+                        : " text-gray-700 hover:text-gray-900"
+                    )}
+                  style={{
+                    animationDelay: `${index * 50}ms`,
+                    fontFamily: "'DM Sans', Arial, sans-serif",
+                    fontWeight: 400,
+                  }}
+                >
+                  <span className="relative z-10">{item}</span>
+
+                  {/* Bottom border effect */}
+                  <div
+                    className={`absolute bottom-0 left-0 h-0.5 bg-gradient-to-r from-cyan-400 to-blue-500 transition-all duration-300 ease-out ${
+                      isActive ? "w-full" : "w-0 group-hover:w-full"
+                    }`}
+                  />
+                </Link>
+              )
+            })}
+          </div>
+        </div>
+
+        {/* Desktop Actions - Keep Enhanced Right Side */}
+        <div className="hidden lg:flex items-center space-x-2 ml-auto">
+          {/* Theme Toggle */}
           <button
             onClick={toggleTheme}
-            className="theme-toggle-btn"
+            className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
+              theme === "dark"
+                ? "bg-gradient-to-r from-yellow-900/20 to-orange-900/20 hover:from-yellow-800/30 hover:to-orange-800/30 text-yellow-400 hover:text-yellow-300 border border-yellow-500/20 hover:border-yellow-400/40"
+                : "bg-gradient-to-r from-blue-100/50 to-purple-100/50 hover:from-blue-200/50 hover:to-purple-200/50 text-blue-600 hover:text-purple-600 border border-blue-200/50 hover:border-purple-300/50"
+            } hover:scale-110 hover:shadow-lg hover:shadow-yellow-500/20`}
             title={`Switch to ${theme === "dark" ? "light" : "dark"} mode`}
-            aria-label="Toggle theme"
           >
             {theme === "dark" ? (
-              <Sun className="w-6 h-6 text-gray-300 hover:text-cyan-400 transition-colors duration-300" />
+              <Sun className="w-5 h-5 transition-all duration-300 group-hover:rotate-180 group-hover:scale-110" />
             ) : (
-              <Moon className="w-6 h-6 text-gray-300 hover:text-cyan-400 transition-colors duration-300" />
+              <Moon className="w-5 h-5 transition-all duration-300 group-hover:rotate-12 group-hover:scale-110" />
             )}
+            <div className="absolute inset-0 bg-gradient-to-r from-yellow-500/0 via-yellow-500/20 to-yellow-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
           </button>
-        </li>
 
-        {isLoggedIn ? (
-          <>
-            {/* Notification Icon */}
-            <li title="Notifications">
+          {isLoggedIn ? (
+            <>
+              {/* Notifications */}
               <Link
                 to="/notifications"
-                className="text-gray-300 hover:text-cyan-400 transition-colors duration-300 relative"
+                className={`relative p-3 rounded-2xl transition-all duration-300 group overflow-hidden ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-cyan-400 border border-gray-700/50 hover:border-cyan-500/30"
+                    : "bg-gray-100/50 hover:bg-gray-200/50 text-gray-600 hover:text-cyan-600 border border-gray-200/50 hover:border-cyan-300/50"
+                } hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20`}
+                title="Notifications"
               >
-                <Bell className="w-6 h-6" />
+                <Bell className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
                 {notificationCount > 0 && (
-                  <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                  <span className="absolute -top-1 -right-1 bg-gradient-to-r from-red-500 via-pink-500 to-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-bounce border-2 border-white dark:border-gray-900">
                     {notificationCount > 9 ? "9+" : notificationCount}
                   </span>
                 )}
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
               </Link>
-            </li>
 
-            <li title="Profile">
-              <Link to={getProfileLink()} className="text-gray-300 hover:text-cyan-400 transition-colors duration-300">
-                <CgProfile size={24} />
+              {/* Profile */}
+              <Link
+                to={getProfileLink()}
+                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
+                  theme === "dark"
+                    ? "bg-gradient-to-r from-cyan-900/30 to-blue-900/30 hover:from-cyan-800/40 hover:to-blue-800/40 text-cyan-400 hover:text-cyan-300 border border-cyan-500/30 hover:border-cyan-400/50"
+                    : "bg-gradient-to-r from-cyan-100/50 to-blue-100/50 hover:from-cyan-200/50 hover:to-blue-200/50 text-cyan-600 hover:text-blue-600 border border-cyan-200/50 hover:border-blue-300/50"
+                } hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20`}
+                title="Profile"
+              >
+                <CgProfile className="w-5 h-5 transition-all duration-300 group-hover:scale-110" />
+                <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
               </Link>
-            </li>
-            <li title="Mark Attendance">
-              <Link to="/qr-scan" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300">
-                <QrCode className="w-6 h-6" />
+
+              {/* QR Scan */}
+              <Link
+                to="/qr-scan"
+                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
+                  theme === "dark"
+                    ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-green-400 border border-gray-700/50 hover:border-green-500/30"
+                    : "bg-gray-100/50 hover:bg-gray-200/50 text-gray-600 hover:text-green-600 border border-gray-200/50 hover:border-green-300/50"
+                } hover:scale-110 hover:shadow-lg hover:shadow-green-500/20`}
+                title="QR Scan"
+              >
+                <QrCode className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" />
+                <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
               </Link>
-            </li>
-            {/* Logout Button */}
-            <li title="Logout">
+
+              {/* Logout */}
               <button
                 onClick={handleLogout}
-                className="text-gray-300 hover:text-red-500 transition-colors duration-300"
+                className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${
+                  theme === "dark"
+                    ? "bg-gradient-to-r from-red-900/30 to-pink-900/30 hover:from-red-800/40 hover:to-pink-800/40 text-red-400 hover:text-red-300 border border-red-500/30 hover:border-red-400/50"
+                    : "bg-gradient-to-r from-red-100/50 to-pink-100/50 hover:from-red-200/50 hover:to-pink-200/50 text-red-600 hover:text-red-700 border border-red-200/50 hover:border-red-300/50"
+                } hover:scale-110 hover:shadow-lg hover:shadow-red-500/20`}
+                title="Logout"
               >
-                <RiLogoutCircleLine className="w-6 h-6" />
+                <RiLogoutCircleLine className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
+                <div className="absolute inset-0 bg-gradient-to-r from-red-500/0 via-red-500/20 to-red-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
               </button>
-            </li>
-          </>
-        ) : (
-          // Login Button
-          <li title="Login">
-            <Link to="/auth" className="text-gray-300 hover:text-cyan-400 transition-colors duration-300">
-              <BiLogIn className="w-6 h-6" />
+            </>
+          ) : (
+            <Link
+              to="/auth"
+              className={`px-6 py-3 rounded-2xl font-semibold transition-all duration-300 group relative overflow-hidden ${
+                theme === "dark"
+                  ? "bg-gradient-to-r from-cyan-600 via-blue-600 to-purple-600 hover:from-cyan-500 hover:via-blue-500 hover:to-purple-500 text-white shadow-lg shadow-cyan-500/25 hover:shadow-xl hover:shadow-cyan-500/40"
+                  : "bg-gradient-to-r from-cyan-500 via-blue-500 to-purple-500 hover:from-cyan-600 hover:via-blue-600 hover:to-purple-600 text-white shadow-lg shadow-blue-500/25 hover:shadow-xl hover:shadow-blue-500/40"
+              } hover:scale-105 border border-white/20`}
+              title="Login"
+            >
+              <span className="relative z-10 flex items-center gap-2">
+                <BiLogIn className="w-5 h-5 transition-transform duration-300 group-hover:scale-110" />
+                Login
+              </span>
+              <div className="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-700" />
             </Link>
-          </li>
-        )}
-      </ul>
+          )}
+        </div>
 
-      {/* Mobile Hamburger */}
-      <div className="sm:hidden flex items-center">
-        <button onClick={() => setMenuOpen(!menuOpen)} className="text-white text-2xl focus:outline-none">
-          {menuOpen ? "✖" : "☰"}
-        </button>
-      </div>
+        {/* Mobile Menu Button - Moved to Right */}
+        <div className="lg:hidden flex items-center ml-auto">
+          <button
+            onClick={() => setMenuOpen(!menuOpen)}
+            className={`p-2 rounded-lg transition-all duration-300 ${
+              theme === "dark"
+                ? "text-gray-300 hover:text-white hover:bg-gray-800/50"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-100/50"
+            } hover:scale-105 active:scale-95`}
+            aria-label="Toggle menu"
+          >
+            {menuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
+          </button>
+        </div>
+      </nav>
 
       {/* Mobile Dropdown */}
       {menuOpen && (
-        <div className="sm:hidden absolute top-20 right-4 bg-gray-900/90 backdrop-blur-md p-6 rounded-xl shadow-lg min-w-[180px] z-50 border border-gray-700/50">
+        <div className="lg:hidden absolute top-20 right-4 bg-gray-900/90 backdrop-blur-md p-6 rounded-xl shadow-lg min-w-[180px] z-[10000] border border-gray-700/50">
           <ul className="flex flex-col space-y-4">
             {["Home", "About", "Events", "Clubs"].map((item) => (
               <li key={item}>
@@ -233,7 +324,6 @@ const Navbar = React.memo(function Navbar() {
                 </Link>
               </li>
             ))}
-
             {/* Mobile Theme Toggle */}
             <li>
               <button
@@ -247,7 +337,6 @@ const Navbar = React.memo(function Navbar() {
                 {theme === "dark" ? "Light Mode" : "Dark Mode"}
               </button>
             </li>
-
             {isLoggedIn ? (
               <>
                 <li>
@@ -309,8 +398,8 @@ const Navbar = React.memo(function Navbar() {
           </ul>
         </div>
       )}
-    </nav>
+    </>
   )
-});
+})
 
-export default Navbar;
+export default Navbar
