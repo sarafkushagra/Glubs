@@ -703,114 +703,100 @@ const EventLanding = () => {
           </div>
 
           {/* Split Screen Content */}
-          <div className="flex min-h-screen">
+          <div className="flex h-screen overflow-hidden">
             {/* Left Panel - Events List (30%) */}
-            <div className="w-[30%] border-r border-gray-700/50 overflow-y-auto hide-scrollbar">
-              <div className="p-6">
-                {/* Events List */}
-                <div className="space-y-3">
-                  {filteredEvents.length === 0 ? (
-                    <div className="text-center py-20">
-                      <div className={`${themeClasses.card} border rounded-xl p-12`}>
-                        <Calendar className={`w-16 h-16 ${themeClasses.textMuted} mx-auto mb-4`} />
-                        <h3 className={`text-xl font-semibold ${themeClasses.textSecondary} mb-2`}>No events found</h3>
-                        <p className={themeClasses.textMuted}>Try adjusting your search or filters</p>
-                      </div>
-                    </div>
-                  ) : (
-                    filteredEvents.map((event) => {
-                      const config = eventTypeConfig[event.eventType] || eventTypeConfig.Other
-                      const IconComponent = config.icon
-                      const daysLeft = getDaysLeft(event.date)
-                      const isSelected = selectedEvent && selectedEvent._id === event._id
-                      return (
-                        <div
-                          key={event._id}
-                          onClick={() => handleEventClick(event)}
-                          className={`${themeClasses.card} border ${
-                            isSelected ? "border-indigo-500 ring-2 ring-indigo-500/30" : themeClasses.cardHover
-                          } rounded-lg transition-all duration-300 overflow-hidden cursor-pointer hover:shadow-lg`}
-                        >
-                          {/* Event Header */}
-                          <div
-                            className={`${isDarkMode ? config.bgColorDark : config.bgColor} border-b ${isDarkMode ? "border-gray-700/50" : "border-gray-200"} p-3`}
-                          >
-                            <div className="flex items-center justify-between mb-2">
-                              <div
-                                className={`flex items-center gap-1 px-2 py-1 rounded-full border ${isDarkMode ? config.colorDark : config.color} text-xs font-medium`}
-                              >
-                                <IconComponent className="w-2 h-2" />
-                                {event.eventType || "Event"}
-                              </div>
-                              {daysLeft <= 7 && daysLeft > 0 && (
-                                <div
-                                  className={`flex items-center gap-1 ${isDarkMode ? "bg-red-900/30 border-red-500/30 text-red-300" : "bg-red-100 border-red-300 text-red-700"} px-2 py-1 rounded-full text-xs font-medium border`}
-                                >
-                                  <Clock className="w-2 h-2" />
-                                  {daysLeft}d
-                                </div>
-                              )}
-                            </div>
-                            <h3 className={`text-sm font-bold ${themeClasses.text} line-clamp-2 mb-1`}>
-                              {event.title}
-                            </h3>
-                            <p className={`${themeClasses.textMuted} text-xs line-clamp-1`}>
-                              {event.description || "No description available"}
-                            </p>
-                          </div>
-                          {/* Event Details */}
-                          <div className="p-3">
-                            <div className="space-y-1 mb-3">
-                              <div className={`flex items-center gap-2 text-xs ${themeClasses.textSecondary}`}>
-                                <Calendar className="w-2 h-2 text-indigo-500" />
-                                {new Date(event.date).toLocaleDateString("en-US", {
-                                  month: "short",
-                                  day: "numeric",
-                                })}
-                              </div>
-                              <div className={`flex items-center gap-2 text-xs ${themeClasses.textSecondary}`}>
-                                <Users className="w-2 h-2 text-blue-500" />
-                                {event.registeredUsers?.length || 0} registered
-                              </div>
-                            </div>
-                            {/* Prize Pool */}
-                            {event.prizePool && (
-                              <div className="mb-3">
-                                <div className={`text-lg font-bold ${themeClasses.text}`}>
-                                  ₹ {event.prizePool.toLocaleString()}
-                                </div>
-                                <div className="text-indigo-500 text-xs">Prize Pool</div>
-                              </div>
-                            )}
-                            {/* Registration Status */}
-                            {/* <div
-                              className={`text-xs px-2 py-1 rounded text-center font-medium ${
-                                isUserRegistered(event)
-                                  ? isDarkMode
-                                    ? "bg-green-900/30 text-green-300"
-                                    : "bg-green-100 text-green-700"
-                                  : isDarkMode
-                                    ? "bg-indigo-900/30 text-indigo-300"
-                                    : "bg-indigo-100 text-indigo-700"
-                              }`}
-                            >
-                              {isUserRegistered(event) ? "✓ Registered" : "Click to Register"}
-                            </div> */}
-                          </div>
-                        </div>
-                      )
-                    })
+
+
+  <div className={`w-[30%] overflow-y-auto hide-scrollbar border-r rounded-2xl border-gray-200 dark:border-gray-700 ${themeClasses.background}`}>
+
+    <div className="p-6 space-y-3">
+      {filteredEvents.length === 0 ? (
+        <div className="text-center text-gray-500 dark:text-gray-400">No events found</div>
+      ) : (
+        filteredEvents.map((event) => {
+          const config = eventTypeConfig[event.eventType] || eventTypeConfig.Other
+          const IconComponent = config.icon
+          const daysLeft = getDaysLeft(event.date)
+          const isSelected = selectedEvent && selectedEvent._id === event._id
+
+          return (
+            <div
+              key={event._id}
+              onClick={() => handleEventClick(event)}
+              title={event.title}
+              className={`flex items-start gap-4 p-4 rounded-2xl border shadow-sm transition-all duration-200 cursor-pointer group hover:shadow-md hover:-translate-y-0.5 
+                ${
+                  isSelected
+                    ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-400 dark:border-indigo-600"
+                    : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                }`}
+            >
+              <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                {event.image ? (
+                  <img src={event.image} alt="Event" className="w-full h-full object-cover" />
+                ) : (
+                  <IconComponent className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                )}
+              </div>
+
+              <div className="flex-1">
+                <div className="mb-1">
+                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">
+                    {event.title}
+                  </h3>
+                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    {event.host || "Unknown Host"}
+                  </p>
+                </div>
+
+                <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mt-1">
+                  <div className="flex items-center gap-1">
+                    <Users className="w-4 h-4 text-indigo-500" />
+                    {event.registeredUsers?.length || 0} Registered
+                  </div>
+                  <div className="flex items-center gap-1">
+                    <Clock className="w-4 h-4 text-yellow-500" />
+                    {daysLeft > 0 ? `${daysLeft} days left` : "Closed"}
+                  </div>
+                </div>
+
+                {event.prizePool && (
+                  <div className="mt-2">
+                    <span className="inline-block bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                      🏆 ₹{event.prizePool.toLocaleString()}
+                    </span>
+                  </div>
+                )}
+
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {(event.tags || []).slice(0, 3).map((tag, index) => (
+                    <span
+                      key={index}
+                      className="text-xs px-2 py-0.5 border rounded-full text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 bg-transparent"
+                    >
+                      {tag}
+                    </span>
+                  ))}
+                  {event.tags?.length > 3 && (
+                    <span className="text-xs px-2 py-0.5 text-gray-400 border border-gray-300 dark:border-gray-600 rounded-full">
+                      +{event.tags.length - 3}
+                    </span>
                   )}
                 </div>
               </div>
             </div>
+          )
+        })
+      )}
+    </div>
+  </div>
 
             {/* Right Panel - Event Details (70%) */}
-            <div className="w-[70%] overflow-y-auto hide-scrollbar">
+            <div className="w-full lg:w-[70%] h-full overflow-y-auto hide-scrollbar">
               {selectedEvent ? (
                 <div className="p-8">
                   {detailsLoading ? (
-                    <div className="flex justify-center items-center py-20">
+                    <div className="flex sticky justify-center items-center py-20">
                       <Loader2 className="animate-spin text-indigo-500 w-8 h-8" />
                     </div>
                   ) : (
@@ -1129,17 +1115,17 @@ const EventLanding = () => {
                                       ? "Find Team"
                                       : "Register Now"}
                             </button>
-                            {selectedEvent.participationType === "Team" && (
+                            {/* {selectedEvent.participationType === "Team" && (
                               <button
                                 onClick={() => {
                                   navigate(`/events/${selectedEvent._id}/team-room`)
                                 }}
                                 className={`w-full py-2 rounded-lg font-semibold transition-all duration-300 ${themeClasses.button} mt-2`}
                               >
-                                <Users className="w-4 h-4" />
-                                {isUserRegistered(selectedEvent) ? "Team Room" : "Find Team"}
+                                {/* <Users className="w-4 h-4" />
+                                {isUserRegistered(selectedEvent) ? "Team Room" : "Find Team"} 
                               </button>
-                            )}
+                            )} */}
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={() => setShowShareModal(true)}

@@ -21,6 +21,7 @@ import {
   CheckCircle,
   Loader2,
 } from "lucide-react"
+import { toast} from "react-toastify"
 
 const EventRegistrationForm = () => {
   const navigate = useNavigate()
@@ -34,6 +35,7 @@ const EventRegistrationForm = () => {
   // Check if user has permission
   useEffect(() => {
     if (!user || (user.role !== "club-admin" && user.role !== "admin")) {
+      toast("You are not authorized to create or edit events")
       navigate("/events")
       return
     }
@@ -261,7 +263,7 @@ const EventRegistrationForm = () => {
 
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) return
-const token = localStorage.getItem('token');
+const token = localStorage.getItem('glubsToken');
 
     try {
       setLoading(true)

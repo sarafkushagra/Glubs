@@ -147,6 +147,29 @@ const EventDetails = () => {
 };
 
 
+const handleSubmit = async () => {
+  setSubmitting(true);
+  try {
+    await axios.post("http://localhost:3000/feedback", {
+      event: eventId,
+      rating,
+      review,
+    });
+
+    // ✅ Refresh feedbacks after submit
+    fetchFeedbacks();
+
+    // Optionally clear the form
+    setReview("");
+    setRating(0);
+    setShowFeedbackForm(false);
+  } catch (err) {
+    console.error("Error submitting feedback:", err);
+  } finally {
+    setSubmitting(false);
+  }
+};
+
 
   const handleRegister = async () => {
     // If it's a team event, redirect to team room instead of direct registration
@@ -576,7 +599,7 @@ const EventDetails = () => {
           <Star key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" />
         ))
       }
-      fetchFeedbacks={fetchFeedbacks} // passed to FeedbackSection so it can refresh
+      // fetchFeedbacks={fetchFeedbacks} // passed to FeedbackSection so it can refresh
     />
 
           </div>
@@ -648,15 +671,7 @@ const EventDetails = () => {
                         ? "Find Team"
                         : "Register Now"}
               </button>
-              {event.participationType === "Team" && (
-                <button
-                  onClick={() => navigate(`/events/${eventId}/team-room`)}
-                  className={`w-full py-3 rounded-xl font-semibold transition-all duration-300 mt-3 ${themeClasses.button} border`}
-                >
-                  <Users className="w-4 h-4 inline mr-2" />
-                  {isUserRegistered() ? "Team Room" : "Find Team"}
-                </button>
-              )}
+
               <div className="flex gap-2 mt-4">
                 <button
                   onClick={() => setShowShareModal(true)}

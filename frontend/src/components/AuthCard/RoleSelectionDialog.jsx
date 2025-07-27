@@ -26,6 +26,15 @@ const RoleSelectionDialog = () => {
         { withCredentials: true }
       );
       toast.success("Role request submitted successfully");
+
+      const gUser = localStorage.getItem("glubsUser");
+      if (gUser) {
+        const parsedUser = JSON.parse(gUser);
+        parsedUser.requestedRole = selected;
+        localStorage.setItem("glubsUser", JSON.stringify(parsedUser));
+      }
+
+
       navigate("/events");
     } catch (err) {
       console.log(err);
@@ -60,8 +69,8 @@ const RoleSelectionDialog = () => {
             <button
               onClick={() => setSelected("student")}
               className={`w-full py-3 px-4 rounded-lg border text-left transition-all ${selected === "student"
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 hover:border-blue-500"
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 hover:border-blue-500"
                 }`}
             >
               <span className="font-medium">I'm a Student</span>
@@ -73,8 +82,8 @@ const RoleSelectionDialog = () => {
             <button
               onClick={() => setSelected("club-admin")}
               className={`w-full py-3 px-4 rounded-lg border text-left transition-all ${selected === "club-admin"
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 hover:border-blue-500"
+                ? "bg-blue-600 text-white border-blue-600"
+                : "bg-white dark:bg-gray-800 text-gray-800 dark:text-white border-gray-300 dark:border-gray-600 hover:border-blue-500"
                 }`}
             >
               <span className="font-medium">I'm a Club-Admin</span>

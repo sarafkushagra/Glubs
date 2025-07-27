@@ -309,7 +309,7 @@ const Navbar = React.memo(function Navbar() {
 
       {/* Mobile Dropdown */}
       {menuOpen && (
-        <div className="lg:hidden absolute top-20 right-4 bg-gray-900/90 backdrop-blur-md p-6 rounded-xl shadow-lg min-w-[180px] z-[10000] border border-gray-700/50">
+        <div className="lg:hidden fixed top-20 right-4 bg-gray-900/90 backdrop-blur-md p-6 rounded-xl shadow-lg min-w-[180px] z-[10000] border border-gray-700/50">
           <ul className="flex flex-col space-y-4">
             {["Home", "About", "Events", "Clubs"].map((item) => (
               <li key={item}>
