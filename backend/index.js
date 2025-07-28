@@ -6,10 +6,13 @@ const mongoose = require("mongoose");
 
 const app = express();
 
+app.use(express.json({ limit: "20mb" }))
+app.use(express.urlencoded({ extended: true, limit: "20mb" }))
+
 // Middleware
 app.use(cors({ origin: ["http://localhost:5173","https://glubs.vercel.app"], credentials: true }));
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+// app.use(express.json());
+// app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
 
 // MongoDB Connection

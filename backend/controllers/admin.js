@@ -3,7 +3,7 @@ const User = require("../schema/user");
 
 
 exports.getPendingClubAdmins = async (req, res) => {
-  const pending = await User.find({ role: "pending-club-admin" }).select("-password");
+  const pending = await User.find({ requestedRole: "pending-club-admin" }).select("-password");
   res.status(200).json({ users: pending });
 };
 
@@ -11,14 +11,18 @@ exports.getPendingClubAdmins = async (req, res) => {
 exports.approveClubAdmin = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
-    if (!user || user.role !== "pending-club-admin") {
+    if (!user || user.requestedRole !== "pending-club-admin") {
       return res.status(400).json({ message: "Invalid user or role" });
     }
 
     user.role = "club-admin";
+    user.requestedRole = null;
     await User.findByIdAndUpdate(
       req.params.id,
-      { role: user.role },
+      { 
+        role: user.role ,
+        requestedRole: user.requestedRole
+      },
       { new: true }
     );
 

@@ -46,6 +46,12 @@ const userSchema = new mongoose.Schema(
       required: true,
     },
 
+    requestedRole: {
+      type: String,
+      enum: ["pending-club-admin"],
+      default: null,
+    },
+
     age: {
       type : Number,
     },
