@@ -15,6 +15,16 @@ const sendEmail = async (options) => {
       to: options.email,
       subject: options.subject,
       html: options.html,
+            attachments: options.qrImageBase64
+        ? [
+            {
+              filename: "qrcode.png",
+              content: options.qrImageBase64.split("base64,")[1],
+              encoding: "base64",
+              cid: "qrcodeimg", // same as used in HTML: <img src="cid:qrcodeimg">
+            },
+          ]
+        : [],
     };
 
     const info = await transporter.sendMail(mailOptions);
