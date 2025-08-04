@@ -10,7 +10,7 @@ import QRCodeGenerator from "./QR/QR_Generator";
 import QRScanner from "./QR/QR_Scanner";
 import MyProfile from "./Users/MyProfile";
 import HostOpportunityPage from "./Hosts/HostLandingPage";
-import ClubAdminDashboard from "./DashBoard/ClubAdminDashboard";
+import AdminDashboard from "./DashBoard/AdminDashboard";
 import ClubDetails from "./Clubs/ClubDetails";
 import ClubMembers from "./Clubs/ClubMembers";
 import ClubEvents from "./Clubs/ClubEvents";
@@ -53,7 +53,6 @@ export default function Router() {
     <Routes>
       <Route path="/" element={<LandingPage />} />
       <Route path="/about" element={<About />} />
-
       <Route path="/auth" element={<AuthCard />} />
       <Route path="/auth/signin" element={<SignInForm />} />
       <Route path="/auth/signup" element={<SignUpForm />} />
@@ -62,7 +61,6 @@ export default function Router() {
       <Route path="/verify-otp" element={<VerifyOTPAndReset />} />
       <Route path="/reset-success" element={<ResetSuccess />} />
       <Route path="/unauthorized" element={<UnauthorizedPage />} />
-      {/* For Wrong URL */}
       <Route path="*" element={<NotFound />} />
       <Route path="/events" element={<EventLanding />} />
       <Route path="/clubs" element={<AllClubs />} />
@@ -70,7 +68,6 @@ export default function Router() {
       <Route path="/events/:eventId/team-room" element={<TeamRoomPage />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/role-selection" element={<RoleSelectionDialog />} />
-
 
       {/* All users allowed but after verification  */}
       <Route element={<ProtectedRoute allowedRoles={["student","club-admin","admin","pending-club-admin"]} />}>
@@ -102,7 +99,7 @@ export default function Router() {
 
       <Route element={<ProtectedRoute allowedRoles={"admin"} />}>
         <Route path="/allusers" element={<AllUsers />} />
-        <Route path="/clubadmin/dash" element={<ClubAdminDashboard />} />
+        <Route path="/admin/dash" element={<AdminDashboard />} />
         <Route path="/users/details/:id" element={<UsersDetails />} />
       </Route>
 

@@ -85,7 +85,7 @@ const Navbar = React.memo(function Navbar() {
     if (userData) {
       const role = JSON.parse(userData).role
       if (role === "student" || role === "club-admin") return "/profile"
-      if (role === "admin") return "/clubadmin/dash"
+      if (role === "admin") return "/admin/dash"
     }
     return "/"
   }

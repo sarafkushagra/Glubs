@@ -1,4 +1,3 @@
-
 const mongoose = require("mongoose");
 const User = require("../schema/user");
 const Team = require("../schema/team");

@@ -5,7 +5,7 @@ const clubSchema = new mongoose.Schema({
     description: String,
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
     events: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true }],
-    category: { type: String, enum: ['Sports', 'Arts', 'Technology', 'Environment', 'Academic', 'Literature'], required: true , default: 'arts' },
+    category: { type: String, enum: ['Sports', 'Arts', 'Technology', 'Environment', 'Academic', 'Literature'], required: true, default: 'arts' },
 }, { timestamps: true });
 
 module.exports = mongoose.model('Club', clubSchema);

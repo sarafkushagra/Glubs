@@ -88,7 +88,6 @@ const AllClubs = () => {
   const [search, setSearch] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('All');
   const [favorites, setFavorites] = useState(() => {
-    // Optionally persist favorites in localStorage
     const fav = localStorage.getItem('clubFavorites');
     return fav ? JSON.parse(fav) : [];
   });
@@ -116,17 +115,17 @@ const AllClubs = () => {
     fetchClubs();
   }, []);
   const filteredClubs = clubs.filter((club) => {
-  const name = club.name || '';
-  const description = club.description || '';
-  const matchesSearch =
-    name.toLowerCase().includes(search.toLowerCase()) ||
-    description.toLowerCase().includes(search.toLowerCase());
-  const matchesCategory =
-    selectedCategory === 'All' || club.category === selectedCategory;
-  const matchesFavorite =
-    !showOnlyFavorites || favorites.includes(club._id);
-  return matchesSearch && matchesCategory && matchesFavorite;
-});
+    const name = club.name || '';
+    const description = club.description || '';
+    const matchesSearch =
+      name.toLowerCase().includes(search.toLowerCase()) ||
+      description.toLowerCase().includes(search.toLowerCase());
+    const matchesCategory =
+      selectedCategory === 'All' || club.category === selectedCategory;
+    const matchesFavorite =
+      !showOnlyFavorites || favorites.includes(club._id);
+    return matchesSearch && matchesCategory && matchesFavorite;
+  });
 
 
   if (loading) return <div className="flex justify-center items-center h-40 text-white">Loading...</div>;
@@ -193,12 +192,12 @@ const AllClubs = () => {
                 key={category}
                 onClick={() => setSelectedCategory(category)}
                 className={`rounded-full px-4 py-2 text-sm font-semibold border-2 transition-all duration-200 ${selectedCategory === category
-                    ? isDarkMode
-                      ? 'bg-indigo-700 border-indigo-400 text-white shadow'
-                      : 'bg-indigo-200 border-indigo-400 text-indigo-900 shadow'
-                    : isDarkMode
-                      ? 'bg-gray-900/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white hover:border-indigo-400'
-                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-indigo-700 hover:border-indigo-400'
+                  ? isDarkMode
+                    ? 'bg-indigo-700 border-indigo-400 text-white shadow'
+                    : 'bg-indigo-200 border-indigo-400 text-indigo-900 shadow'
+                  : isDarkMode
+                    ? 'bg-gray-900/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white hover:border-indigo-400'
+                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-indigo-700 hover:border-indigo-400'
                   }`}
               >
                 {category}
@@ -210,21 +209,21 @@ const AllClubs = () => {
           <Button
             onClick={() => setShowOnlyFavorites((prev) => !prev)}
             className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${showOnlyFavorites
-                ? isDarkMode
-                  ? 'bg-pink-600 text-white'
-                  : 'bg-pink-200 text-pink-900'
-                : isDarkMode
-                  ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              ? isDarkMode
+                ? 'bg-pink-600 text-white'
+                : 'bg-pink-200 text-pink-900'
+              : isDarkMode
+                ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
               }`}
           >
             <Heart className={`h-5 w-5 ${showOnlyFavorites
-                ? isDarkMode
-                  ? 'fill-pink-500 text-pink-200'
-                  : 'fill-pink-400 text-pink-700'
-                : isDarkMode
-                  ? 'text-gray-400'
-                  : 'text-gray-500'
+              ? isDarkMode
+                ? 'fill-pink-500 text-pink-200'
+                : 'fill-pink-400 text-pink-700'
+              : isDarkMode
+                ? 'text-gray-400'
+                : 'text-gray-500'
               }`} />
             {showOnlyFavorites ? 'Show All Clubs' : 'Show Favorites'}
           </Button>

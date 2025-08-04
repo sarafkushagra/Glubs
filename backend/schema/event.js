@@ -55,13 +55,6 @@ const eventSchema = new mongoose.Schema({
       ref: 'User',
     }
   ],
-  comments: [
-    {
-      user: { type: mongoose.Schema.Types.ObjectId, ref: 'User' },
-      text: String,
-      timestamp: { type: Date, default: Date.now }
-    }
-  ],
   feedback: [
     {
       type: mongoose.Schema.Types.ObjectId,
@@ -73,10 +66,10 @@ const eventSchema = new mongoose.Schema({
   commentsCount: { type: Number, default: 0 },
   // Additional fields for the registration form
   prizePool: { type: Number },
-  eligibility: {type :String},
-  rules: {type : String },
-  contactEmail : {type : String},
-  contactPhone: {type :String},
+  eligibility: { type: String },
+  rules: { type: String },
+  contactEmail: { type: String },
+  contactPhone: { type: String },
 
 }, { timestamps: true });
 

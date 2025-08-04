@@ -13,13 +13,11 @@ const signToken = (id) => {
 
 const createSendToken = (user, statusCode, res, message) => {
   const token = signToken(user._id);
-
   const cookieOptions = {
     expires: new Date(
       Date.now() +
       Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
     ),
-
     httpOnly: true,
     secure: true, //only secure in production
     sameSite: "None", //process.env.NODE_ENV === "production" ? "none" :
@@ -122,8 +120,6 @@ exports.verifyAccount = catchAsync(async (req, res, next) => {
 
   await user.save({ validateBeforeSave: false });
 
-  // createSendToken(user, 200, res, "Email has been verified");
-  // Don't issue a token here — just confirm success
   res.status(200).json({
     status: "success",
     message: "Email has been verified. Please login to continue.",

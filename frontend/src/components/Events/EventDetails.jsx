@@ -358,12 +358,6 @@ const handleSubmit = async () => {
                 <Users className="w-5 h-5" />
                 <span className="font-medium">{event.registeredUsers?.length || 0} registered</span>
               </div>
-              {event.views && (
-                <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
-                  <Eye className="w-5 h-5" />
-                  <span className="font-medium">{event.views} views</span>
-                </div>
-              )}
               <div className="flex items-center gap-2 bg-white/20 backdrop-blur-sm px-4 py-2 rounded-full">
                 <Users className="w-4 h-4" />
                 <span className="font-medium">
@@ -675,7 +669,7 @@ const handleSubmit = async () => {
                 <button
                   onClick={() => setShowShareModal(true)}
 
-                  className="w-60 py-2 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
+                  className="w-52 py-2 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
                 >
                   <Share2 className="w-4 h-4 inline mr-2" />
                   Share Event

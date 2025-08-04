@@ -35,7 +35,7 @@ const SignInForm = ({ onSwitch }) => {
       if (data.user.role === "student") {
         navigate("/events");
       } else {
-        navigate("/clubadmin/dash");
+        navigate("/admin/dash");
       }
     } catch (err) {
       const message =
