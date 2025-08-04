@@ -51,7 +51,6 @@ const About = () => {
         <div className="flex gap-4 flex-wrap justify-center">
           <Link to="/events" className={theme === 'dark' ? 'bg-white text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-700 hover:text-white transition-all duration-300 shadow hover:scale-105' : 'bg-indigo-700 text-white font-semibold rounded-full px-6 py-3 hover:bg-white hover:text-indigo-700 transition-all duration-300 shadow hover:scale-105'}>Explore Events</Link>
           <Link to="/clubs" className={theme === 'dark' ? 'border border-white text-white font-semibold rounded-full px-6 py-3 hover:bg-white hover:text-indigo-700 transition-all duration-300 shadow hover:scale-105' : 'border border-indigo-700 text-indigo-700 font-semibold rounded-full px-6 py-3 hover:bg-indigo-700 hover:text-white transition-all duration-300 shadow hover:scale-105'}>Discover Clubs</Link>
-          <Link to="/host" className="bg-green-600 hover:bg-green-700 text-white font-semibold rounded-full px-6 py-3 transition-all duration-300 shadow hover:scale-105">Host an Event</Link>
         </div>
       </section>
 

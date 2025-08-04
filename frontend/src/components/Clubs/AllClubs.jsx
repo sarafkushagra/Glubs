@@ -115,15 +115,19 @@ const AllClubs = () => {
     };
     fetchClubs();
   }, []);
-
   const filteredClubs = clubs.filter((club) => {
-    const matchesSearch =
-      club.name.toLowerCase().includes(search.toLowerCase()) ||
-      (club.description && club.description.toLowerCase().includes(search.toLowerCase()));
-    const matchesCategory = selectedCategory === 'All' || club.category === selectedCategory;
-    const matchesFavorite = !showOnlyFavorites || favorites.includes(club._id);
-    return matchesSearch && matchesCategory && matchesFavorite;
-  });
+  const name = club.name || '';
+  const description = club.description || '';
+  const matchesSearch =
+    name.toLowerCase().includes(search.toLowerCase()) ||
+    description.toLowerCase().includes(search.toLowerCase());
+  const matchesCategory =
+    selectedCategory === 'All' || club.category === selectedCategory;
+  const matchesFavorite =
+    !showOnlyFavorites || favorites.includes(club._id);
+  return matchesSearch && matchesCategory && matchesFavorite;
+});
+
 
   if (loading) return <div className="flex justify-center items-center h-40 text-white">Loading...</div>;
   if (error) return <div className="text-red-500 text-center mt-8">{error}</div>;
@@ -188,15 +192,14 @@ const AllClubs = () => {
               <Button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`rounded-full px-4 py-2 text-sm font-semibold border-2 transition-all duration-200 ${
-                  selectedCategory === category
+                className={`rounded-full px-4 py-2 text-sm font-semibold border-2 transition-all duration-200 ${selectedCategory === category
                     ? isDarkMode
                       ? 'bg-indigo-700 border-indigo-400 text-white shadow'
                       : 'bg-indigo-200 border-indigo-400 text-indigo-900 shadow'
                     : isDarkMode
-                    ? 'bg-gray-900/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white hover:border-indigo-400'
-                    : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-indigo-700 hover:border-indigo-400'
-                }`}
+                      ? 'bg-gray-900/60 border-gray-700 text-gray-300 hover:bg-gray-800 hover:text-white hover:border-indigo-400'
+                      : 'bg-white border-gray-300 text-gray-700 hover:bg-gray-100 hover:text-indigo-700 hover:border-indigo-400'
+                  }`}
               >
                 {category}
               </Button>
@@ -206,25 +209,23 @@ const AllClubs = () => {
         <div className="flex justify-end mb-4">
           <Button
             onClick={() => setShowOnlyFavorites((prev) => !prev)}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${
-              showOnlyFavorites
+            className={`flex items-center gap-2 px-4 py-2 rounded-md font-semibold text-sm transition-all duration-200 ${showOnlyFavorites
                 ? isDarkMode
                   ? 'bg-pink-600 text-white'
                   : 'bg-pink-200 text-pink-900'
                 : isDarkMode
-                ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
-                : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-            }`}
+                  ? 'bg-gray-800 text-gray-300 hover:bg-gray-700'
+                  : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+              }`}
           >
-            <Heart className={`h-5 w-5 ${
-              showOnlyFavorites
+            <Heart className={`h-5 w-5 ${showOnlyFavorites
                 ? isDarkMode
                   ? 'fill-pink-500 text-pink-200'
                   : 'fill-pink-400 text-pink-700'
                 : isDarkMode
-                ? 'text-gray-400'
-                : 'text-gray-500'
-            }`} />
+                  ? 'text-gray-400'
+                  : 'text-gray-500'
+              }`} />
             {showOnlyFavorites ? 'Show All Clubs' : 'Show Favorites'}
           </Button>
         </div>
@@ -267,14 +268,14 @@ const AllClubs = () => {
                               ? 'border-pink-400 bg-pink-900/20 text-pink-200 hover:bg-pink-900/40'
                               : 'border-pink-500 bg-pink-50 text-pink-700 hover:bg-pink-100'
                             : isDarkMode
-                            ? 'border-gray-700 bg-gray-900/40 text-gray-300 hover:bg-gray-800'
-                            : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-100'
-                        }`}
+                              ? 'border-gray-700 bg-gray-900/40 text-gray-300 hover:bg-gray-800'
+                              : 'border-gray-300 bg-white text-gray-500 hover:bg-gray-100'
+                          }`}
                         onClick={() => toggleFavorite(club._id)}
                       >
                         <Heart className={`h-4 w-4 ${favorites.includes(club._id)
                           ? isDarkMode ? 'fill-pink-400 text-pink-200' : 'fill-pink-500 text-pink-700'
-                          : isDarkMode ? 'text-gray-400' : 'text-gray-400'}`}/>
+                          : isDarkMode ? 'text-gray-400' : 'text-gray-400'}`} />
                         {favorites.includes(club._id) ? 'Favorited' : 'Favorite'}
                       </Button>
                     </div>
