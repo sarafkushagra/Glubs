@@ -7,21 +7,32 @@ Glubs is a full-stack, feature-rich platform designed to streamline the manageme
 
 ## 🚀 Built With
 
-![Express.js](https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white)
-![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
-![Vite](https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white)
-![Node.js](https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white)
-![MongoDB](https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white)
-![Mongoose](https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white)
-![EJS](https://img.shields.io/badge/EJS-9B479F?style=for-the-badge&logo=ejs&logoColor=white)
-![JavaScript](https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black)
-![PostCSS](https://img.shields.io/badge/PostCSS-DD3A0A?style=for-the-badge&logo=postcss&logoColor=white)
-![ESLint](https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white)
-![npm](https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white)
-![Axios](https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white)
-![Chart.js](https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white)
-![date-fns](https://img.shields.io/badge/date--fns-5573F4?style=for-the-badge&logo=date-fns&logoColor=white)
+<p align="center">
+  <img src="https://img.shields.io/badge/Express.js-000000?style=for-the-badge&logo=express&logoColor=white" alt="Express.js"/>
+  <img src="https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB" alt="React"/>
+  <img src="https://img.shields.io/badge/Vite-646CFF?style=for-the-badge&logo=vite&logoColor=white" alt="Vite"/>
+  <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"/>
+  <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
+  <img src="https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white" alt="Mongoose"/>
+  <img src="https://img.shields.io/badge/EJS-9B479F?style=for-the-badge&logo=ejs&logoColor=white" alt="EJS"/>
+  <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript"/>
+  <img src="https://img.shields.io/badge/PostCSS-DD3A0A?style=for-the-badge&logo=postcss&logoColor=white" alt="PostCSS"/>
+  <img src="https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white" alt="ESLint"/>
+  <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white" alt="npm"/>
+  <img src="https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white" alt="Axios"/>
+  <img src="https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Chart.js"/>
+  <img src="https://img.shields.io/badge/date--fns-5573F4?style=for-the-badge&logo=date-fns&logoColor=white" alt="date-fns"/>
+</p>
 
+## ✨ Features
+
+- 🧑‍🎓 Student, Admin & ClubAdmin Role-Based Authentication
+- 📧 OTP Email Verification
+- 📊 Club Dashboards with Charts & Stats
+- 📅 Event Creation & Registration
+- 🔍 Member Search & Management
+- 📤 Share & Promote Events
+- 💬 Feedback Submission & Analysis
 
 ## Key Features
 
@@ -42,10 +53,10 @@ Glubs is a full-stack, feature-rich platform designed to streamline the manageme
 | [React Router](https://reactrouter.com/)                                                                     | [MongoDB](https://www.mongodb.com/) with [Mongoose](https://mongoosejs.com/)                                 |
 | [Tailwind CSS](https://tailwindcss.com/)                                                                     | [JWT](https://jwt.io/) for Authentication                                                                    |
 | [Axios](https://axios-http.com/)                                                                             | [Bcrypt.js](https://github.com/dcodeIO/bcrypt.js) for Password Hashing                                       |
-| [Zustand](https://github.com/pmndrs/zustand) for State Management                                            | [Nodemailer](https://nodemailer.com/) for Email Services (OTP, Invitations)                                  |
+| [Lucide React](https://lucide.dev/) for icons                                                                | [Nodemailer](https://nodemailer.com/) for Email Services (OTP, Invitations)                                  |
 | [Recharts](https://recharts.org/) & [Chart.js](https://www.chartjs.org/) for data visualization              | [Faker.js](https://fakerjs.dev/) for database seeding                                                        |
 | [Framer Motion](https://www.framer.com/motion/) for animations                                               | [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS), [Dotenv](https://www.npmjs.com/package/dotenv) |
-| [Lucide React](https://lucide.dev/) for icons                                                                |                                                                                                              |
+                                                                                                                                                                            
 
 ## Getting Started
 
