@@ -14,7 +14,6 @@ const ClubMembers = () => {
     const fetchMembers = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/clubs/${clubId}/members`);
-        console.log("Fetched members:", res.data);
         setMembers(res.data || []);
       } catch (err) {
         setError('Failed to fetch club members');

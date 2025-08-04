@@ -106,7 +106,6 @@ export default function EditHostBasicDetails() {
     try {
       const res = await axios.put(`${import.meta.env.VITE_API_BASE_URL}/event/${id}`, payload);
       alert("Event updated successfully!");
-      console.log(res.data);
       navigate("/events"); // adjust to your desired redirect page
     } catch (err) {
       console.error("Error updating event:", err);

@@ -169,82 +169,6 @@ module.exports.removeMember = async (req, res) => {
   }
 }
 
-// // Send team request
-// module.exports.sendTeamRequest = async (req, res) => {
-//   try {
-//     const { teamId, targetUserId, eventId, message } = req.body
-//     const fromUserId = req.user._id
-
-//     // Validate team exists and user is the leader
-//     const team = await Team.findById(teamId).populate("members")
-//     if (!team) {
-//       return res.status(404).json({ message: "Team not found" })
-//     }
-
-//     if (team.leader.toString() !== fromUserId.toString()) {
-//       return res.status(403).json({ message: "Only team leaders can send invitations" })
-//     }
-
-//     // Check if team is already full
-//     const event = await Event.findById(eventId)
-//     if (team.members.length >= event.teamMax) {
-//       return res.status(400).json({ message: "Team is already full" })
-//     }
-
-//     // Check if target user exists and is available
-//     const targetUser = await User.findById(targetUserId)
-//     if (!targetUser) {
-//       return res.status(404).json({ message: "Target user not found" })
-//     }
-
-//     // Check if target user is already registered for the event
-//     if (event.registeredUsers.includes(targetUserId)) {
-//       return res.status(400).json({ message: "User is already registered for this event" })
-//     }
-
-//     // Check if target user is already in a team for this event
-//     const existingTeam = await Team.findOne({
-//       event: eventId,
-//       members: targetUserId,
-//     })
-//     if (existingTeam) {
-//       return res.status(400).json({ message: "User is already in a team for this event" })
-//     }
-
-//     // Check if there's already a pending request
-//     const existingRequest = await TeamRequest.findOne({
-//       team: teamId,
-//       to: targetUserId,
-//       event: eventId,
-//       status: "pending",
-//     })
-//     if (existingRequest) {
-//       return res.status(400).json({ message: "Request already sent to this user" })
-//     }
-
-//     // Create the team request
-//     const teamRequest = new TeamRequest({
-//       team: teamId,
-//       from: fromUserId,
-//       to: targetUserId,
-//       event: eventId,
-//       message: message || "",
-//       status: "pending",
-//     })
-
-//     await teamRequest.save()
-
-//     res.status(201).json({
-//       message: "Team invitation sent successfully",
-//       request: teamRequest,
-//     })
-//   } catch (error) {
-//     console.error("Error sending team request:", error)
-//     res.status(500).json({ message: "Error sending team request", error: error.message })
-//   }
-// }
-
-// Get team requests for a user in a specific event
 module.exports.getTeamRequests = async (req, res) => {
   try {
     const { eventId } = req.params
@@ -377,90 +301,6 @@ module.exports.getSentRequests = async (req, res) => {
     res.status(500).json({ message: "Error fetching sent requests", error: error.message })
   }
 }
-
-// // Enhanced team request sending with better validation
-// module.exports.sendTeamRequest = async (req, res) => {
-//   try {
-//     const { teamId, targetUserId, eventId, message } = req.body
-//     const fromUserId = req.user._id
-
-//     const Team = require("../schema/team")
-//     const Event = require("../schema/event")
-//     const User = require("../schema/user")
-//     const TeamRequest = require("../schema/teamRequest")
-
-//     // Validate team exists and user is the leader
-//     const team = await Team.findById(teamId).populate("members")
-//     if (!team) {
-//       return res.status(404).json({ message: "Team not found" })
-//     }
-
-//     if (team.leader.toString() !== fromUserId.toString()) {
-//       return res.status(403).json({ message: "Only team leaders can send invitations" })
-//     }
-
-//     // Check if team is already full
-//     const event = await Event.findById(eventId)
-//     if (team.members.length >= event.teamMax) {
-//       return res.status(400).json({ message: "Team is already full" })
-//     }
-
-//     // Check if target user exists and is available
-//     const targetUser = await User.findById(targetUserId)
-//     if (!targetUser) {
-//       return res.status(404).json({ message: "Target user not found" })
-//     }
-
-//     // Check if target user is already registered for the event
-//     if (event.registeredUsers.includes(targetUserId)) {
-//       return res.status(400).json({ message: "User is already registered for this event" })
-//     }
-
-//     // Check if target user is already in a team for this event
-//     const existingTeam = await Team.findOne({
-//       event: eventId,
-//       members: targetUserId,
-//     })
-//     if (existingTeam) {
-//       return res.status(400).json({ message: "User is already in a team for this event" })
-//     }
-
-//     // Check if there's already a pending request
-//     const existingRequest = await TeamRequest.findOne({
-//       team: teamId,
-//       to: targetUserId,
-//       event: eventId,
-//       status: "pending",
-//     })
-//     if (existingRequest) {
-//       return res.status(400).json({ message: "Request already sent to this user" })
-//     }
-
-//     // Create the team request
-//     const teamRequest = new TeamRequest({
-//       team: teamId,
-//       from: fromUserId,
-//       to: targetUserId,
-//       event: eventId,
-//       message: message || "",
-//       status: "pending",
-//     })
-
-//     await teamRequest.save()
-
-//     res.status(201).json({
-//       message: "Team invitation sent successfully",
-//       request: teamRequest,
-//     })
-//   } catch (error) {
-//     console.error("Error sending team request:", error)
-//     res.status(500).json({ message: "Error sending team request", error: error.message })
-//   }
-// }
-
-
-
-// Enhanced team request sending with email notification
 module.exports.sendTeamRequest = async (req, res) => {
   try {
     const { teamId, targetUserId, eventId, message } = req.body
@@ -591,4 +431,3 @@ module.exports.sendTeamRequest = async (req, res) => {
   }
 }
 
-// module.exports = { sendTeamRequest }

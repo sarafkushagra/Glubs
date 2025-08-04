@@ -84,7 +84,6 @@ const Navbar = React.memo(function Navbar() {
     const userData = localStorage.getItem("glubsUser")
     if (userData) {
       const role = JSON.parse(userData).role
-      console.log("User role:", role)
       if (role === "student" || role === "club-admin") return "/profile"
       if (role === "admin") return "/clubadmin/dash"
     }

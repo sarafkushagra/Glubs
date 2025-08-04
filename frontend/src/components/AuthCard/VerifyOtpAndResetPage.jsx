@@ -42,7 +42,6 @@ const VerifyOTPAndReset = () => {
       const redirectPath =
         localStorage.getItem("redirectAfterVerify") || "/events";
       localStorage.removeItem("redirectAfterVerify");
-      console.log(redirectPath)
       navigate("/auth");
     } catch (err) {
       alert("Invalid OTP or server error");

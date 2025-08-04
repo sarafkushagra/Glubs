@@ -26,7 +26,6 @@ module.exports.showEvent = async (req, res) => {
 // 📌 Create Event with Host Fields
 module.exports.createEvent = async (req, res) => {
   try {
-    console.log("Incoming event payload:", req.body);
     const {
       title,
       description,
@@ -227,72 +226,6 @@ exports.registerUserToEvent = async (req, res) => {
   }
 };
 
-
-
-
-// // Register entire team for an event
-// module.exports.registerTeamToEvent = async (req, res) => {
-//   try {
-//     const { eventId } = req.params
-//     const { teamId } = req.body
-//     const userId = req.user._id
-
-//     // Find the event
-//     const event = await Event.findById(eventId)
-//     if (!event) {
-//       return res.status(404).json({ message: "Event not found" })
-//     }
-
-//     // Find the team
-//     const team = await Team.findById(teamId).populate("members")
-//     if (!team) {
-//       return res.status(404).json({ message: "Team not found" })
-//     }
-
-//     // Check if user is team leader
-//     if (team.leader.toString() !== userId.toString()) {
-//       return res.status(403).json({ message: "Only team leaders can register the team" })
-//     }
-
-//     // Check team size requirements
-//     if (team.members.length < event.teamMin) {
-//       return res.status(400).json({
-//         message: `Team needs at least ${event.teamMin} members. Current: ${team.members.length}`,
-//       })
-//     }
-
-//     if (team.members.length > event.teamMax) {
-//       return res.status(400).json({
-//         message: `Team exceeds maximum size of ${event.teamMax} members. Current: ${team.members.length}`,
-//       })
-//     }
-
-//     // Check if any team member is already registered
-//     const memberIds = team.members.map((member) => member._id.toString())
-//     const alreadyRegistered = memberIds.some((memberId) =>
-//       event.registeredUsers.some((regUserId) => regUserId.toString() === memberId),
-//     )
-
-//     if (alreadyRegistered) {
-//       return res.status(400).json({ message: "One or more team members are already registered" })
-//     }
-
-//     // Register all team members
-//     event.registeredUsers.push(...memberIds)
-//     event.registrations = (event.registrations || 0) + team.members.length
-
-//     await event.save()
-
-//     res.json({
-//       message: "Team registered successfully!",
-//       registeredMembers: team.members.length,
-//       teamName: team.name,
-//     })
-//   } catch (error) {
-//     console.error("Error registering team:", error)
-//     res.status(500).json({ message: "Error registering team", error: error.message })
-//   }
-// }
 
 // Enhanced share event functionality
 module.exports.shareEventToWhatsApp = (event) => {

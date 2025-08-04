@@ -165,7 +165,6 @@ const TeamRoomPage = () => {
       const availableRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/available/${eventId}`, {
         withCredentials: true,
       })
-      console.log(availableRes)
       setAvailableUsers(availableRes.data.users)
 
       // Fetch team requests (received)

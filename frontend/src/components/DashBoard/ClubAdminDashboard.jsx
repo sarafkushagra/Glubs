@@ -152,7 +152,6 @@ const fetchPendingRequests = async () => {
   try {
     const data = await apiRequest("/admin/club-admin-requests");
    setPendingRequests(Array.isArray(data.users) ? data.users : []);
-   console.log(data);
   } catch (error) {
     setErrors((prev) => ({ ...prev, requests: error.message }));
     setPendingRequests([]);
@@ -165,7 +164,6 @@ const fetchPendingRequests = async () => {
   const approveClubAdmin = async (requestId) => {
     setLoading((prev) => ({ ...prev, action: true }))
     setErrors((prev) => ({ ...prev, action: null }))
-    console.log(requestId);
     try {
       await apiRequest(`/admin/approve-club-admin/${requestId}`, { method: "POST" })
       setPendingRequests((prev) => prev.filter((req) => req._id !== requestId))

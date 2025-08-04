@@ -19,7 +19,6 @@ export default function MyProfile() {
     const fetchUser = async () => {
       try {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true });
-        console.log("Fetched user:", res.data);
         setUser(res.data.user);
       } catch (error) {
         console.error("Error fetching user:", error);
@@ -34,22 +33,16 @@ export default function MyProfile() {
 
   useEffect(() => {
     if (!user || !user._id) {
-      console.log("User or user._id not available, skipping fetchEvents");
       return;
     }
 
     const fetchEvents = async () => {
       try {
-        console.log("Fetching events for userId:", user._id);
         const [participatedRes, upcomingRes, completedRes] = await Promise.all([
           axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/participated/${user._id}`, { withCredentials: true }),
           axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/upcoming/${user._id}`, { withCredentials: true }),
           axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/completed/${user._id}`, { withCredentials: true }),
         ]);
-
-        console.log("Participated Events:", participatedRes.data);
-        console.log("Upcoming Events:", upcomingRes.data);
-        console.log("Completed Events:", completedRes.data);
 
         setParticipatedEvents(participatedRes.data || []);
         setUpcomingEvents(upcomingRes.data || []);

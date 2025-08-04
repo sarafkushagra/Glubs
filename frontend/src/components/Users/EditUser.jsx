@@ -6,7 +6,6 @@ import Navbar from "../Pages/Navbar";
 
 export default function EditProfile() {
   const { id } = useParams();
-  console.log("Editing user with ID:", id);
   const navigate = useNavigate();
   const [user, setUser] = useState({
     username: "",
@@ -26,7 +25,6 @@ export default function EditProfile() {
         const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/details/${id}`, {
           withCredentials: true,
         });
-        console.log(res.data);
         
         setUser({
           username: res.data.username || "",

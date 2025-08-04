@@ -304,7 +304,6 @@ const handleSubmit = async () => {
   const IconComponent = config.icon
   const daysLeft = getDaysLeft(event.date)
   const isOwner = user && event.createdBy && event.createdBy._id === user._id
-  console.log(user, event.createdBy);
   return (
     <div className={`min-h-screen ${themeClasses.background}`}>
       <Navbar />

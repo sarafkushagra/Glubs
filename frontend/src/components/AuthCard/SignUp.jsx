@@ -69,15 +69,11 @@ const SignUpForm = ({ onSwitch }) => {
       setLoading(false);
       return;
     }
-
-    console.log(formData);
-
     try {
       const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/users/signup`, formData, {
         withCredentials: true,
       });
 
-      console.log(response.data)
       const { data, token } = response.data;
 
       setAuth({ user : data.user, token });
