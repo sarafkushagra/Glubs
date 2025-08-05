@@ -28,7 +28,7 @@ module.exports.createClub = async (req, res) => {
 };
 
 module.exports.showClub = async (req, res) => {
-    const club = await Club.findById(req.params.id);
+    const club = await Club.findById(req.params.id).populate('createdBy', 'username');
     res.json(club);
 };
 
