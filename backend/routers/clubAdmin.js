@@ -3,15 +3,14 @@ const router = express.Router()
 const clubAdminController = require("../controllers/clubAdmin")
 const { isAuthenticated } = require("../middlewares/auth")
 
-// Middleware to check if user is club-admin
+// Middleware to check if user is club admin
 const isClubAdmin = (req, res, next) => {
-  if (req.user.role !== "club-admin") {
-    return res.status(403).json({ message: "Access denied. Club admin role required." })
+  if (req.user.role !== "club-admin" && req.user.role !== "admin") {
+    return res.status(403).json({ message: "Access denied. Club admin privileges required." })
   }
   next()
 }
 
-// Club admin dashboard routes
 router.get("/dashboard", isAuthenticated, isClubAdmin, clubAdminController.getDashboardData)
 router.get("/requests", isAuthenticated, isClubAdmin, clubAdminController.getJoinRequests)
 router.patch("/requests/:requestId", isAuthenticated, isClubAdmin, clubAdminController.handleJoinRequest)

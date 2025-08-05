@@ -83,12 +83,18 @@ export default function MyProfile() {
         {/* Profile Header Section */}
         <div className="relative w-full bg-black shadow-sm border-b border-gray-800 px-4 sm:px-8 pt-20 pb-8 flex flex-col sm:flex-row items-center sm:items-end gap-8 z-10">
           {/* Edit Profile button on top right for desktop */}
-          <div className="hidden md:flex absolute right-8 top-24 z-20">
+          <div className="hidden md:flex absolute right-8 gap-2  top-24 z-20">
+            <Link to={`/my-join-requests`}
+              className=""
+            >
+              <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-6 py-2 rounded transition shadow">Applied Clubs</button>
+            </Link>
             <Link to={`/users/edit/${user._id}`}
               className=""
             >
               <button className="bg-indigo-600 hover:bg-indigo-700 text-white text-sm font-semibold px-6 py-2 rounded transition shadow">Edit Profile</button>
             </Link>
+            
           </div>
           {/* Avatar and Info/Stats Responsive Layout */}
           <div className="w-full flex flex-col md:flex-row items-center md:items-end gap-8">

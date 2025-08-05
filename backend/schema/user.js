@@ -1,6 +1,6 @@
-const mongoose = require("mongoose");
-const validator = require("validator");
-const bcrypt = require("bcryptjs");
+const mongoose = require("mongoose")
+const validator = require("validator")
+const bcrypt = require("bcryptjs")
 
 const userSchema = new mongoose.Schema(
   {
@@ -15,7 +15,7 @@ const userSchema = new mongoose.Schema(
 
     email: {
       type: String,
-      required: [true, "Please Proovide an email"],
+      required: [true, "Please Provide an email"],
       unique: true,
       lowercase: true,
       validate: [validator.isEmail, "Please provide a valid email"],
@@ -33,7 +33,7 @@ const userSchema = new mongoose.Schema(
       required: [true, "Please Confirm your password"],
       validate: {
         validator: function (el) {
-          return el === this.password;
+          return el === this.password
         },
         message: "Passwords are not same",
       },
@@ -53,29 +53,40 @@ const userSchema = new mongoose.Schema(
     },
 
     age: {
-      type : Number,
+      type: Number,
     },
 
     yearOfStudy: {
-      type : String,
+      type: String,
       enum: ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"],
-      default: "1st Year",  
-      required: true
+      default: "1st Year",
+      required: true,
     },
 
     department: {
-      type :String,
+      type: String,
     },
 
-    isClubMember: { 
-      type: Boolean, 
-      default: false 
+    isClubMember: {
+      type: Boolean,
+      default: false,
     },
-    
-    club: { 
-      type: mongoose.Schema.Types.ObjectId,
-       ref: "Club", default: null 
-    },
+
+    // Support multiple club memberships
+    memberOfClubs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Club",
+      },
+    ],
+
+    // Clubs this user administers
+    adminOfClubs: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Club",
+      },
+    ],
 
     isVerified: {
       type: Boolean,
@@ -107,23 +118,19 @@ const userSchema = new mongoose.Schema(
       default: Date.now,
     },
   },
-  { timestamps: true }
-);
+  { timestamps: true },
+)
 
 userSchema.pre("save", async function (next) {
-  if (!this.isModified("password")) return next();
+  if (!this.isModified("password")) return next()
 
-  this.password = await bcrypt.hash(this.password, 12);
+  this.password = await bcrypt.hash(this.password, 12)
 
-  this.passwordConfirm = undefined;
+  this.passwordConfirm = undefined
 
-  next();
-});
+  next()
+})
 
-userSchema.methods.correctPassword = async function (password, userPassword) {
-  return await bcrypt.compare(password, userPassword);
-};
+userSchema.methods.correctPassword = async (password, userPassword) => await bcrypt.compare(password, userPassword)
 
-//const User = mongoose.model("User", userSchema);
-// ...existing code...
-module.exports = mongoose.models.User || mongoose.model("User", userSchema);
+module.exports = mongoose.models.User || mongoose.model("User", userSchema)

@@ -150,7 +150,7 @@ const fetchPendingRequests = async () => {
   setLoading((prev) => ({ ...prev, requests: true }));
   setErrors((prev) => ({ ...prev, requests: null }));
   try {
-    const data = await apiRequest("/admin/club-admin-requests");
+    const data = await apiRequest("/admin/admin-requests");
    setPendingRequests(Array.isArray(data.users) ? data.users : []);
   } catch (error) {
     setErrors((prev) => ({ ...prev, requests: error.message }));
@@ -165,7 +165,7 @@ const fetchPendingRequests = async () => {
     setLoading((prev) => ({ ...prev, action: true }))
     setErrors((prev) => ({ ...prev, action: null }))
     try {
-      await apiRequest(`/admin/approve-club-admin/${requestId}`, { method: "POST" })
+      await apiRequest(`/admin/approve-admin/${requestId}`, { method: "POST" })
       setPendingRequests((prev) => prev.filter((req) => req._id !== requestId))
       alert("Request approved successfully!")
     } catch (error) {
