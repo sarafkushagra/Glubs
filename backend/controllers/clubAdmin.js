@@ -1,8 +1,9 @@
 const Club = require("../schema/club")
 const User = require("../schema/user")
-const ClubJoinRequest = require("../schema/clubAdmin")
+const ClubJoinRequest = require("../schema/clubJoinRequest") // Fixed import path
 const Event = require("../schema/event")
 const sendEmail = require("../utils/email")
+const { request } = require("express")
 
 // Get club admin dashboard data
 exports.getDashboardData = async (req, res) => {
@@ -56,14 +57,17 @@ exports.getJoinRequests = async (req, res) => {
   try {
     const { status = "pending", clubId } = req.query
 
+    let clubFilter = req.user.adminOfClubs || []
+
+    if (clubId && clubFilter.includes(clubId)) {
+      clubFilter = [clubId] // only fetch for this club if admin manages it
+    }
+
     const query = {
-      club: { $in: req.user.adminOfClubs || [] },
+      club: { $in: clubFilter },
       status,
     }
 
-    if (clubId) {
-      query.club = clubId
-    }
 
     const requests = await ClubJoinRequest.find(query)
       .populate("user", "username email yearOfStudy department age")
@@ -113,36 +117,42 @@ exports.handleJoinRequest = async (req, res) => {
       // Update user's club membership
       await User.findByIdAndUpdate(request.user._id, {
         $addToSet: { memberOfClubs: request.club._id },
-        isClubMember: true,
+        $set: {
+          isClubMember: true,
+          club: request.club.name, // optional: if you want to store club name
+        },
       })
+
 
       request.status = "accepted"
       request.reviewedBy = adminId
       request.reviewedAt = new Date()
 
       // Send acceptance email
-      try {
-        await sendEmail({
-          email: request.user.email,
-          subject: `Welcome to ${request.club.name}! 🎉`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #10b981;">Congratulations! 🎉</h2>
-              <p>Hello ${request.user.username},</p>
-              <p>Great news! Your request to join <strong>${request.club.name}</strong> has been <strong>accepted</strong>!</p>
-              <p>You are now an official member of the club. You can now:</p>
-              <ul>
-                <li>Participate in club events</li>
-                <li>Access club resources</li>
-                <li>Connect with other members</li>
-              </ul>
-              <p>Welcome to the community!</p>
-              <p>Best regards,<br>The Glubs Team</p>
-            </div>
-          `,
-        })
-      } catch (emailError) {
-        console.error("Error sending acceptance email:", emailError)
+      if (typeof sendEmail === "function") {
+        try {
+          await sendEmail({
+            email: request.user.email,
+            subject: `Welcome to ${request.club.name}! 🎉`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #10b981;">Congratulations! 🎉</h2>
+                <p>Hello ${request.user.username},</p>
+                <p>Great news! Your request to join <strong>${request.club.name}</strong> has been <strong>accepted</strong>!</p>
+                <p>You are now an official member of the club. You can now:</p>
+                <ul>
+                  <li>Participate in club events</li>
+                  <li>Access club resources</li>
+                  <li>Connect with other members</li>
+                </ul>
+                <p>Welcome to the community!</p>
+                <p>Best regards,<br>The Glubs Team</p>
+              </div>
+            `,
+          })
+        } catch (emailError) {
+          console.error("Error sending acceptance email:", emailError)
+        }
       }
     } else if (action === "reject") {
       request.status = "rejected"
@@ -151,24 +161,26 @@ exports.handleJoinRequest = async (req, res) => {
       request.rejectionReason = rejectionReason || "No reason provided"
 
       // Send rejection email
-      try {
-        await sendEmail({
-          email: request.user.email,
-          subject: `Update on your club membership request`,
-          html: `
-            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
-              <h2 style="color: #ef4444;">Club Membership Update</h2>
-              <p>Hello ${request.user.username},</p>
-              <p>Thank you for your interest in joining <strong>${request.club.name}</strong>.</p>
-              <p>Unfortunately, your membership request has not been approved at this time.</p>
-              ${rejectionReason ? `<p><strong>Reason:</strong> ${rejectionReason}</p>` : ""}
-              <p>You're welcome to apply again in the future or explore other clubs that might be a great fit for you!</p>
-              <p>Best regards,<br>The Glubs Team</p>
-            </div>
-          `,
-        })
-      } catch (emailError) {
-        console.error("Error sending rejection email:", emailError)
+      if (typeof sendEmail === "function") {
+        try {
+          await sendEmail({
+            email: request.user.email,
+            subject: `Update on your club membership request`,
+            html: `
+              <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px;">
+                <h2 style="color: #ef4444;">Club Membership Update</h2>
+                <p>Hello ${request.user.username},</p>
+                <p>Thank you for your interest in joining <strong>${request.club.name}</strong>.</p>
+                <p>Unfortunately, your membership request has not been approved at this time.</p>
+                ${rejectionReason ? `<p><strong>Reason:</strong> ${rejectionReason}</p>` : ""}
+                <p>You're welcome to apply again in the future or explore other clubs that might be a great fit for you!</p>
+                <p>Best regards,<br>The Glubs Team</p>
+              </div>
+            `,
+          })
+        } catch (emailError) {
+          console.error("Error sending rejection email:", emailError)
+        }
       }
     } else {
       return res.status(400).json({ message: "Invalid action. Use 'accept' or 'reject'" })

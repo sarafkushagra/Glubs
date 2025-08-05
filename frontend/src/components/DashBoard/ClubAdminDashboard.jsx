@@ -26,8 +26,6 @@ import {
   Search,
 } from "lucide-react"
 import { CgProfile } from "react-icons/cg"
-import Navbar from "../Pages/Navbar"
-import Footer from "../Pages/Footer"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"
 
@@ -63,6 +61,16 @@ const EnhancedClubAdminDashboard = () => {
     members: null,
   })
 
+  // Check if user is authenticated and has admin privileges
+  useEffect(() => {
+    const userData = JSON.parse(localStorage.getItem("glubsUser") || "null")
+    if (!userData || (userData.role !== "club-admin" && userData.role !== "admin")) {
+      toast.error("Access denied. Club admin privileges required.")
+      navigate("/")
+      return
+    }
+  }, [navigate])
+
   // API Functions
   const apiRequest = async (endpoint, options = {}) => {
     try {
@@ -88,6 +96,7 @@ const EnhancedClubAdminDashboard = () => {
     } catch (error) {
       setErrors((prev) => ({ ...prev, dashboard: error.message }))
       toast.error("Failed to load dashboard data")
+      console.error("Dashboard fetch error:", error)
     } finally {
       setLoading((prev) => ({ ...prev, dashboard: false }))
     }
@@ -103,6 +112,7 @@ const EnhancedClubAdminDashboard = () => {
     } catch (error) {
       setErrors((prev) => ({ ...prev, requests: error.message }))
       toast.error("Failed to load join requests")
+      console.error("Join requests fetch error:", error)
     } finally {
       setLoading((prev) => ({ ...prev, requests: false }))
     }
@@ -112,16 +122,18 @@ const EnhancedClubAdminDashboard = () => {
   const handleJoinRequest = async (requestId, action, rejectionReason = "") => {
     setLoading((prev) => ({ ...prev, action: true }))
     try {
-      await apiRequest(`/club-admin/requests/${requestId}`, {
+      const response = await apiRequest(`/club-admin/requests/${requestId}`, {
         method: "PATCH",
         data: { action, rejectionReason },
       })
 
       toast.success(`Request ${action}ed successfully!`)
-      fetchJoinRequests() // Refresh requests
-      fetchDashboardData() // Refresh dashboard stats
+
+      // Refresh both requests and dashboard data
+      await Promise.all([fetchJoinRequests(), fetchDashboardData()])
     } catch (error) {
       toast.error(`Failed to ${action} request: ${error.message}`)
+      console.error(`Handle join request error:`, error)
     } finally {
       setLoading((prev) => ({ ...prev, action: false }))
     }
@@ -135,6 +147,7 @@ const EnhancedClubAdminDashboard = () => {
       setClubMembers((prev) => ({ ...prev, [clubId]: data }))
     } catch (error) {
       toast.error("Failed to load club members")
+      console.error("Fetch club members error:", error)
     } finally {
       setLoading((prev) => ({ ...prev, members: false }))
     }
@@ -155,6 +168,7 @@ const EnhancedClubAdminDashboard = () => {
       fetchDashboardData() // Refresh dashboard stats
     } catch (error) {
       toast.error(`Failed to remove member: ${error.message}`)
+      console.error("Remove member error:", error)
     } finally {
       setLoading((prev) => ({ ...prev, action: false }))
     }
@@ -162,9 +176,25 @@ const EnhancedClubAdminDashboard = () => {
 
   // Initial data fetch
   useEffect(() => {
-    fetchDashboardData()
-    fetchJoinRequests()
+    const initializeData = async () => {
+      await fetchDashboardData()
+      await fetchJoinRequests()
+    }
+    initializeData()
   }, [])
+
+  // Auto-refresh data every 30 seconds when on requests tab
+  useEffect(() => {
+    let interval
+    if (activeTab === "requests") {
+      interval = setInterval(() => {
+        fetchJoinRequests()
+      }, 30000) // 30 seconds
+    }
+    return () => {
+      if (interval) clearInterval(interval)
+    }
+  }, [activeTab])
 
   // Components
   const LoadingSpinner = () => (
@@ -189,8 +219,11 @@ const EnhancedClubAdminDashboard = () => {
     </div>
   )
 
-  const StatCard = ({ title, value, icon: Icon, color = "blue", loading = false }) => (
-    <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200">
+  const StatCard = ({ title, value, icon: Icon, color = "blue", loading = false, onClick }) => (
+    <div
+      className={`bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-lg transition-all duration-200 ${onClick ? "cursor-pointer" : ""}`}
+      onClick={onClick}
+    >
       <div className="flex items-center justify-between">
         <div className="flex-1">
           <p className="text-sm font-medium text-gray-600 mb-1">{title}</p>
@@ -253,6 +286,7 @@ const EnhancedClubAdminDashboard = () => {
           icon={UserCheck}
           color="orange"
           loading={loading.dashboard}
+          onClick={() => setActiveTab("requests")}
         />
         <StatCard
           title="Total Events"
@@ -262,6 +296,27 @@ const EnhancedClubAdminDashboard = () => {
           loading={loading.dashboard}
         />
       </div>
+
+      {/* Quick Actions for Pending Requests */}
+      {dashboardData.stats.pendingRequests > 0 && (
+        <div className="bg-gradient-to-r from-orange-50 to-yellow-50 border border-orange-200 rounded-xl p-6">
+          <div className="flex items-center justify-between">
+            <div>
+              <h3 className="text-lg font-semibold text-orange-900 mb-1">
+                You have {dashboardData.stats.pendingRequests} pending join request
+                {dashboardData.stats.pendingRequests > 1 ? "s" : ""}
+              </h3>
+              <p className="text-orange-700">Review and approve new club members</p>
+            </div>
+            <button
+              onClick={() => setActiveTab("requests")}
+              className="px-6 py-3 bg-orange-600 text-white rounded-lg hover:bg-orange-700 transition-colors shadow-lg"
+            >
+              Review Requests
+            </button>
+          </div>
+        </div>
+      )}
 
       {/* My Clubs */}
       <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-6">
@@ -416,9 +471,18 @@ const EnhancedClubAdminDashboard = () => {
                             </span>
                           </div>
                         </div>
+                        {request.user?.yearOfStudy && (
+                          <div className="mt-1">
+                            <span className="text-xs text-gray-500">
+                              {request.user.yearOfStudy} • {request.user.department || "No department"}
+                            </span>
+                          </div>
+                        )}
                         {request.message && (
-                          <div className="mt-2 p-3 bg-blue-50 rounded-lg">
-                            <p className="text-sm text-gray-700">"{request.message}"</p>
+                          <div className="mt-3 p-3 bg-blue-50 rounded-lg">
+                            <p className="text-sm text-gray-700">
+                              <strong>Message:</strong> "{request.message}"
+                            </p>
                           </div>
                         )}
                       </div>
@@ -587,7 +651,6 @@ const EnhancedClubAdminDashboard = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-
       <div className="flex">
         {/* Sidebar */}
         <div
@@ -616,10 +679,11 @@ const EnhancedClubAdminDashboard = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === item.id
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
+                    activeTab === item.id
                       ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg"
                       : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                    }`}
+                  }`}
                 >
                   <Icon className="w-5 h-5 flex-shrink-0" />
                   {sidebarOpen && (
@@ -662,13 +726,16 @@ const EnhancedClubAdminDashboard = () => {
                 </h2>
               </div>
               <div className="flex items-center gap-4">
-                <button className="relative p-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+                <button
+                  className="relative p-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"
+                  onClick={() => setActiveTab("requests")}
+                >
                   <Bell className="w-5 h-5" />
                   {dashboardData.stats.pendingRequests > 0 && (
                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
                   )}
                 </button>
-                <span className="font-semibold text-gray-700">Club Admin</span>
+                <span className="font-semibold text-gray-700">Hi, Club Admin</span>
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                   <CgProfile size={24} className="text-white" />
                 </div>

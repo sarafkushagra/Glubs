@@ -48,6 +48,7 @@ import UserDemographics from "./Features/Explore_Features/UserDemographics";
 import RoleSelectionDialog from "./AuthCard/RoleSelectionDialog";
 import ClubAdminDashboard from "./DashBoard/ClubAdminDashboard";
 
+import MyJoinRequests from "./Clubs/MyJoinRequests"
 
 export default function Router() {
   return (
@@ -69,7 +70,6 @@ export default function Router() {
       <Route path="/events/:eventId/team-room" element={<TeamRoomPage />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/role-selection" element={<RoleSelectionDialog />} />
-      <Route path="/clubadmin" element={<ClubAdminDashboard/>}/>
 
       {/* All users allowed but after verification  */}
       <Route element={<ProtectedRoute allowedRoles={["student","club-admin","admin","pending-club-admin"]} />}>
@@ -83,6 +83,7 @@ export default function Router() {
         <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
         <Route path="/profile" element={<MyProfile />} />
         <Route path="/hosts" element={<HostOpportunityPage />} />
+        <Route path="/my-join-requests" element={<MyJoinRequests />} />
       </Route>
 
       <Route element={<ProtectedRoute allowedRoles={["admin", "student"]} />}>
@@ -103,6 +104,10 @@ export default function Router() {
         <Route path="/allusers" element={<AllUsers />} />
         <Route path="/admin/dash" element={<AdminDashboard />} />
         <Route path="/users/details/:id" element={<UsersDetails />} />
+      </Route>
+
+      <Route element={<ProtectedRoute allowedRoles={"club-admin"} />}>
+        <Route path="/clubadmin" element={<ClubAdminDashboard />} />
       </Route>
 
       {/* Explore Features */}
