@@ -40,6 +40,7 @@ const clubRouter = require("./routers/club");
 const feedbackRouter = require("./routers/feedback");
 const adminRouter = require("./routers/admin")
 const teamRouter = require("./routers/team");
+const clubAdminRouter = require("./routers/clubAdmin");
 const globalErrorHandler = require("./utils/globalErrorHandler");
 
 app.use("/users", userRouter);
@@ -48,6 +49,7 @@ app.use("/clubs", clubRouter);
 app.use("/feedback", feedbackRouter);
 app.use("/admin", adminRouter);
 app.use("/teams", teamRouter);
+app.use("/club-admin", clubAdminRouter);
 
 // Global Error Handler
 app.use(globalErrorHandler);

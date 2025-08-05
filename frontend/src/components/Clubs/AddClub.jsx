@@ -6,11 +6,13 @@ import Footer from '../Pages/Footer';
 
 const AddClub = () => {
   const navigate = useNavigate();
+
   const [form, setForm] = useState({
     name: '',
     description: '',
-    category: 'Academic', // default category
+    category: 'Academic',
   });
+
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
@@ -27,36 +29,41 @@ const AddClub = () => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError(null);
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError(null);
 
-    try {
-      const token = localStorage.getItem('glubsToken'); // adjust if token key is different
-      const res = await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/clubs`,
-        form,
-        {
-          headers: {
-            'Content-Type': 'application/json',
-            Authorization: `Bearer ${token}`,
-          },
-        }
-      );
-
-      if (res.status === 201) {
-        navigate('/clubs');
-      } else {
-        setError('Failed to add club. Server did not return success.');
+  try {
+    const token = localStorage.getItem('glubsToken');
+    const res = await axios.post(
+      `${import.meta.env.VITE_API_BASE_URL}/clubs`,
+      {
+        name: form.name,
+        description: form.description,
+        category: form.category,
+      },
+      {
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`,
+        },
       }
-    } catch (err) {
-      console.error('Error adding club:', err.response?.data || err.message);
-      setError(err.response?.data?.error || 'Something went wrong.');
-    } finally {
-      setLoading(false);
+    );
+
+    if (res.status === 201) {
+      navigate('/clubs');
+    } else {
+      setError('Failed to add club.');
     }
-  };
+  } catch (err) {
+    console.error('Error adding club:', err.response?.data || err.message);
+    setError(err.response?.data?.error || 'Something went wrong.');
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="bg-gradient-to-b from-indigo-900 via-purple-50 to-white min-h-screen">

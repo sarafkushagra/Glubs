@@ -52,6 +52,8 @@ const ClubDetails = () => {
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
 
+  const userData = JSON.parse(localStorage.getItem("glubsUser") || "null");
+
   useEffect(() => {
     const fetchClub = async () => {
       try {
@@ -117,16 +119,27 @@ const ClubDetails = () => {
               <AnimatedMemberCount count={club.members ? club.members.length : 0} /> members
             </div>
             <div className="flex gap-4 flex-wrap mt-4 mb-2 items-center">
+              {(userData.role === 'admin' || userData.role ==='clubadmin') && (
               <Button onClick={() => navigate(`/clubs/edit/${club._id}`)} className={isDarkMode ? 'border border-indigo-400 text-indigo-200 bg-transparent rounded-md px-6 py-2 font-medium text-base transition-all duration-200 hover:bg-indigo-900/30 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400' : 'border border-indigo-400 text-indigo-700 bg-transparent rounded-md px-6 py-2 font-medium text-base transition-all duration-200 hover:bg-indigo-100/30 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400'}>
                 Edit Club
               </Button>
+              )}
               <Button onClick={() => navigate(`/clubs/${club._id}/members`)} className={isDarkMode ? 'border border-indigo-400 text-indigo-200 bg-transparent rounded-md px-6 py-2 font-medium text-base transition-all duration-200 hover:bg-indigo-900/30 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400' : 'border border-indigo-400 text-indigo-700 bg-transparent rounded-md px-6 py-2 font-medium text-base transition-all duration-200 hover:bg-indigo-100/30 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400'}>
                 View Members
               </Button>
+              {(userData.isClubMember === false) && (
+              <Button onClick={() => navigate(`/clubs/${club._id}/members`)} className={isDarkMode ? 'border border-indigo-400 text-indigo-200 bg-transparent rounded-md px-6 py-2 font-medium text-base transition-all duration-200 hover:bg-indigo-900/30 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400' : 'border border-indigo-400 text-indigo-700 bg-transparent rounded-md px-6 py-2 font-medium text-base transition-all duration-200 hover:bg-indigo-100/30 hover:border-indigo-300 focus:outline-none focus:ring-2 focus:ring-indigo-400'}>
+                Apply for club
+              </Button>
+              )}
+              {(userData.role === 'admin' || userData.role ==='clubadmin') && (
+                <>
               <span className="mx-2 hidden md:inline-block h-6 border-l border-gray-700"></span>
               <Button onClick={() => setShowDeleteModal(true)} className={isDarkMode ? 'border border-red-400 text-red-200 bg-transparent rounded-md px-6 py-2 font-medium text-base transition-all duration-200 hover:bg-red-900/30 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-400 ml-0 md:ml-8' : 'border border-red-400 text-red-700 bg-transparent rounded-md px-6 py-2 font-medium text-base transition-all duration-200 hover:bg-red-100/30 hover:border-red-300 focus:outline-none focus:ring-2 focus:ring-red-400 ml-0 md:ml-8'}>
                 Delete Club
               </Button>
+             </>
+              )}
             </div>
           </div>
         </div>

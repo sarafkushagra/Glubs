@@ -1,11 +1,11 @@
 const User = require("../schema/user");
 
-exports.getPendingClubAdmins = async (req, res) => {
+exports.getPendingAdmins = async (req, res) => {
   const pending = await User.find({ requestedRole: "pending-club-admin" }).select("-password");
   res.status(200).json({ users: pending });
 };
 
-exports.approveClubAdmin = async (req, res) => {
+exports.approveAdmin = async (req, res) => {
   try {
     const user = await User.findById(req.params.id);
     if (!user || user.requestedRole !== "pending-club-admin") {

@@ -46,6 +46,7 @@ import LiveMetrics from "./Features/Explore_Features/LiveMetrics";
 import GrowthAnalysis from "./Features/Explore_Features/GrowthAnalysis";
 import UserDemographics from "./Features/Explore_Features/UserDemographics";
 import RoleSelectionDialog from "./AuthCard/RoleSelectionDialog";
+import ClubAdminDashboard from "./DashBoard/ClubAdminDashboard";
 
 
 export default function Router() {
@@ -68,6 +69,7 @@ export default function Router() {
       <Route path="/events/:eventId/team-room" element={<TeamRoomPage />} />
       <Route path="/notifications" element={<Notifications />} />
       <Route path="/role-selection" element={<RoleSelectionDialog />} />
+      <Route path="/clubadmin" element={<ClubAdminDashboard/>}/>
 
       {/* All users allowed but after verification  */}
       <Route element={<ProtectedRoute allowedRoles={["student","club-admin","admin","pending-club-admin"]} />}>

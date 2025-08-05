@@ -6,15 +6,25 @@ module.exports.showAllClubs = async (req, res) => {
     const clubs = await Club.find();
     res.json(clubs);
 }
-
 module.exports.createClub = async (req, res) => {
-    try {
-        const club = new Club(req.body);
-        await club.save();
-        res.status(201).json(club);
-    } catch (err) {
-        res.status(400).json({ error: err.message });
+  try {
+    const userId = req.user;
+
+    if (!userId) {
+      return res.status(400).json({ error: 'User not authenticated.' });
     }
+
+    const club = new Club({
+      ...req.body,
+      createdBy: userId,
+      members: [userId], // userId must be ObjectId (string is okay if valid)
+    });
+
+    await club.save();
+    res.status(201).json(club);
+  } catch (err) {
+    res.status(400).json({ error: err.message });
+  }
 };
 
 module.exports.showClub = async (req, res) => {
