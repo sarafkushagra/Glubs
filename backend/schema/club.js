@@ -5,7 +5,9 @@ const clubSchema = new mongoose.Schema({
     description: String,
     createdBy: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'User'
+        ref: 'User',
+        default: '687cd1a8b9b0a7fd9a92382f',
+        required: true
     },
     members: [{ type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true }],
     events: [{ type: mongoose.Schema.Types.ObjectId, ref: 'Event', required: true }],
