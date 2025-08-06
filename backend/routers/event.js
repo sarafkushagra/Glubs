@@ -14,7 +14,7 @@ router.get('/upcoming/:userid', eventController.getUserUpcomingEvents);
 router.get('/completed/:userid', eventController.getUserCompletedEvents);
 router.post('/:id/register',isAuthenticated, eventController.registerUserToEvent);
 router.post("/:eventId/register-team", isAuthenticated, eventController.registerTeamToEvent)
-
+router.get('/club/:clubId',isAuthenticated, eventController.getEventsByClub);
 
 module.exports = router;
 

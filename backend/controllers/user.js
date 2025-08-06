@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 const User = require("../schema/user");
 const Team = require("../schema/team");
 const Event = require("../schema/event");
+const Club = require("../schema/club");
 
 // Get all users
 exports.showAllUsers = async (req, res) => {
@@ -138,3 +139,79 @@ exports.getAvailableUsers = async (req, res) => {
     res.status(500).json({ message: "Error fetching available users", error: err.message });
   }
 };
+
+
+module.exports.getUserAdminClubs = async (req, res) => {
+  try {
+    const userId = req.user;
+
+    // Find clubs where user is either creator or member with admin role
+    const clubs = await Club.find({
+      $or: [
+        { createdBy: userId },
+        { 
+          members: userId,
+          // You might want to add a role field to track admin members
+          // For now, assuming createdBy is the admin
+        }
+      ]
+    }).select('_id name description category createdBy');
+    // Filter to only include clubs where user is actually admin
+    // This assumes that createdBy users are admins
+    const adminClubs = clubs.filter(club => 
+      club.createdBy.toString() === userId._id.toString()
+    );
+
+    res.status(200).json({
+      message: "Admin clubs fetched successfully",
+      clubs: adminClubs
+    });
+  } catch (error) {
+    console.error("Error fetching user admin clubs:", error);
+    res.status(500).json({
+      message: "Error fetching admin clubs",
+      error: error.message
+    });
+  }
+};
+
+// // Get user profile with clubs
+// module.exports.getUserProfile = async (req, res) => {
+//   try {
+//     const userId = req.user;
+
+//     const user = await User.findById(userId)
+//       .select('-password')
+//       .populate('club', 'name description');
+
+//     if (!user) {
+//       return res.status(404).json({ message: "User not found" });
+//     }
+
+//     // Get clubs where user is admin
+//     const adminClubs = await Club.find({
+//       createdBy: userId
+//     }).select('_id name description category');
+
+//     // Get clubs where user is member
+//     const memberClubs = await Club.find({
+//       members: userId,
+//       createdBy: { $ne: userId }
+//     }).select('_id name description category');
+
+//     res.status(200).json({
+//       message: "User profile fetched successfully",
+//       user: {
+//         ...user.toObject(),
+//         adminClubs,
+//         memberClubs
+//       }
+//     });
+//   } catch (error) {
+//     console.error("Error fetching user profile:", error);
+//     res.status(500).json({
+//       message: "Error fetching user profile",
+//       error: error.message
+//     });
+//   }
+// };

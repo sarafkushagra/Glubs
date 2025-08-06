@@ -264,6 +264,7 @@ const ClubDetails = () => {
 
             <div className="flex gap-4 flex-wrap mt-4 mb-2 items-center">
               {(userData?.role === "admin" || userData?.role === "club-admin") && (
+                userData._id === club.createdBy?._id) && (
                 <Button
                   onClick={() => navigate(`/clubs/edit/${club._id}`)}
                   className={
@@ -310,6 +311,7 @@ const ClubDetails = () => {
               )}
 
               {(userData?.role === "admin" || userData?.role === "club-admin") && (
+                userData._id === club.createdBy?._id) && (
                 <>
                   <span className="mx-2 hidden md:inline-block h-6 border-l border-gray-700"></span>
                   <Button

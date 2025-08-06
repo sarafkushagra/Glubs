@@ -21,7 +21,6 @@ const MyJoinRequests = () => {
       const response = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/clubs/my/requests`, {
         withCredentials: true,
       })
-      console.log("Fetched join requests:", response.data.requests)
       setRequests(response.data.requests)
     } catch (error) {
       console.error("Failed to fetch join requests:", error)

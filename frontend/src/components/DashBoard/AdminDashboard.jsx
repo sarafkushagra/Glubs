@@ -42,6 +42,7 @@ import { Link } from "react-router-dom";
 // If you deploy the backend elsewhere (e.g. Render, Railway) set NEXT_PUBLIC_API_BASE_URL.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
+  const userss = JSON.parse(localStorage.getItem("glubsUser") || "null")
 const ClubAdminDashboard = () => {
   // State management
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -1834,11 +1835,10 @@ const fetchPendingRequests = async () => {
               </h2>
             </div>
             <div className="flex items-center gap-4">
-              <button className="relative p-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors">
+              <button className="relative p-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"  onClick={() => setActiveTab("requests")}>
                 <Bell className="w-5 h-5" />
-                <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
               </button>
-              <span className="font-semibold text-gray-700">Hi,{" Admin"}
+              <span className="font-semibold text-gray-700">Hi, {userss?.username || "Club Admin"}
                
               </span>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">

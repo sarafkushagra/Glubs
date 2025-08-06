@@ -56,7 +56,7 @@ export default function LandingPage() {
   return (
     <div className="flex flex-col min-h-screen font-poppins" style={themeStyles.container}>
       {/* Inline style block for keyframes - Generally not recommended for production */}
-      <style jsx>{`
+      <style jsx="true">{`
         @keyframes fadeIn {
           from { opacity: 0; }
           to { opacity: 1; }

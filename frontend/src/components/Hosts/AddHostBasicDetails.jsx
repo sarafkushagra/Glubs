@@ -1,27 +1,12 @@
 "use client"
-
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
 import { useAuth } from "../Context/userStore"
 import Navbar from "../Pages/Navbar"
 import Footer from "../Pages/Footer"
-import {
-  ArrowLeft,
-  ArrowRight,
-  Upload,
-  X,
-  Users,
-  Globe,
-  Eye,
-  EyeOff,
-  MapPin,
-  Save,
-  Trash2,
-  CheckCircle,
-  Loader2,
-} from "lucide-react"
-import { toast} from "react-toastify"
+import { ArrowLeft, ArrowRight, Upload, X, Users, Globe, Eye, EyeOff, MapPin, Save, Trash2, CheckCircle, Loader2, Building2 } from 'lucide-react'
+import { toast } from "react-toastify"
 
 const EventRegistrationForm = () => {
   const navigate = useNavigate()
@@ -31,14 +16,18 @@ const EventRegistrationForm = () => {
   const [loading, setLoading] = useState(false)
   const [isEditing, setIsEditing] = useState(false)
   const [isDarkMode, setIsDarkMode] = useState(true)
+  const [userClubs, setUserClubs] = useState([])
+  const [loadingClubs, setLoadingClubs] = useState(true)
 
   // Check if user has permission
   useEffect(() => {
     if (!user || (user.role !== "club-admin" && user.role !== "admin")) {
-      toast("You are not authorized to create or edit events")
+      toast.error("You are not authorized to create or edit events")
       navigate("/events")
       return
     }
+
+    fetchUserClubs()
 
     if (eventId) {
       setIsEditing(true)
@@ -56,7 +45,8 @@ const EventRegistrationForm = () => {
     logo: "",
     website: "",
     festival: "",
-
+    // Club Selection
+    club: "",
     // Event Settings
     date: "",
     venue: "",
@@ -64,7 +54,6 @@ const EventRegistrationForm = () => {
     visibility: "public",
     categories: [],
     skillsToBeAssessed: "",
-
     // Registration Details
     participationType: "Individual",
     teamMin: 2,
@@ -73,7 +62,6 @@ const EventRegistrationForm = () => {
     registrationEnd: "",
     registrationLimit: "",
     hideContact: false,
-
     // Additional Fields
     prizePool: "",
     eligibility: "",
@@ -132,12 +120,44 @@ const EventRegistrationForm = () => {
     "Teamwork",
   ]
 
+  const fetchUserClubs = async () => {
+    try {
+      setLoadingClubs(true)
+      const token = localStorage.getItem('glubsToken')
+      // Fixed: Changed from /users/admin-clubs to /user/admin-clubs
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/admin-clubs`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        withCredentials: true
+      })
+
+      setUserClubs(res.data.clubs || [])
+
+      // If user has only one club, auto-select it
+      if (res.data.clubs && res.data.clubs.length === 1) {
+        setFormData(prev => ({ ...prev, club: res.data.clubs[0]._id }))
+      }
+
+    } catch (err) {
+      console.error("Error fetching user clubs:", err)
+      toast.error("Error loading clubs")
+    } finally {
+      setLoadingClubs(false)
+    }
+  }
+
   const fetchEventData = async () => {
     try {
       setLoading(true)
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
+      const token = localStorage.getItem('glubsToken')
+      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        withCredentials: true
+      })
       const event = res.data.event
-
       setFormData({
         title: event.title || "",
         description: event.description || "",
@@ -146,6 +166,7 @@ const EventRegistrationForm = () => {
         logo: event.logo || "",
         website: event.website || "",
         festival: event.festival || "",
+        club: event.club?._id || event.club || "",
         date: event.date ? new Date(event.date).toISOString().slice(0, 16) : "",
         venue: event.venue || "",
         mode: event.mode || "online",
@@ -165,13 +186,12 @@ const EventRegistrationForm = () => {
         contactEmail: event.contactEmail || "",
         contactPhone: event.contactPhone || "",
       })
-
       if (event.logo) {
         setLogoPreview(event.logo)
       }
     } catch (err) {
       console.error("Error fetching event:", err)
-      alert("Error loading event data")
+      toast.error("Error loading event data")
     } finally {
       setLoading(false)
     }
@@ -201,7 +221,6 @@ const EventRegistrationForm = () => {
     const updatedSkills = currentSkills.includes(skill)
       ? currentSkills.filter((s) => s !== skill)
       : [...currentSkills, skill]
-
     setFormData((prev) => ({
       ...prev,
       skillsToBeAssessed: updatedSkills.join(", "),
@@ -212,11 +231,9 @@ const EventRegistrationForm = () => {
     const file = e.target.files[0]
     if (file) {
       if (file.size > 1024 * 1024) {
-        // 1MB limit
-        alert("File size should be less than 1MB")
+        toast.error("File size should be less than 1MB")
         return
       }
-
       const reader = new FileReader()
       reader.onload = (e) => {
         const base64 = e.target.result
@@ -229,14 +246,13 @@ const EventRegistrationForm = () => {
 
   const validateStep = (step) => {
     const newErrors = {}
-
     if (step === 1) {
       if (!formData.title.trim()) newErrors.title = "Title is required"
       if (!formData.description.trim()) newErrors.description = "Description is required"
       if (!formData.eventType) newErrors.eventType = "Event type is required"
       if (!formData.date) newErrors.date = "Event date is required"
+      if (!formData.club) newErrors.club = "Please select a club"
     }
-
     if (step === 2) {
       if (!formData.registrationStart) newErrors.registrationStart = "Registration start date is required"
       if (!formData.registrationEnd) newErrors.registrationEnd = "Registration end date is required"
@@ -246,7 +262,6 @@ const EventRegistrationForm = () => {
           newErrors.teamMax = "Maximum team size should be greater than minimum"
       }
     }
-
     setErrors(newErrors)
     return Object.keys(newErrors).length === 0
   }
@@ -263,34 +278,44 @@ const EventRegistrationForm = () => {
 
   const handleSubmit = async () => {
     if (!validateStep(currentStep)) return
-const token = localStorage.getItem('glubsToken');
+
+    const token = localStorage.getItem('glubsToken')
+
 
     try {
       setLoading(true)
       const payload = {
         ...formData,
         createdBy: user._id,
-        club: user.club,
         teamMin: formData.participationType === "Individual" ? null : formData.teamMin,
         teamMax: formData.participationType === "Individual" ? null : formData.teamMax,
       }
-      if (isEditing) {
-        await axios.put(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, payload, { withCredentials: true })
-        alert("Event updated successfully!")
-      } else {
-        await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event`, payload, {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-          , withCredentials: true
-        })
-        alert("Event created successfully!")
-      }
 
+
+      if (isEditing) {
+        await axios.put(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        })
+        toast.success("Event updated successfully!")
+      } else {
+        const response = await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event`, payload, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+            'Content-Type': 'application/json'
+          },
+          withCredentials: true
+        })
+        toast.success("Event created successfully!")
+      }
       navigate("/events")
     } catch (err) {
       console.error("Error saving event:", err)
-      alert("Error saving event. Please try again.")
+      console.error("Error response:", err.response?.data) // Debug log
+      toast.error(err.response?.data?.message || "Error saving event. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -298,15 +323,20 @@ const token = localStorage.getItem('glubsToken');
 
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this event? This action cannot be undone.")) return
-
     try {
       setLoading(true)
-      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
-      alert("Event deleted successfully!")
+      const token = localStorage.getItem('glubsToken')
+      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        withCredentials: true
+      })
+      toast.success("Event deleted successfully!")
       navigate("/events")
     } catch (err) {
       console.error("Error deleting event:", err)
-      alert("Error deleting event. Please try again.")
+      toast.error("Error deleting event. Please try again.")
     } finally {
       setLoading(false)
     }
@@ -352,7 +382,6 @@ const token = localStorage.getItem('glubsToken');
   return (
     <div className={`min-h-screen ${themeClasses.background}`}>
       <Navbar />
-
       <div className="max-w-4xl mx-auto px-4 pt-24 pb-12">
         {/* Header */}
         <div className="mb-8">
@@ -363,7 +392,6 @@ const token = localStorage.getItem('glubsToken');
             <ArrowLeft className="w-5 h-5 group-hover:-translate-x-1 transition-transform" />
             Back to Events
           </button>
-
           <div className="text-center mb-8">
             <h1 className={`text-4xl font-bold ${themeClasses.text} mb-2`}>
               {isEditing ? "Edit Event" : "Create New Event"}
@@ -372,17 +400,16 @@ const token = localStorage.getItem('glubsToken');
               {isEditing ? "Update your event details" : "Fill in the details to create an amazing event"}
             </p>
           </div>
-
           {/* Progress Steps */}
           <div className="flex items-center justify-center mb-8">
             {[1, 2, 3].map((step) => (
               <div key={step} className="flex items-center">
                 <div
                   className={`w-10 h-10 rounded-full flex items-center justify-center font-semibold transition-all duration-300 ${step <= currentStep
-                    ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
-                    : isDarkMode
-                      ? "bg-gray-800 text-gray-400 border border-gray-700"
-                      : "bg-gray-200 text-gray-500 border border-gray-300"
+                      ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white shadow-lg"
+                      : isDarkMode
+                        ? "bg-gray-800 text-gray-400 border border-gray-700"
+                        : "bg-gray-200 text-gray-500 border border-gray-300"
                     }`}
                 >
                   {step < currentStep ? <CheckCircle className="w-5 h-5" /> : step}
@@ -390,17 +417,16 @@ const token = localStorage.getItem('glubsToken');
                 {step < 3 && (
                   <div
                     className={`w-16 h-1 mx-2 transition-all duration-300 ${step < currentStep
-                      ? "bg-gradient-to-r from-indigo-600 to-purple-600"
-                      : isDarkMode
-                        ? "bg-gray-700"
-                        : "bg-gray-300"
+                        ? "bg-gradient-to-r from-indigo-600 to-purple-600"
+                        : isDarkMode
+                          ? "bg-gray-700"
+                          : "bg-gray-300"
                       }`}
                   />
                 )}
               </div>
             ))}
           </div>
-
           {/* Step Labels */}
           <div className="flex justify-center mb-8">
             <div className="flex gap-16">
@@ -430,7 +456,7 @@ const token = localStorage.getItem('glubsToken');
               {/* Logo Upload */}
               <div className="text-center mb-8">
                 <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-4`}>
-                  Event Logo <span className="text-red-500">*</span>
+                  Event Logo
                 </label>
                 <div
                   className={`relative w-32 h-32 mx-auto border-2 border-dashed ${isDarkMode ? "border-gray-600" : "border-gray-300"
@@ -503,6 +529,52 @@ const token = localStorage.getItem('glubsToken');
                 {errors.description && <p className="text-red-500 text-sm mt-1">{errors.description}</p>}
               </div>
 
+               {/* Club Selection - Improved Styling */}
+              <div>
+                <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-4`}>
+                  Select Club <span className="text-red-500">*</span>
+                </label>
+                {loadingClubs ? (
+                  <div className="flex items-center justify-center py-8">
+                    <Loader2 className="animate-spin text-indigo-500 w-6 h-6" />
+                    <span className={`ml-2 ${themeClasses.textMuted}`}>Loading clubs...</span>
+                  </div>
+                ) : userClubs.length > 0 ? (
+                  <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
+                    {userClubs.map((club) => (
+                      <button
+                        key={club._id}
+                        type="button"
+                        onClick={() => handleInputChange("club", club._id)}
+                        className={`p-4 rounded-md border  transition-all hover:shadow-md ${formData.club === club._id
+                            ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-700 dark:text-indigo-300"
+                            : "border-gray-300 dark:border-gray-700 text-gray-800 dark:text-gray-100"
+                          }`}
+                      >
+                        <span className="text-base font-medium">{club.name}</span>
+
+                        {formData.club === club._id && (
+                          <div className="-mt-4 text-xs flex items-center gap-1 text-indigo-500 dark:text-indigo-300">
+                            <CheckCircle className="w-3 h-3" />
+                    
+                          </div>
+                        )}
+                      </button>
+
+                    ))}
+                  </div>
+                ) : (
+                  <div className={`text-center py-8 ${themeClasses.card} border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-xl`}>
+                    <Building2 className={`w-12 h-12 mx-auto mb-4 ${themeClasses.textMuted}`} />
+                    <h3 className={`text-lg font-medium ${themeClasses.text} mb-2`}>No Clubs Available</h3>
+                    <p className={`text-sm ${themeClasses.textMuted} mb-4`}>
+                      You are not an admin of any clubs. Contact your administrator to get access.
+                    </p>
+                  </div>
+                )}
+                {errors.club && <p className="text-red-500 text-sm mt-2">{errors.club}</p>}
+              </div>
+
               {/* Event Type and Date */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
@@ -522,7 +594,6 @@ const token = localStorage.getItem('glubsToken');
                   </select>
                   {errors.eventType && <p className="text-red-500 text-sm mt-1">{errors.eventType}</p>}
                 </div>
-
                 <div>
                   <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>
                     Event Date & Time <span className="text-red-500">*</span>
@@ -548,8 +619,8 @@ const token = localStorage.getItem('glubsToken');
                         type="button"
                         onClick={() => handleInputChange("mode", mode)}
                         className={`flex-1 py-3 px-4 rounded-xl border font-medium transition-all ${formData.mode === mode
-                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
-                          : `${themeClasses.button} border`
+                            ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
+                            : `${themeClasses.button} border`
                           }`}
                       >
                         <div className="flex items-center justify-center gap-2">
@@ -562,7 +633,6 @@ const token = localStorage.getItem('glubsToken');
                     ))}
                   </div>
                 </div>
-
                 <div>
                   <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>
                     Venue {formData.mode !== "online" && <span className="text-red-500">*</span>}
@@ -593,8 +663,8 @@ const token = localStorage.getItem('glubsToken');
                       type="button"
                       onClick={() => handleInputChange("visibility", value)}
                       className={`flex-1 py-3 px-4 rounded-xl border font-medium transition-all ${formData.visibility === value
-                        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
-                        : `${themeClasses.button} border`
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
+                          : `${themeClasses.button} border`
                         }`}
                     >
                       <div className="flex items-center justify-center gap-2">
@@ -607,7 +677,7 @@ const token = localStorage.getItem('glubsToken');
               </div>
 
               {/* Optional Fields */}
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid mb-4 grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                   <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>Website URL</label>
                   <input
@@ -618,7 +688,6 @@ const token = localStorage.getItem('glubsToken');
                     className={`w-full px-4 py-3 ${themeClasses.input} border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all`}
                   />
                 </div>
-
                 <div>
                   <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>
                     Festival/Event Series
@@ -658,22 +727,25 @@ const token = localStorage.getItem('glubsToken');
                       type="button"
                       onClick={() => handleInputChange("participationType", value)}
                       className={`p-6 rounded-xl border-2 transition-all text-left ${formData.participationType === value
-                        ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
-                        : `border-gray-300 dark:border-gray-600 hover:border-indigo-300`
+                          ? "border-indigo-500 bg-indigo-50 dark:bg-indigo-900/20"
+                          : `border-gray-300 dark:border-gray-600 hover:border-indigo-300`
                         }`}
                     >
                       <div className="flex items-center gap-3 mb-2">
                         <Icon
-                          className={`w-5 h-5 ${formData.participationType === value ? "text-indigo-600" : themeClasses.textMuted}`}
+                          className={`w-5 h-5 ${formData.participationType === value ? "text-indigo-600" : themeClasses.textMuted
+                            }`}
                         />
                         <span
-                          className={`font-semibold ${formData.participationType === value ? "text-indigo-600" : themeClasses.text}`}
+                          className={`font-semibold ${formData.participationType === value ? "text-indigo-600" : themeClasses.text
+                            }`}
                         >
                           {value}
                         </span>
                       </div>
                       <p
-                        className={`text-sm ${formData.participationType === value ? "text-indigo-600" : themeClasses.textMuted}`}
+                        className={`text-sm ${formData.participationType === value ? "text-indigo-600" : themeClasses.textMuted
+                          }`}
                       >
                         {desc}
                       </p>
@@ -698,7 +770,6 @@ const token = localStorage.getItem('glubsToken');
                     />
                     {errors.teamMin && <p className="text-red-500 text-sm mt-1">{errors.teamMin}</p>}
                   </div>
-
                   <div>
                     <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>
                       Maximum Team Size <span className="text-red-500">*</span>
@@ -729,7 +800,6 @@ const token = localStorage.getItem('glubsToken');
                   />
                   {errors.registrationStart && <p className="text-red-500 text-sm mt-1">{errors.registrationStart}</p>}
                 </div>
-
                 <div>
                   <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>
                     Registration End <span className="text-red-500">*</span>
@@ -813,8 +883,8 @@ const token = localStorage.getItem('glubsToken');
                       type="button"
                       onClick={() => handleCategoryToggle(category)}
                       className={`px-4 py-2 rounded-full border font-medium transition-all ${formData.categories.includes(category)
-                        ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
-                        : `${themeClasses.button} border`
+                          ? "bg-gradient-to-r from-indigo-600 to-purple-600 text-white border-transparent shadow-lg"
+                          : `${themeClasses.button} border`
                         }`}
                     >
                       {category}
@@ -840,8 +910,8 @@ const token = localStorage.getItem('glubsToken');
                         type="button"
                         onClick={() => handleSkillToggle(skill)}
                         className={`px-3 py-1 rounded-full text-sm border font-medium transition-all ${isSelected
-                          ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent shadow-lg"
-                          : `${themeClasses.button} border`
+                            ? "bg-gradient-to-r from-green-600 to-emerald-600 text-white border-transparent shadow-lg"
+                            : `${themeClasses.button} border`
                           }`}
                       >
                         {skill}
@@ -886,7 +956,6 @@ const token = localStorage.getItem('glubsToken');
                     className={`w-full px-4 py-3 ${themeClasses.input} border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all`}
                   />
                 </div>
-
                 <div>
                   <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>
                     Contact Phone
@@ -915,7 +984,6 @@ const token = localStorage.getItem('glubsToken');
                     className={`w-full px-4 py-3 ${themeClasses.input} border rounded-xl focus:ring-2 focus:ring-indigo-500 focus:border-transparent transition-all resize-none`}
                   />
                 </div>
-
                 <div>
                   <label className={`block text-sm font-medium ${themeClasses.textSecondary} mb-2`}>
                     Rules & Guidelines
@@ -944,7 +1012,6 @@ const token = localStorage.getItem('glubsToken');
                   Previous
                 </button>
               )}
-
               {isEditing && (
                 <button
                   onClick={handleDelete}
@@ -956,7 +1023,6 @@ const token = localStorage.getItem('glubsToken');
                 </button>
               )}
             </div>
-
             <div className="flex gap-3">
               {currentStep < 3 ? (
                 <button
@@ -980,7 +1046,6 @@ const token = localStorage.getItem('glubsToken');
           </div>
         </div>
       </div>
-
       <Footer />
     </div>
   )

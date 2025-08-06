@@ -13,6 +13,7 @@ router.delete('/:id', isAuthenticated, userController.deleteUser);
 router.post("/request-club-admin", isAuthenticated , restrictTo("student"),userController.requestClubAdmin);
 router.get("/available/:eventId", isAuthenticated, userController.getAvailableUsers)
 router.get("/unregistered/:eventId", isAuthenticated, userController.getUnregisteredUsers)
+router.get('/admin-clubs', isAuthenticated, userController.getUserAdminClubs);
 
 // auths routes
 
@@ -24,5 +25,7 @@ router.post('/logout', logout);
 router.post('/forget-password', forgetPassword);
 router.post('/reset-password', resetPassword);
 
+// Get user profile with clubs
+// router.get('/profile', isAuthenticated, userController.getUserProfile);
 module.exports = router;
 

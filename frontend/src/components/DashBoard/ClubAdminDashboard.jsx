@@ -4,27 +4,7 @@ import { useState, useEffect } from "react"
 import { useNavigate } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
-import {
-  Users,
-  Calendar,
-  Globe,
-  UserCheck,
-  CheckCircle,
-  X,
-  Trash2,
-  Mail,
-  Clock,
-  Activity,
-  Bell,
-  Settings,
-  Home,
-  Menu,
-  ChevronRight,
-  RefreshCw,
-  AlertCircle,
-  Loader,
-  Search,
-} from "lucide-react"
+import { Users, Calendar, Globe, UserCheck, CheckCircle, X, Trash2, Mail, Clock, Activity, Bell, Settings, Home, Menu, ChevronRight, RefreshCw, AlertCircle, Loader, Search } from 'lucide-react'
 import { CgProfile } from "react-icons/cg"
 
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"
@@ -45,12 +25,14 @@ const EnhancedClubAdminDashboard = () => {
   })
   const [joinRequests, setJoinRequests] = useState([])
   const [clubMembers, setClubMembers] = useState({})
+  const [clubEvents, setClubEvents] = useState({})
 
   // Loading states
   const [loading, setLoading] = useState({
     dashboard: false,
     requests: false,
     members: false,
+    events: false,
     action: false,
   })
 
@@ -61,6 +43,7 @@ const EnhancedClubAdminDashboard = () => {
     members: null,
   })
 
+  const userss = JSON.parse(localStorage.getItem("glubsUser") || "null")
   // Check if user is authenticated and has admin privileges
   useEffect(() => {
     const userData = JSON.parse(localStorage.getItem("glubsUser") || "null")
@@ -139,17 +122,31 @@ const EnhancedClubAdminDashboard = () => {
     }
   }
 
-  // Fetch club members
+  // Fetch club members - Fixed to use correct endpoint
   const fetchClubMembers = async (clubId) => {
     setLoading((prev) => ({ ...prev, members: true }))
     try {
       const data = await apiRequest(`/club-admin/clubs/${clubId}/members`)
-      setClubMembers((prev) => ({ ...prev, [clubId]: data }))
+      // Clear previous data and set only the current club's members
+      setClubMembers({ [clubId]: data })
     } catch (error) {
       toast.error("Failed to load club members")
       console.error("Fetch club members error:", error)
     } finally {
       setLoading((prev) => ({ ...prev, members: false }))
+    }
+  }
+
+  const fetchClubEvents = async (clubId) => {
+    setLoading((prev) => ({ ...prev, events: true }))
+    try {
+      const data = await apiRequest(`/clubs/${clubId}/events`)
+      setClubEvents({ [clubId]: data })
+    } catch (error) {
+      toast.error("Failed to load club events")
+      console.error("Fetch club events error:", error)
+    } finally {
+      setLoading((prev) => ({ ...prev, events: false }))
     }
   }
 
@@ -164,7 +161,16 @@ const EnhancedClubAdminDashboard = () => {
       })
 
       toast.success("Member removed successfully!")
-      fetchClubMembers(clubId) // Refresh members
+    
+      // Immediately update the UI by removing the member from state
+      setClubMembers((prev) => ({
+        ...prev,
+        [clubId]: {
+          ...prev[clubId],
+          members: prev[clubId].members.filter(member => member._id !== memberId)
+        }
+      }))
+    
       fetchDashboardData() // Refresh dashboard stats
     } catch (error) {
       toast.error(`Failed to remove member: ${error.message}`)
@@ -279,6 +285,7 @@ const EnhancedClubAdminDashboard = () => {
           icon={Users}
           color="green"
           loading={loading.dashboard}
+          onClick={() => setActiveTab("members")}
         />
         <StatCard
           title="Pending Requests"
@@ -294,6 +301,7 @@ const EnhancedClubAdminDashboard = () => {
           icon={Calendar}
           color="purple"
           loading={loading.dashboard}
+          onClick={() => setActiveTab("events")}
         />
       </div>
 
@@ -331,15 +339,29 @@ const EnhancedClubAdminDashboard = () => {
                 className="border border-gray-200 rounded-lg p-6 hover:shadow-lg transition-all duration-200"
               >
                 <div className="flex items-start justify-between mb-4">
-                  <div className="w-12 h-12 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
-                    <Globe className="w-6 h-6 text-white" />
+                  <div className="w-14 h-14 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center shadow-lg">
+                    <Globe className="w-8 h-8 text-white" />
                   </div>
-                  <button
-                    onClick={() => fetchClubMembers(club._id)}
-                    className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                  >
-                    View Members
-                  </button>
+                  <div className="flex flex-col gap-2">
+                    <button
+                      onClick={() => {
+                        fetchClubMembers(club._id)
+                        setActiveTab("members")
+                      }}
+                      className="text-blue-600 hover:text-blue-700 text-xs font-medium px-2 py-1 border border-blue-200 rounded"
+                    >
+                      Members
+                    </button>
+                    <button
+                      onClick={() => {
+                        fetchClubEvents(club._id)
+                        setActiveTab("events")
+                      }}
+                      className="text-green-600 hover:text-green-700 text-xs font-medium px-2 py-1 border border-green-200 rounded"
+                    >
+                      Events
+                    </button>
+                  </div>
                 </div>
                 <h4 className="text-lg font-semibold text-gray-900 mb-2">{club.name}</h4>
                 <p className="text-sm text-gray-600 mb-3">{club.description}</p>
@@ -519,6 +541,7 @@ const EnhancedClubAdminDashboard = () => {
     </div>
   )
 
+  // Added back the renderMembers function
   const renderMembers = () => (
     <div className="space-y-6">
       <div>
@@ -526,93 +549,155 @@ const EnhancedClubAdminDashboard = () => {
         <p className="text-gray-600 mt-1">Manage members across all your clubs</p>
       </div>
 
-      {Object.entries(clubMembers).map(([clubId, data]) => (
-        <div key={clubId} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
-          <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
-            <h3 className="text-lg font-semibold text-gray-900">
-              {data.club.name} Members ({data.members.length})
-            </h3>
-          </div>
-
-          {loading.members ? (
-            <LoadingSpinner />
-          ) : data.members.length === 0 ? (
-            <div className="p-12 text-center">
-              <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <p className="text-lg font-medium text-gray-600">No members yet</p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
-              <table className="w-full">
-                <thead className="bg-gray-50">
-                  <tr>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Member
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Year of Study
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Department
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Joined
-                    </th>
-                    <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="bg-white divide-y divide-gray-200">
-                  {data.members.map((member) => (
-                    <tr key={member._id} className="hover:bg-gray-50 transition-colors">
-                      <td className="px-6 py-4 whitespace-nowrap">
-                        <div className="flex items-center">
-                          <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
-                            <span className="text-white font-semibold text-sm">
-                              {member.username?.charAt(0)?.toUpperCase()}
-                            </span>
-                          </div>
-                          <div className="ml-4">
-                            <div className="text-sm font-semibold text-gray-900">{member.username}</div>
-                            <div className="text-sm text-gray-500">{member.email}</div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {member.yearOfStudy || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                        {member.department || "N/A"}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
-                        {new Date(member.createdAt).toLocaleDateString()}
-                      </td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
-                        <button
-                          onClick={() => removeMember(clubId, member._id)}
-                          disabled={loading.action}
-                          className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
+      {Object.keys(clubMembers).length === 0 ? (
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-12 text-center">
+          <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p className="text-lg font-medium text-gray-600">No club members loaded</p>
+          <p className="text-sm text-gray-500">Click "View Members" on any club from the dashboard to see members</p>
         </div>
-      ))}
+      ) : (
+        Object.entries(clubMembers).map(([clubId, data]) => (
+          <div key={clubId} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+              <h3 className="text-lg font-semibold text-gray-900">
+                {data.club.name} Members ({data.members.length})
+              </h3>
+            </div>
+
+            {loading.members ? (
+              <LoadingSpinner />
+            ) : data.members.length === 0 ? (
+              <div className="p-12 text-center">
+                <Users className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-lg font-medium text-gray-600">No members yet</p>
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full">
+                  <thead className="bg-gray-50">
+                    <tr>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Member
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Year of Study
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Department
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Joined
+                      </th>
+                      <th className="px-6 py-4 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                        Actions
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody className="bg-white divide-y divide-gray-200">
+                    {data.members.map((member) => (
+                      <tr key={member._id} className="hover:bg-gray-50 transition-colors">
+                        <td className="px-6 py-4 whitespace-nowrap">
+                          <div className="flex items-center">
+                            <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center">
+                              <span className="text-white font-semibold text-sm">
+                                {member.username?.charAt(0)?.toUpperCase()}
+                              </span>
+                            </div>
+                            <div className="ml-4">
+                              <div className="text-sm font-semibold text-gray-900">{member.username}</div>
+                              <div className="text-sm text-gray-500">{member.email}</div>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {member.yearOfStudy || "N/A"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
+                          {member.department || "N/A"}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {new Date(member.createdAt).toLocaleDateString()}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium">
+                          <button
+                            onClick={() => removeMember(clubId, member._id)}
+                            disabled={loading.action}
+                            className="text-red-600 hover:text-red-900 p-2 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </button>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+        ))
+      )}
     </div>
   )
 
+  const renderEvents = () => (
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-3xl font-bold text-gray-900">Club Events</h1>
+        <p className="text-gray-600 mt-1">Manage events across all your clubs</p>
+      </div>
+
+      {Object.keys(clubEvents).length === 0 ? (
+        <div className="bg-white rounded-xl shadow-lg border border-gray-100 p-12 text-center">
+          <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+          <p className="text-lg font-medium text-gray-600">No club events loaded</p>
+          <p className="text-sm text-gray-500">Click "View Events" on any club from the dashboard to see events</p>
+        </div>
+      ) : (
+        Object.entries(clubEvents).map(([clubId, events]) => (
+          <div key={clubId} className="bg-white rounded-xl shadow-lg border border-gray-100 overflow-hidden">
+            <div className="px-6 py-4 border-b border-gray-200 bg-gray-50">
+              <h3 className="text-lg font-semibold text-gray-900">
+                Club Events ({events.length})
+              </h3>
+            </div>
+
+            {loading.events ? (
+              <LoadingSpinner />
+            ) : events.length === 0 ? (
+              <div className="p-12 text-center">
+                <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
+                <p className="text-lg font-medium text-gray-600">No events yet</p>
+              </div>
+            ) : (
+              <div className="p-6 space-y-4">
+                {events.map((event) => (
+                  <div key={event._id} className="border border-gray-200 rounded-lg p-4 hover:shadow-md transition-shadow">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <h4 className="text-lg font-semibold text-gray-900 mb-2">{event.title}</h4>
+                        <p className="text-gray-600 mb-2">{event.description}</p>
+                        <div className="flex items-center gap-4 text-sm text-gray-500">
+                          <span>📅 {new Date(event.date).toLocaleDateString()}</span>
+                          <span>👤 {event.createdBy?.username}</span>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        ))
+      )}
+    </div>
+  )
+
+  // Updated sidebar items to include members tab
   const sidebarItems = [
     { id: "dashboard", label: "Dashboard", icon: Activity },
-    { id: "requests", label: "Join Requests", icon: UserCheck, badge: dashboardData.stats.pendingRequests },
     { id: "members", label: "Members", icon: Users },
     { id: "events", label: "Events", icon: Calendar },
+    { id: "requests", label: "Join Requests", icon: UserCheck, badge: dashboardData.stats.pendingRequests },
     { id: "settings", label: "Settings", icon: Settings },
   ]
 
@@ -625,15 +710,7 @@ const EnhancedClubAdminDashboard = () => {
       case "members":
         return renderMembers()
       case "events":
-        return (
-          <div className="flex items-center justify-center h-96">
-            <div className="text-center">
-              <Calendar className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Events Management</h2>
-              <p className="text-gray-600">Event management features coming soon.</p>
-            </div>
-          </div>
-        )
+        return renderEvents()
       case "settings":
         return (
           <div className="flex items-center justify-center h-96">
@@ -735,7 +812,7 @@ const EnhancedClubAdminDashboard = () => {
                     <span className="absolute -top-1 -right-1 w-3 h-3 bg-red-500 rounded-full"></span>
                   )}
                 </button>
-                <span className="font-semibold text-gray-700">Hi, Club Admin</span>
+                <span className="font-semibold text-gray-700">Hi, {userss?.username || "Club Admin"}</span>
                 <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                   <CgProfile size={24} className="text-white" />
                 </div>

@@ -526,56 +526,7 @@ const handleSubmit = async () => {
               )}
             </div>
 
-            {/* Feedback Section */}
-            {/* <div className={`${themeClasses.card} border rounded-2xl p-8`}>
-              <div className="flex items-center gap-3 mb-6">
-                <MessageSquare className="w-6 h-6 text-indigo-500" />
-                <h2 className={`text-2xl font-bold ${themeClasses.text}`}>User Feedback</h2>
-              </div>
-              {feedbacks.length > 0 ? (
-                <div className="space-y-4 hide-scrollbar">
-                  {feedbacks.map((feedback) => (
-                    <div
-                      key={feedback._id}
-                      className={`p-6 ${isDarkMode ? "bg-gray-800/30 border-gray-700/50" : "bg-gray-50 border-gray-200"} border rounded-xl`}
-                    >
-                      <div className="flex items-start justify-between mb-4">
-                        <div>
-                          <div className={`font-semibold ${themeClasses.text}`}>
-                            {feedback.user?.username || "Anonymous"}
-                          </div>
-                          <div className={`text-sm ${themeClasses.textMuted}`}>
-                            {new Date(feedback.createdAt).toLocaleDateString()}
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          {renderStars(feedback.rating)}
-                          <span className={`ml-2 text-sm font-medium ${themeClasses.textSecondary}`}>
-                            {feedback.rating}/5
-                          </span>
-                        </div>
-                      </div>
-                      <p className={`${themeClasses.textSecondary} mb-4`}>{feedback.review}</p>
-                      {user && feedback.user && feedback.user._id === user._id && (
-                        <button
-                          onClick={() => handleDeleteFeedback(feedback._id)}
-                          className="text-red-500 hover:text-red-400 hover:underline text-sm transition-colors"
-                        >
-                          Delete
-                        </button>
-                      )}
-                    </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <MessageSquare className={`w-16 h-16 mx-auto mb-4 ${themeClasses.textMuted}`} />
-                  <p className={`${themeClasses.textMuted} text-lg`}>No feedback yet</p>
-                  <p className={`${themeClasses.textMuted}`}>Be the first to share your thoughts!</p>
-                </div>
-              )}
-            </div> */}
-
+           
     <FeedbackSection
       eventId={eventId}
       feedbacks={feedbacks}

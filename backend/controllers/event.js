@@ -1,6 +1,7 @@
 const Event = require("../schema/event");
 const Feedback = require("../schema/feedback")
 const mongoose = require("mongoose");
+const Club = require("../schema/club");
 
 // 📌 Show All Events
 module.exports.showAllEvents = async (req, res) => {
@@ -23,16 +24,57 @@ module.exports.showEvent = async (req, res) => {
 
 // 📌 Create Event with Host Fields
 module.exports.createEvent = async (req, res) => {
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
   try {
-    const { title, description, details, eventType, date, venue, mode, visibility, opportunityType, categories, skillsToBeAssessed, website, festival, participationType, teamMin, teamMax, registrationStart, registrationEnd, registrationLimit, hideContact } = req.body;
+    const { title, description, details, eventType, date, venue, mode, visibility, categories, skillsToBeAssessed, website, festival, participationType, teamMin, teamMax, registrationStart, registrationEnd, registrationLimit, hideContact, prizePool, eligibility, rules, contactEmail, contactPhone, logo, club } = req.body;
 
-    const event = new Event({ title, description, details, eventType, date, venue, mode, visibility, opportunityType, categories, skillsToBeAssessed, website, festival, participationType, teamMin, teamMax, registrationStart, registrationEnd, registrationLimit, hideContact, createdBy: req.user });
+    const clubDoc = await Club.findById(club).session(session);
+    if (!clubDoc) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(404).json({ message: "Club not found" });
+    }
 
-    const savedEvent = await event.save();
-    res.status(201).json({ message: "Event created successfully!", event: savedEvent });
+    const isCreator = clubDoc.createdBy.toString() === req.user._id.toString();
+    if (!isCreator) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(403).json({
+        message: "You are not authorized to create events for this club",
+        debug: { isCreator, isMember, userId: req.user, clubCreator: clubDoc.createdBy }
+      });
+    }
+
+    // Create the event
+    const event = new Event({ title, description, details, eventType, date, venue, mode, visibility, categories, skillsToBeAssessed, website, festival, participationType, teamMin: participationType === "Individual" ? null : teamMin, teamMax: participationType === "Individual" ? null : teamMax, registrationStart, registrationEnd, registrationLimit, hideContact, prizePool, eligibility, rules, contactEmail, contactPhone, logo, createdBy: req.user, club: club });
+
+    const savedEvent = await event.save({ session });
+
+    await Club.findByIdAndUpdate(
+      club,
+      { $push: { events: savedEvent._id } },
+      { session }
+    );
+
+    console.log("Club updated with event ID"); // Debug log
+
+    await session.commitTransaction();
+    session.endSession();
+
+    res.status(201).json({
+      message: "Event created successfully!",
+      event: savedEvent
+    });
   } catch (error) {
+    await session.abortTransaction();
+    session.endSession();
     console.error("Error creating event:", error);
-    res.status(400).json({ message: "Error creating event", error: error.message });
+    res.status(400).json({
+      message: "Error creating event",
+      error: error.message
+    });
   }
 };
 
@@ -238,3 +280,37 @@ module.exports.registerTeamToEvent = async (req, res) => {
     res.status(500).json({ message: "Error registering team", error: error.message })
   }
 }
+
+module.exports.getEventsByClub = async (req, res) => {
+  try {
+    const { clubId } = req.params;
+
+    const club = await Club.findById(clubId).populate({
+      path: 'events',
+      populate: {
+        path: 'createdBy',
+        select: 'username email'
+      }
+    });
+
+    if (!club) {
+      return res.status(404).json({ message: "Club not found" });
+    }
+
+    res.status(200).json({
+      message: "Events fetched successfully",
+      events: club.events,
+      club: {
+        id: club._id,
+        name: club.name,
+        description: club.description
+      }
+    });
+  } catch (error) {
+    console.error("Error fetching club events:", error);
+    res.status(500).json({
+      message: "Error fetching events",
+      error: error.message
+    });
+  }
+};

@@ -34,8 +34,15 @@ const SignInForm = ({ onSwitch }) => {
       localStorage.removeItem("redirectAfterVerify");
       if (data.user.role === "student") {
         navigate("/events");
-      } else {
+      }
+       else if (data.user.role === "club-admin") {
+        navigate("/clubadmin");
+      }
+      else if (data.user.role === "admin") {
         navigate("/admin/dash");
+      }
+      else {
+        navigate("/");
       }
     } catch (err) {
       const message =

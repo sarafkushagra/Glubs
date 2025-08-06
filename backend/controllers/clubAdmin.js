@@ -200,39 +200,24 @@ exports.handleJoinRequest = async (req, res) => {
 
 // Remove member from club
 exports.removeMember = async (req, res) => {
+  const { clubId, memberId } = req.params;
+
   try {
-    const { clubId, memberId } = req.params
+    const club = await Club.findById(clubId);
+    if (!club) return res.status(404).json({ message: "Club not found" });
 
-    // Check if admin manages this club
-    if (!req.user.adminOfClubs?.includes(clubId)) {
-      return res.status(403).json({ message: "You don't have permission to manage this club" })
-    }
+    // Remove member
+    club.members = club.members.filter(
+      (id) => id.toString() !== memberId
+    );
+    await club.save();
 
-    const club = await Club.findById(clubId)
-    if (!club) {
-      return res.status(404).json({ message: "Club not found" })
-    }
-
-    // Remove member from club
-    club.members = club.members.filter((member) => member.toString() !== memberId)
-    await club.save()
-
-    // Update user's memberOfClubs
-    const user = await User.findById(memberId)
-    if (user) {
-      user.memberOfClubs = user.memberOfClubs?.filter((club) => club.toString() !== clubId) || []
-      if (user.memberOfClubs.length === 0) {
-        user.isClubMember = false
-      }
-      await user.save()
-    }
-
-    res.json({ message: "Member removed successfully" })
-  } catch (error) {
-    console.error("Error removing member:", error)
-    res.status(500).json({ message: "Error removing member", error: error.message })
+    res.status(200).json({ message: "Member removed successfully" });
+  } catch (err) {
+    console.error("Error removing member:", err);
+    res.status(500).json({ message: "Error removing member" });
   }
-}
+};
 
 // Get club members with details
 exports.getClubMembers = async (req, res) => {
