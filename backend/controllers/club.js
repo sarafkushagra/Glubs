@@ -1,3 +1,16 @@
+/**
+ * club.js
+ * Controller for club-related operations:
+ *  - List, create, update, delete clubs
+ *  - Show members and events for a club
+ *  - Handle club join requests and user-specific join request retrieval
+ *
+ * General patterns:
+ *  - Uses Mongoose models: Club, Event, ClubJoinRequest, User
+ *  - Returns JSON responses; standardizes status/message where appropriate
+ *  - Some handlers perform notification emails to club admins
+ */
+
 const Club = require("../schema/club")
 const Event = require("../schema/event")
 const mongoose = require("mongoose")
@@ -5,11 +18,30 @@ const ClubJoinRequest = require("../schema/clubJoinRequest")
 const User = require("../schema/user")
 const sendEmail = require("../utils/email")
 
+// ---------------------------------------------------------------------------
+// Handler: showAllClubs
+// Purpose: Return a list of all clubs.
+// Request: none
+// Response: JSON array of clubs
+// Errors: Unexpected DB errors will propagate (consider try/catch in future)
+// ---------------------------------------------------------------------------
 module.exports.showAllClubs = async (req, res) => {
   const clubs = await Club.find()
   res.json(clubs)
 }
 
+// ---------------------------------------------------------------------------
+// Handler: createClub
+// Purpose: Create a new club and make the creating user the club admin/member.
+// Request: expects authenticated `req.user` (user id or user object) and club data in req.body
+// Behaviour:
+//  - Validates authentication presence
+//  - Creates Club with createdBy and members set to the creator
+//  - Adds the club id to the user's adminOfClubs and memberOfClubs arrays
+//  - Sets user's isClubMember and club name fields
+// Response: 201 with the newly created club
+// Errors: 400 for validation/creation errors; returns error.message in JSON
+// ---------------------------------------------------------------------------
 module.exports.createClub = async (req, res) => {
   try {
     const userId = req.user
@@ -44,16 +76,37 @@ module.exports.createClub = async (req, res) => {
 }
 
 
+// ---------------------------------------------------------------------------
+// Handler: showClub
+// Purpose: Get details for a specific club by id.
+// Request: req.params.id = club ObjectId
+// Response: JSON club document (populates createdBy username)
+// Errors: If not found, returns null body currently (consider 404 handling)
+// ---------------------------------------------------------------------------
 module.exports.showClub = async (req, res) => {
   const club = await Club.findById(req.params.id).populate("createdBy", "username")
   res.json(club)
 }
 
+// ---------------------------------------------------------------------------
+// Handler: updateClub
+// Purpose: Update club fields by id.
+// Request: req.params.id, req.body contains update payload
+// Response: JSON updated club document
+// Errors: Unexpected DB errors will propagate (consider try/catch)
+// ---------------------------------------------------------------------------
 module.exports.updateClub = async (req, res) => {
   const updatedClub = await Club.findByIdAndUpdate(req.params.id, req.body, { new: true })
   res.json(updatedClub)
 }
 
+// ---------------------------------------------------------------------------
+// Handler: deleteClub
+// Purpose: Remove a club document by id.
+// Request: req.params.id
+// Response: JSON with confirmation message and deleted club
+// Errors: Unexpected DB errors will propagate (consider try/catch and cleanup of related references)
+// ---------------------------------------------------------------------------
 module.exports.deleteClub = async (req, res) => {
   const deletedClub = await Club.findByIdAndDelete(req.params.id)
   res.json({
@@ -62,6 +115,13 @@ module.exports.deleteClub = async (req, res) => {
   })
 }
 
+// ---------------------------------------------------------------------------
+// Handler: showClubMembers
+// Purpose: Return the member list for a club.
+// Request: req.params.id (club id)
+// Response: JSON array of members (populated)
+// Errors: 404 when club not found; 500 for unexpected failures
+// ---------------------------------------------------------------------------
 module.exports.showClubMembers = async (req, res) => {
   const club = await Club.findById(req.params.id).populate("members")
   if (!club) {
@@ -70,6 +130,13 @@ module.exports.showClubMembers = async (req, res) => {
   res.json(club.members)
 }
 
+// ---------------------------------------------------------------------------
+// Handler: showClubEvents
+// Purpose: Fetch all events for a club.
+// Request: req.params.clubId
+// Response: JSON array of event documents (populates createdBy)
+// Errors: 500 with error message when database or other failure occurs
+// ---------------------------------------------------------------------------
 module.exports.showClubEvents = async (req, res) => {
   try {
     const { clubId } = req.params
@@ -81,6 +148,17 @@ module.exports.showClubEvents = async (req, res) => {
   }
 }
 
+// ---------------------------------------------------------------------------
+// Handler: sendJoinRequest
+// Purpose: Allow a user to request joining a club.
+// Request: req.params.clubId, req.body.message (optional), authenticated req.user
+// Behaviour:
+//  - Validates club exists and user is not already a member
+//  - Rejects duplicate pending requests
+//  - Creates a ClubJoinRequest and notifies club admins via email
+// Response: 201 with created join request
+// Errors: 400/404 for user/club/duplicate request; 500 for unexpected failures
+// ---------------------------------------------------------------------------
 module.exports.sendJoinRequest = async (req, res) => {
   try {
     const { clubId } = req.params
@@ -160,6 +238,13 @@ module.exports.sendJoinRequest = async (req, res) => {
 }
 
 // Get user's join requests
+// ---------------------------------------------------------------------------
+// Handler: getUserJoinRequests
+// Purpose: Retrieve all join requests created by the authenticated user.
+// Request: authenticated req.user (user id)
+// Response: JSON { requests: [...] } with populated club and reviewer information
+// Errors: 500 on unexpected failures
+// ---------------------------------------------------------------------------
 module.exports.getUserJoinRequests = async (req, res) => {
   try {
     const userId = req.user._id || req.user
