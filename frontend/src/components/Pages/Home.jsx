@@ -4,12 +4,17 @@ import { useState } from "react"
 import { Link } from "react-router-dom"
 import { useTheme } from "../Context/ThemeContext"
 import Navbar from "./Navbar"
-import img2 from "../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp"
+// import img2 from "../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp" // Not used in this section anymore
 import event1 from "../images/EventA.jpg"
 import event2 from "../images/EventB.jpg"
 import event3 from "../images/EventC.jpg"
 import backgroundhero from "../images/backgroundhero.avif"
 import Footer from "./Footer"
+
+// Define celebrity images (Public URLs)
+const rdjImg = "https://upload.wikimedia.org/wikipedia/commons/thumb/9/94/Robert_Downey_Jr_2014_Comic_Con_%28cropped%29.jpg/440px-Robert_Downey_Jr_2014_Comic_Con_%28cropped%29.jpg"
+const emmaImg = "https://upload.wikimedia.org/wikipedia/commons/thumb/3/31/Emma_Stone_at_Maniac_UK_premiere_%28cropped%29.jpg/440px-Emma_Stone_at_Maniac_UK_premiere_%28cropped%29.jpg"
+const ruskinImg = "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRfjk9hGhqMmFLSy_EUtXmCgVNdT34fNOliK0P6x1zS82jQn8Fof-Egorp8IrlSdygcaLkFEQ&s"
 
 export default function LandingPage() {
   const [isSidebarOpen, setSidebarOpen] = useState(false)
@@ -84,7 +89,7 @@ export default function LandingPage() {
           animation: fadeInDown 0.8s ease-out forwards;
         }
 
-        /* Utility for animation delay - not strictly needed if doing individual inline delays */
+        /* Utility for animation delay */
         .animate-delay-0_1s { animation-delay: 0.1s; }
         .animate-delay-0_2s { animation-delay: 0.2s; }
         .animate-delay-0_3s { animation-delay: 0.3s; }
@@ -263,19 +268,19 @@ export default function LandingPage() {
         <div className="max-w-6xl mx-auto grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
           {[
             {
-              img: img2,
+              img: rdjImg, // Updated to Robert Downey Jr.
               text: '"GLUBS increased our event turnout by 300%! The QR system made attendance tracking so easy."',
-              name: "Mark Zuckerberg",
+              name: "Robert Downey Jr.",
             },
             {
-              img: img2,
+              img: emmaImg,
               text: '"Finally, I never miss events. The dashboard keeps me updated on everything happening on campus."',
-              name: "Katrina Kaif",
+              name: "Emma Stone",
             },
             {
-              img: img2,
+              img: ruskinImg,
               text: '"This platform made it so easy to find and join events. Highly recommended!"',
-              name: "Johny Bhai",
+              name: "Ruskin Bond",
             },
           ].map((item, idx) => (
             <div
@@ -297,7 +302,8 @@ export default function LandingPage() {
                 <img
                   src={item.img || "/placeholder.svg"}
                   alt={item.name}
-                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 mr-3 sm:mr-4"
+                  // Added object-cover here to ensure the image fits the circle perfectly without stretching
+                  className="w-10 h-10 sm:w-12 sm:h-12 rounded-full border-2 mr-3 sm:mr-4 object-cover"
                   style={{
                     borderColor: theme === "dark" ? "#06b6d4" : "#4f46e5",
                   }}
