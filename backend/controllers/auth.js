@@ -1,3 +1,21 @@
+/**
+ * auth.js
+ * Controller responsible for authentication-related flows:
+ *  - User signup (with email OTP verification)
+ *  - Email verification and OTP resend
+ *  - Login / logout
+ *  - Password reset (request OTP and reset)
+ *
+ * Each exported handler uses `catchAsync` to forward errors to the global error
+ * handler and returns JSON responses. Helper functions below manage token
+ * creation and sending responses with cookies.
+ *
+ * Inputs / outputs (general patterns):
+ *  - Inputs: request body (email, password, otp, etc) and authenticated `req.user` where applicable.
+ *  - Success responses: JSON with `status` and `message`, sometimes `token` and `data.user`.
+ *  - Errors: use `AppError` for client-visible errors (4xx) and allow unexpected errors to be handled by global handler (5xx).
+ */
+
 const User = require("../schema/user");
 const AppError = require("../utils/appError");
 const catchAsync = require("../utils/catchAsync");
@@ -5,12 +23,33 @@ const sendEmail = require("../utils/email");
 const generateOtp = require("../utils/generateOtp");
 const jwt = require("jsonwebtoken");
 
+// ---------------------------------------------------------------------------
+// Helper: signToken
+// Purpose: Create a JWT for a given user id.
+// Input: user id (string/ObjectId)
+// Output: signed JWT string with expiry according to env config.
+// Note: This is a small wrapper around jsonwebtoken for consistent signing.
+// ---------------------------------------------------------------------------
 const signToken = (id) => {
   return jwt.sign({ id }, process.env.JWT_SECRET, {
     expiresIn: process.env.JWT_EXPIRES_IN,
   });
 };
 
+// ---------------------------------------------------------------------------
+// Helper: createSendToken
+// Purpose: Create a JWT, set it as an httpOnly cookie on the response and send
+// a standardized JSON response including the token and (sanitized) user data.
+// Inputs:
+//  - user: Mongoose user document (will be sanitized before sending)
+//  - statusCode: HTTP status to return
+//  - res: Express response object
+//  - message: human-readable success message
+// Behavior:
+//  - Signs a token with `signToken`, configures cookie options (expiry, httpOnly)
+//  - Clears sensitive properties from the user object (password, otp)
+//  - Sends { status, message, token, data: { user } }
+// ---------------------------------------------------------------------------
 const createSendToken = (user, statusCode, res, message) => {
   const token = signToken(user._id);
   const cookieOptions = {
@@ -39,6 +78,19 @@ const createSendToken = (user, statusCode, res, message) => {
   });
 };
 
+// ---------------------------------------------------------------------------
+// Handler: signup
+// Purpose: Register a new user with email verification via OTP.
+// Request body: { email, password, passwordConfirm, username }
+// Behaviour:
+//  - Rejects if email already exists.
+//  - Generates an OTP, sets expiry, creates the user (isVerified=false).
+//  - Sends verification email containing the OTP.
+//  - On successful email send, issues a token and responds with user data.
+// Errors:
+//  - 400 if email already registered.
+//  - 500 if sending email fails (user is removed in that case).
+// ---------------------------------------------------------------------------
 exports.signup = catchAsync(async (req, res, next) => {
   const { email, password, passwordConfirm, username } = req.body;
 
@@ -95,6 +147,17 @@ exports.signup = catchAsync(async (req, res, next) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// Handler: verifyAccount
+// Purpose: Verify a newly registered user's email using an OTP.
+// Request body: { otp }
+// Requirements: `req.user` should be set (authentication middleware) and contain otp fields.
+// Behaviour:
+//  - Validates OTP presence and correctness and that it hasn't expired.
+//  - Marks user as verified, clears otp fields and saves.
+// Response: 200 with success message on verification.
+// Errors: 400 for missing/invalid/expired OTP.
+// ---------------------------------------------------------------------------
 exports.verifyAccount = catchAsync(async (req, res, next) => {
   const { otp } = req.body;
 
@@ -126,6 +189,16 @@ exports.verifyAccount = catchAsync(async (req, res, next) => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Handler: resentOTP
+// Purpose: Resend a new email verification OTP to a user.
+// Request: uses `req.user.email` (authenticated) to find the user.
+// Behaviour:
+//  - Validates user exists and is not already verified.
+//  - Generates new OTP, saves, and emails it to the user.
+// Response: 200 with confirmation message when email is sent.
+// Errors: 400/404 if data missing or user not found; 500 if email sending fails.
+// ---------------------------------------------------------------------------
 exports.resentOTP = catchAsync(async (req, res, next) => {
   const { email } = req.user;
 
@@ -189,6 +262,16 @@ exports.resentOTP = catchAsync(async (req, res, next) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// Handler: login
+// Purpose: Authenticate user by email and password and issue a JWT cookie.
+// Request body: { email, password }
+// Behaviour:
+//  - Validates presence of email/password.
+//  - Loads user with password and checks verification and password correctness.
+//  - On success, uses createSendToken to set cookie and respond.
+// Errors: 400 for missing credentials, 401 for incorrect credentials or unverified account.
+// ---------------------------------------------------------------------------
 exports.login = catchAsync(async (req, res, next) => {
   const { email, password } = req.body;
 
@@ -218,6 +301,11 @@ exports.login = catchAsync(async (req, res, next) => {
   createSendToken(user, 200, res, "Login Successfull");
 });
 
+// ---------------------------------------------------------------------------
+// Handler: logout
+// Purpose: Invalidate auth cookie by overwriting it with a short-lived 'loggedout' value.
+// Behaviour: sets cookie to 'loggedout' with a near-future expiry and returns success.
+// ---------------------------------------------------------------------------
 exports.logout = catchAsync(async (req, res, next) => {
   res.cookie("token", "loggedout", {
     expires: new Date(Date.now() + 1000),
@@ -231,6 +319,16 @@ exports.logout = catchAsync(async (req, res, next) => {
   });
 });
 
+// ---------------------------------------------------------------------------
+// Handler: forgetPassword
+// Purpose: Begin password reset by generating an OTP and emailing it to the user.
+// Request body: { email }
+// Behaviour:
+//  - Finds user by email, sets reset OTP and expiry, saves.
+//  - Sends email with reset OTP.
+// Response: 200 if email sent.
+// Errors: 404 if user not found; 500 if email sending fails (cleans up OTP fields on error).
+// ---------------------------------------------------------------------------
 exports.forgetPassword = catchAsync(async (req, res, next) => {
   const { email } = req.body;
   const user = await User.findOne({ email });
@@ -285,6 +383,16 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
   }
 });
 
+// ---------------------------------------------------------------------------
+// Handler: resetPassword
+// Purpose: Complete password reset using email + OTP. Sets new password if OTP valid.
+// Request body: { email, otp, password, passwordConfirm }
+// Behaviour:
+//  - Validates user exists with matching, non-expired reset OTP.
+//  - Updates password fields, clears reset OTP fields, saves.
+// Response: 200 with a message instructing the user to login.
+// Errors: 400 if user not found or OTP invalid/expired.
+// ---------------------------------------------------------------------------
 exports.resetPassword = catchAsync(async (req, res, next) => {
   const { email, otp, password, passwordConfirm } = req.body;
 
