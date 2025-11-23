@@ -7,7 +7,27 @@
   import { useAuth } from "../Context/userStore";
   import RoleSelectionDialog from "./RoleSelectionDialog";
 
+  /*
+    Component: EmailVerificationPage
+    Purpose:
+      - Collects a 4-digit OTP from the user and verifies their email.
+      - Provides resend functionality and simple UI feedback (toasts,
+        loading states). On success navigates to role-selection.
+
+    Key bits:
+      - `otp` state: array of 4 strings, one per input box.
+      - `inputsRef`: refs to focus inputs programmatically when typing/backspacing.
+      - `verifyHandler`: assembles OTP and calls verify endpoint.
+      - `resendHandler`: requests a new OTP be sent to the user's email.
+
+    Notes:
+      - This component is UI-focused — business rules (rate limits, exact
+        error handling) should be enforced server-side.
+      - All network calls use `withCredentials: true` so cookies/sessions are included.
+  */
+
   const EmailVerificationPage = () => {
+    // otp is stored as an array for easy per-input rendering and control.
     const [otp, setOtp] = useState(["", "", "", ""]);
     const [loading, setLoading] = useState(false);
     const inputsRef = useRef([]);
@@ -15,7 +35,8 @@
     const { updateUser, user } = useAuth();
 
 
-
+    // Handles changes in individual OTP inputs. Accepts only numeric input
+    // and automatically moves focus to the next input on entry.
     const handleChange = (e, index) => {
       const value = e.target.value;
       if (!/^\d*$/.test(value)) return;
@@ -24,33 +45,33 @@
       newOtp[index] = value.slice(-1);
       setOtp(newOtp);
 
+      // Auto-focus next input when a digit is entered.
       if (value && index < 3) inputsRef.current[index + 1]?.focus();
     };
 
+    // Handle backspace navigation: move focus to previous box when empty.
     const handleKeyDown = (e, index) => {
       if (e.key === "Backspace" && !otp[index] && index > 0) {
         inputsRef.current[index - 1]?.focus();
       }
     };
 
+    // Sends assembled OTP to the server for verification.
     const verifyHandler = async () => {
       const fullOtp = otp.join("");
       if (fullOtp.length !== 4) return toast.error("Please enter 4-digit OTP");
 
       setLoading(true);
       try {
-        const res = await axios.post(
+        await axios.post(
           `${import.meta.env.VITE_API_BASE_URL}/users/verify`,
           { otp: fullOtp },
           { withCredentials: true }
         );
         toast.success("Verified successfully!");
         updateUser({ isVerified: true });
-        const redirectPath =
-          localStorage.getItem("redirectAfterVerify") || "/events";
-        localStorage.removeItem("redirectAfterVerify");
+        // After verification navigate to role selection.
         navigate("/role-selection");
-        // navigate(redirectPath);
       } catch (err) {
         toast.error(
           "Verification failed: " + (err.response?.data?.message || "")
@@ -60,6 +81,7 @@
       }
     };
 
+    // Requests the backend to resend the OTP to the user's email.
     const resendHandler = async () => {
       try {
         toast.info("OTP sent again to your email!");
@@ -70,7 +92,8 @@
         );
 
       } catch (err) {
-        toast.error("This accound is already verified");
+        // Display a friendly message; backend controls exact failure reason.
+        toast.error("This account is already verified");
       }
     };
 
@@ -85,7 +108,7 @@
             <div className="absolute bottom-32 left-32 w-20 h-20 bg-indigo-200 rounded-full opacity-25 animate-ping"></div>
             <div className="absolute bottom-20 right-20 w-28 h-28 bg-pink-200 rounded-full opacity-20 animate-pulse"></div>
 
-            {/* Grid pattern */}
+            {/* Grid pattern (visual only) */}
             <div className="absolute inset-0 bg-[url('data:image/svg+xml,%3Csvg%20width%3D%2260%22%20height%3D%2260%22%20viewBox%3D%220%200%2060%2060%22%20xmlns%3D%22http%3A//www.w3.org/2000/svg%22%3E%3Cg%20fill%3D%22none%22%20fill-rule%3D%22evenodd%22%3E%3Cg%20fill%3D%22%239C92AC%22%20fill-opacity%3D%220.05%22%3E%3Ccircle%20cx%3D%2230%22%20cy%3D%2230%22%20r%3D%221%22/%3E%3C/g%3E%3C/g%3E%3C/svg%3E')]"></div>
           </div>
         </div>
