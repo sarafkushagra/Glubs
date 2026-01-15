@@ -1,24 +1,26 @@
-const nodemailer = require("nodemailer");
+const { Resend } = require("resend");
 
 const sendEmail = async (options) => {
   try {
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.EMAIL_USER,
-        pass: process.env.EMAIL_PASSWORD,
-      },
-    });
+    // Initialize Resend with API key from environment variables
+    const resend = new Resend(process.env.RESEND_API_KEY);
 
-    const mailOptions = {
-      from: `"GLUBS Team 👨‍💻" <${process.env.EMAIL_USER}>`,
-      to: options.email,
+    // Send email using Resend API
+    const { data, error } = await resend.emails.send({
+      from: "GLUBS Team 👨‍💻 <onboarding@medhya.life>",
+      to: [options.email],
       subject: options.subject,
       html: options.html,
-    };
+      attachments: options.attachments || [],
+    });
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("✅ Email sent:", info.response);
+    // Handle Resend API errors
+    if (error) {
+      console.error("❌ Actual email error:", error);
+      throw error;
+    }
+
+    console.log("✅ Email sent:", data);
   } catch (err) {
     console.error("❌ Actual email error:", err);
     throw err;
@@ -26,4 +28,3 @@ const sendEmail = async (options) => {
 };
 
 module.exports = sendEmail;
-

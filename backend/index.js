@@ -35,6 +35,7 @@ const feedbackRouter = require("./routers/feedback");
 const adminRouter = require("./routers/admin")
 const teamRouter = require("./routers/team");
 const clubAdminRouter = require("./routers/clubAdmin");
+const attendanceRouter = require("./routers/attendance");
 const globalErrorHandler = require("./utils/globalErrorHandler");
 
 app.use("/users", userRouter);
@@ -44,6 +45,7 @@ app.use("/feedback", feedbackRouter);
 app.use("/admin", adminRouter);
 app.use("/teams", teamRouter);
 app.use("/club-admin", clubAdminRouter);
+app.use("/attendance", attendanceRouter);
 
 app.use(globalErrorHandler);
 

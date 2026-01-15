@@ -45,7 +45,8 @@ const eventSchema = new mongoose.Schema({
   },
   club: {
     type: mongoose.Schema.Types.ObjectId,
-    ref: 'Club'
+    ref: 'Club',
+    required: true
   },
 
   // Engagement Tracking
