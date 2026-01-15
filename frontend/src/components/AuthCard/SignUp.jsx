@@ -14,9 +14,9 @@ function getPasswordStrength(password) {
   if (/[0-9]/.test(password)) score++;
   if (/[^A-Za-z0-9]/.test(password)) score++;
   if (password.length >= 12) score++;
-  if (score <= 2) return { label: "Weak", color: "text-red-500" };
-  if (score <= 4) return { label: "Good", color: "text-yellow-500" };
-  return { label: "Strong", color: "text-green-600" };
+
+  // Return numeric score for progress bar
+  return score;
 }
 
 const SignUpForm = ({ onSwitch }) => {
@@ -58,7 +58,15 @@ const SignUpForm = ({ onSwitch }) => {
     return newErrors;
   };
 
-  const passwordStrength = getPasswordStrength(formData.password);
+  const passwordScore = getPasswordStrength(formData.password);
+
+  const getStrengthLabel = (score) => {
+    if (score <= 2) return { label: "Weak", color: "text-red-500", barColor: "bg-red-500" };
+    if (score <= 4) return { label: "Good", color: "text-yellow-500", barColor: "bg-yellow-500" };
+    return { label: "Strong", color: "text-green-600", barColor: "bg-green-500" };
+  };
+
+  const strengthInfo = getStrengthLabel(passwordScore);
 
   const submitHandler = async (e) => {
     e.preventDefault();
@@ -76,15 +84,15 @@ const SignUpForm = ({ onSwitch }) => {
 
       const { data, token } = response.data;
 
-      setAuth({ user : data.user, token });
+      setAuth({ user: data.user, token });
       toast.success("Signup successful! An OTP is send to your mail. Please verify your email.");
       if (response.data.status === "success") {
         navigate("/verify");
       }
     } catch (error) {
-      if(error.response === "Please verify your email before logging in." && error.response.status === 401) {
-          navigate("/verify");
-          return;
+      if (error.response === "Please verify your email before logging in." && error.response.status === 401) {
+        navigate("/verify");
+        return;
       }
       const errMsg = error?.response?.data?.message || "Something went wrong.";
       toast.error(errMsg);
@@ -93,103 +101,150 @@ const SignUpForm = ({ onSwitch }) => {
       setLoading(false);
     }
   };
+
   return (
-    <div className="w-full max-w-md p-8 bg-white rounded-lg shadow-lg">
-      <h2 className="text-2xl font-bold text-center mb-6 text-black">Sign Up</h2>
+    <div className="w-full">
+      <h2 className="text-3xl font-bold bg-gradient-to-r from-blue-600 to-black bg-clip-text text-black mb-8">
+        Create Account
+      </h2>
+
       {serverError && (
-        <div className="text-red-500 text-sm mb-4 text-center">{serverError}</div>
+        <div className="p-3 mb-6 bg-red-50 border border-red-200 text-red-600 rounded-lg text-sm text-center">
+          {serverError}
+        </div>
       )}
 
-      <form onSubmit={submitHandler} className="space-y-4">
+      <form onSubmit={submitHandler} className="space-y-5">
         {/* Username */}
-        <div>
-          <input
-            name="username"
-            type="text"
-            placeholder="Username"
-            value={formData.username}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded bg-gray-100 text-black"
-          />
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-gray-500 ml-1 uppercase tracking-wide">
+            Username
+          </label>
+          <div className="relative group">
+            <input
+              name="username"
+              type="text"
+              placeholder="Choose a username"
+              value={formData.username}
+              onChange={handleChange}
+              className={`w-full px-4 py-3 border-2 ${errors.username ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm group-hover:border-blue-300`}
+            />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 to-black/0 group-hover:from-blue-500/5 group-hover:to-black/5 transition-all duration-300 pointer-events-none"></div>
+          </div>
           {errors.username && (
-            <p className="text-sm text-red-500 mt-1">{errors.username}</p>
+            <p className="text-sm text-red-500 ml-1">{errors.username}</p>
           )}
         </div>
 
         {/* Email */}
-        <div>
-          <input
-            name="email"
-            type="email"
-            placeholder="Email"
-            value={formData.email}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded bg-gray-100 text-black"
-          />
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-gray-500 ml-1 uppercase tracking-wide">
+            Email Address
+          </label>
+          <div className="relative group">
+            <input
+              name="email"
+              type="email"
+              placeholder="Enter your email"
+              value={formData.email}
+              onChange={handleChange}
+              className={`w-full px-4 py-3 border-2 ${errors.email ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm group-hover:border-blue-300`}
+            />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 to-black/0 group-hover:from-blue-500/5 group-hover:to-black/5 transition-all duration-300 pointer-events-none"></div>
+          </div>
           {errors.email && (
-            <p className="text-sm text-red-500 mt-1">{errors.email}</p>
+            <p className="text-sm text-red-500 ml-1">{errors.email}</p>
           )}
         </div>
 
         {/* Password */}
-        <div>
-          <input
-            name="password"
-            type="password"
-            placeholder="Password (max 12 chars)"
-            value={formData.password}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded bg-gray-100 text-black"
-            maxLength={12}
-          />
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-gray-500 ml-1 uppercase tracking-wide">
+            Password
+          </label>
+          <div className="relative group">
+            <input
+              name="password"
+              type="password"
+              placeholder="Create a password (max 12 chars)"
+              value={formData.password}
+              onChange={handleChange}
+              className={`w-full px-4 py-3 border-2 ${errors.password ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm group-hover:border-blue-300`}
+              maxLength={12}
+            />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 to-black/0 group-hover:from-blue-500/5 group-hover:to-black/5 transition-all duration-300 pointer-events-none"></div>
+          </div>
+
           <div
-            className={`transition-all duration-300 ease-in-out ${formData.password.length > 0 ? 'opacity-100 translate-y-0 mt-1' : 'opacity-0 -translate-y-2 h-0 overflow-hidden'}`}
+            className={`transition-all duration-300 ease-in-out ${formData.password.length > 0 ? 'opacity-100 translate-y-0 mt-2' : 'opacity-0 -translate-y-2 h-0 overflow-hidden'}`}
           >
             {formData.password.length > 0 && (
-              <div className="flex items-center gap-2">
-                <span className={`text-xs font-semibold ${passwordStrength.color}`}>{passwordStrength.label} password</span>
-                <span className="text-xs text-gray-400">({formData.password.length}/12)</span>
+              <div className="space-y-1">
+                <div className="h-1.5 w-full bg-gray-200 rounded-full overflow-hidden">
+                  <div
+                    className={`h-full ${strengthInfo.barColor} transition-all duration-500`}
+                    style={{ width: `${(passwordScore / 6) * 100}%` }}
+                  ></div>
+                </div>
+                <div className="flex justify-between items-center text-xs">
+                  <span className={`font-semibold ${strengthInfo.color}`}>{strengthInfo.label}</span>
+                  <span className="text-gray-400">{formData.password.length}/12</span>
+                </div>
               </div>
             )}
-            {formData.password.length > 0 && passwordStrength.label !== "Strong" && (
+            {formData.password.length > 0 && strengthInfo.label !== "Strong" && (
               <p className="text-xs text-gray-500 mt-1">
-                Tip: Use at least 8 characters, uppercase, lowercase, numbers, and special characters for a strong password.
+                Tip: Mix case, numbers & symbols
               </p>
             )}
           </div>
           {errors.password && (
-            <p className="text-sm text-red-500 mt-1">{errors.password}</p>
+            <p className="text-sm text-red-500 ml-1">{errors.password}</p>
           )}
         </div>
 
         {/* Confirm Password */}
-        <div>
-          <input
-            name="passwordConfirm"
-            type="password"
-            placeholder="Confirm Password"
-            value={formData.passwordConfirm}
-            onChange={handleChange}
-            className="w-full px-4 py-2 border rounded bg-gray-100 text-black"
-            maxLength={12}
-          />
+        <div className="space-y-1">
+          <label className="text-xs font-semibold text-gray-500 ml-1 uppercase tracking-wide">
+            Confirm Password
+          </label>
+          <div className="relative group">
+            <input
+              name="passwordConfirm"
+              type="password"
+              placeholder="Confirm your password"
+              value={formData.passwordConfirm}
+              onChange={handleChange}
+              className={`w-full px-4 py-3 border-2 ${errors.passwordConfirm ? 'border-red-300' : 'border-gray-200'} rounded-xl focus:outline-none focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/50 backdrop-blur-sm group-hover:border-blue-300`}
+              maxLength={12}
+            />
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-r from-blue-500/0 to-black/0 group-hover:from-blue-500/5 group-hover:to-black/5 transition-all duration-300 pointer-events-none"></div>
+          </div>
           {errors.passwordConfirm && (
-            <p className="text-sm text-red-500 mt-1">{errors.passwordConfirm}</p>
+            <p className="text-sm text-red-500 ml-1">{errors.passwordConfirm}</p>
           )}
         </div>
 
         <button
           type="submit"
           disabled={loading}
-          className="w-full py-2 px-4 bg-[#3d348b] text-white rounded hover:bg-[#2d2d6b]"
+          className="w-full py-3 bg-gradient-to-r from-blue-600 to-black text-white rounded-xl hover:from-blue-700 hover:to-gray-800 transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none font-medium shadow-lg hover:shadow-xl mt-4"
         >
-          {loading ? "Loading..." : "Sign Up"}
+          {loading ? (
+            <div className="flex items-center justify-center space-x-2">
+              <div className="w-5 h-5 border-2 border-white/30 border-t-white rounded-full animate-spin"></div>
+              <span>Creating Account...</span>
+            </div>
+          ) : (
+            "Sign Up"
+          )}
         </button>
       </form>
-      <p className="mt-6 text-center text-sm">
+
+      <p className="mt-8 text-center text-sm text-gray-500 md:hidden">
         Already have an account?{' '}
         <span
-          className="text-blue-600 cursor-pointer font-medium hover:underline"
+          className="text-blue-600 cursor-pointer font-bold hover:underline"
           onClick={onSwitch}
         >
           Sign In
