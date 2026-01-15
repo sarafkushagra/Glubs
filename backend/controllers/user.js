@@ -80,9 +80,9 @@ exports.requestClubAdmin = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized or email not verified" });
     }
 
-    user.requestedRole === "club-admin" 
-      await User.findByIdAndUpdate( req.user._id, {requestedRole: "pending-club-admin"} , {new: true})
-  
+    user.requestedRole === "club-admin"
+    await User.findByIdAndUpdate(req.user._id, { requestedRole: "pending-club-admin" }, { new: true })
+
 
     res.status(200).json({ message: "Role request submitted successfully." });
   } catch (err) {
@@ -130,8 +130,8 @@ exports.getAvailableUsers = async (req, res) => {
         $nin: usersInTeams.map(id => new mongoose.Types.ObjectId(id)),
       },
       isVerified: true,
-      role: { $in: ["student"] },
-    }).select("username email yearOfStudy department age");
+      role: { $in: ["student", "club-admin"] },
+    }).select("username email yearOfStudy department age _id");
 
     res.json({ users: availableUsers });
   } catch (err) {
@@ -149,7 +149,7 @@ module.exports.getUserAdminClubs = async (req, res) => {
     const clubs = await Club.find({
       $or: [
         { createdBy: userId },
-        { 
+        {
           members: userId,
           // You might want to add a role field to track admin members
           // For now, assuming createdBy is the admin
@@ -158,7 +158,7 @@ module.exports.getUserAdminClubs = async (req, res) => {
     }).select('_id name description category createdBy');
     // Filter to only include clubs where user is actually admin
     // This assumes that createdBy users are admins
-    const adminClubs = clubs.filter(club => 
+    const adminClubs = clubs.filter(club =>
       club.createdBy.toString() === userId._id.toString()
     );
 

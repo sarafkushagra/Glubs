@@ -1,5 +1,6 @@
 const Team = require("../schema/team")
 const TeamRequest = require("../schema/teamRequest")
+const Notification = require("../schema/notification")
 const User = require("../schema/user")
 const Event = require("../schema/event")
 const mongoose = require("mongoose")
@@ -7,6 +8,7 @@ const { nanoid } = require("nanoid")
 const sendEmail = require("../utils/email")
 const catchAsync = require("../utils/catchAsync")
 const AppError = require("../utils/appError")
+const socketIO = require("../utils/socket")
 
 // Helper for consistent team population
 const populateTeam = (query) => {
@@ -67,13 +69,9 @@ module.exports.getUserTeam = catchAsync(async (req, res, next) => {
     })
   );
 
-  if (!team) {
-    return next(new AppError("No team found for this user and event", 404));
-  }
-
   res.status(200).json({
     status: "success",
-    data: { team },
+    data: { team: team || null },
   });
 });
 
@@ -132,9 +130,44 @@ module.exports.removeMember = catchAsync(async (req, res, next) => {
 
   const updatedTeam = await populateTeam(Team.findById(teamId));
 
+  // 🔔 Create Notification
+  try {
+    if (userId.toString() === memberId) {
+      // User left the team
+      const newNotif = await Notification.create({
+        recipient: team.leader,
+        sender: userId,
+        type: "team_left",
+        title: "Member Left Team",
+        message: `${req.user.username} has left your team "${team.name}".`,
+        metadata: { teamId, eventId: team.event.toString() }
+      });
+      socketIO.sendNotification(team.leader, newNotif)
+    } else {
+      // Leader removed the member
+      const newNotif = await Notification.create({
+        recipient: memberId,
+        sender: userId,
+        type: "member_removed",
+        team: teamId,
+        event: team.event,
+        title: "Removed from Team",
+        message: `You have been removed from the team "${team.name}" for the event.`,
+        metadata: { teamId, eventId: team.event.toString() }
+      });
+      const populatedNotif = await Notification.findById(newNotif._id)
+        .populate("sender", "username email")
+        .populate("team", "name description leader")
+        .populate("event", "title date");
+      socketIO.sendNotification(memberId, populatedNotif)
+    }
+  } catch (err) {
+    console.error("Error creating notification:", err);
+  }
+
   res.status(200).json({
     status: "success",
-    message: "Member removed successfully!",
+    message: memberId === userId.toString() ? "Left team successfully!" : "Member removed successfully!",
     data: { team: updatedTeam },
   });
 });
@@ -198,6 +231,27 @@ module.exports.respondToRequest = catchAsync(async (req, res, next) => {
     request.status = "accepted";
     await request.save();
 
+    // 🔔 Create Notification for leader
+    try {
+      const newNotif = await Notification.create({
+        recipient: request.from._id,
+        sender: userId,
+        type: "team_accepted",
+        team: request.team._id,
+        event: request.event._id,
+        title: "Invitation Accepted",
+        message: `${req.user.username} has accepted your invitation to join "${request.team.name}".`,
+        metadata: { teamId: request.team._id.toString(), eventId: request.event._id.toString() }
+      });
+      const populatedNotif = await Notification.findById(newNotif._id)
+        .populate("sender", "username email")
+        .populate("team", "name description leader")
+        .populate("event", "title date");
+      socketIO.sendNotification(request.from._id, populatedNotif)
+    } catch (err) {
+      console.error("Error creating notification:", err);
+    }
+
     res.status(200).json({
       status: "success",
       message: "Request accepted successfully! You have joined the team.",
@@ -205,6 +259,27 @@ module.exports.respondToRequest = catchAsync(async (req, res, next) => {
   } else if (action === "reject") {
     request.status = "rejected";
     await request.save();
+
+    // 🔔 Create Notification for leader
+    try {
+      const newNotif = await Notification.create({
+        recipient: request.from._id,
+        sender: userId,
+        type: "team_rejected",
+        team: request.team._id,
+        event: request.event._id,
+        title: "Invitation Rejected",
+        message: `${req.user.username} has rejected your invitation to join "${request.team.name}".`,
+        metadata: { teamId: request.team._id.toString(), eventId: request.event._id.toString() }
+      });
+      const populatedNotif = await Notification.findById(newNotif._id)
+        .populate("sender", "username email")
+        .populate("team", "name description leader")
+        .populate("event", "title date");
+      socketIO.sendNotification(request.from._id, populatedNotif)
+    } catch (err) {
+      console.error("Error creating notification:", err);
+    }
 
     res.status(200).json({
       status: "success",
@@ -307,6 +382,28 @@ module.exports.sendTeamRequest = catchAsync(async (req, res, next) => {
     message: message || "",
     status: "pending",
   });
+
+  // 🔔 Create In-App Notification
+  try {
+    const newNotif = await Notification.create({
+      recipient: targetUserId,
+      sender: fromUserId,
+      type: "team_invitation",
+      team: teamId,
+      event: eventId,
+      title: "New Team Invitation",
+      message: `${req.user.username} has invited you to join team "${team.name}" for ${event.title}.`,
+      link: `/events/${eventId}/team-room`,
+      metadata: { teamId, eventId, requestId: teamRequest._id.toString() }
+    });
+    const populatedNotif = await Notification.findById(newNotif._id)
+      .populate("sender", "username email")
+      .populate("team", "name description leader")
+      .populate("event", "title date");
+    socketIO.sendNotification(targetUserId, populatedNotif)
+  } catch (err) {
+    console.error("Error creating notification:", err);
+  }
 
   const sender = await User.findById(fromUserId);
 

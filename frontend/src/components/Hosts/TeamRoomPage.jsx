@@ -143,7 +143,8 @@ const TeamRoomPage = () => {
 
       // Fetch current user
       const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true })
-      setUser(userRes.data.user)
+      const currentUser = userRes.data.user
+      setUser(currentUser)
 
       // Fetch event details
       const eventRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
@@ -151,33 +152,41 @@ const TeamRoomPage = () => {
 
       // Fetch user's team if exists
       try {
-        const teamRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/user/${userRes.data.user._id}/event/${eventId}`, {
+        const teamRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/user/${currentUser._id}/event/${eventId}`, {
           withCredentials: true,
         })
-        setUserTeam(teamRes.data.team)
-        setTeamName(teamRes.data.team.name)
-        setTeamDescription(teamRes.data.team.description || "")
+        const team = teamRes.data.data?.team
+        setUserTeam(team)
+        if (team) {
+          setTeamName(team.name)
+          setTeamDescription(team.description || "")
+        } else {
+          setUserTeam(null)
+          setTeamName("")
+          setTeamDescription("")
+        }
       } catch (err) {
         console.log("User doesn't have a team")
+        setUserTeam(null)
       }
 
       // Fetch available users
       const availableRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/available/${eventId}`, {
         withCredentials: true,
       })
-      setAvailableUsers(availableRes.data.users)
+      setAvailableUsers(availableRes.data.users || [])
 
       // Fetch team requests (received)
       const requestsRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/requests/${eventId}`, {
         withCredentials: true,
       })
-      setTeamRequests(requestsRes.data.requests)
+      setTeamRequests(requestsRes.data.data?.requests || [])
 
       // Fetch sent requests
       const sentRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/sent-requests/${eventId}`, {
         withCredentials: true,
       })
-      setSentRequests(sentRes.data.requests)
+      setSentRequests(sentRes.data.data?.requests || [])
     } catch (err) {
       console.error("Error fetching data:", err)
       showError("Failed to load data. Please try again.")
@@ -205,7 +214,7 @@ const TeamRoomPage = () => {
         { withCredentials: true },
       )
 
-      setUserTeam(res.data.team)
+      setUserTeam(res.data.data?.team)
       setShowCreateTeam(false)
       fetchData()
       showSuccess("Team created successfully!")
@@ -248,12 +257,12 @@ const TeamRoomPage = () => {
       return
     }
 
-    if (userTeam.leader._id !== user._id) {
+    if (userTeam.leader?._id?.toString() !== user?._id?.toString()) {
       showError("Only team leaders can send invitations!")
       return
     }
 
-    if (userTeam.members.length >= event.teamMax) {
+    if ((userTeam.members?.length || 0) >= (event?.teamMax || 0)) {
       showError("Your team is already full!")
       return
     }
@@ -338,13 +347,13 @@ const TeamRoomPage = () => {
       return
     }
 
-    if (userTeam.leader._id !== user._id) {
+    if (userTeam.leader?._id?.toString() !== user?._id?.toString()) {
       showError("Only team leaders can register the team!")
       return
     }
 
-    if (userTeam.members.length < event.teamMin) {
-      showError(`Your team needs at least ${event.teamMin} members to register!`)
+    if ((userTeam.members?.length || 0) < (event?.teamMin || 0)) {
+      showError(`Your team needs at least ${event?.teamMin} members to register!`)
       return
     }
 
@@ -369,11 +378,11 @@ const TeamRoomPage = () => {
   // Filter users based on search and filters
   const filteredUsers = availableUsers.filter((u) => {
     const matchesSearch =
-      u.username.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      u.email.toLowerCase().includes(searchTerm.toLowerCase())
+      u.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      u.email?.toLowerCase().includes(searchTerm.toLowerCase())
     const matchesYear = filterYear === "All" || u.yearOfStudy === filterYear
     const matchesDepartment = filterDepartment === "All" || u.department === filterDepartment
-    return matchesSearch && matchesYear && matchesDepartment && u._id !== user?._id
+    return matchesSearch && matchesYear && matchesDepartment && u._id?.toString() !== user?._id?.toString()
   })
 
   const years = ["All", "1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"]
@@ -546,7 +555,7 @@ const TeamRoomPage = () => {
                       </div>
                       My Team
                     </h2>
-                    {userTeam.leader._id === user._id && (
+                    {userTeam.leader?._id?.toString() === user?._id?.toString() && (
                       <div className="flex items-center gap-2">
                         <Crown className="w-6 h-6 text-yellow-400" />
                         <span className="text-yellow-400 text-sm font-medium">Leader</span>
@@ -556,7 +565,7 @@ const TeamRoomPage = () => {
                   <div className="mb-6">
                     <div className="flex items-center justify-between mb-2">
                       <h3 className={`text-xl font-bold ${themeClasses.text}`}>{userTeam.name}</h3>
-                      {userTeam.leader._id === user._id && (
+                      {userTeam.leader?._id?.toString() === user?._id?.toString() && (
                         <button
                           onClick={() => setShowEditTeam(true)}
                           className={`p-2 ${themeClasses.button} border rounded-lg transition-all hover:scale-105`}
@@ -572,7 +581,7 @@ const TeamRoomPage = () => {
 
                   {/* Team Members */}
                   <div className="space-y-3 mb-6">
-                    {userTeam.members.map((member, index) => (
+                    {userTeam?.members?.map((member, index) => (
                       <div
                         key={member._id}
                         className={`flex items-center justify-between p-4 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"} transition-all hover:scale-[1.02]`}
@@ -580,17 +589,16 @@ const TeamRoomPage = () => {
                         <div className="flex items-center gap-4">
                           <div className="relative">
                             <div
-                              className={`w-12 h-12 rounded-full bg-gradient-to-r ${
-                                index % 3 === 0
-                                  ? "from-indigo-500 to-purple-500"
-                                  : index % 3 === 1
-                                    ? "from-purple-500 to-pink-500"
-                                    : "from-pink-500 to-red-500"
-                              } flex items-center justify-center text-white font-bold text-lg shadow-lg`}
+                              className={`w-12 h-12 rounded-full bg-gradient-to-r ${index % 3 === 0
+                                ? "from-indigo-500 to-purple-500"
+                                : index % 3 === 1
+                                  ? "from-purple-500 to-pink-500"
+                                  : "from-pink-500 to-red-500"
+                                } flex items-center justify-center text-white font-bold text-lg shadow-lg`}
                             >
-                              {member.username.charAt(0).toUpperCase()}
+                              {member.username?.charAt(0).toUpperCase()}
                             </div>
-                            {member._id === userTeam.leader._id && (
+                            {member._id === userTeam.leader?._id && (
                               <div className="absolute -top-1 -right-1 p-1 bg-yellow-400 rounded-full">
                                 <Crown className="w-3 h-3 text-yellow-900" />
                               </div>
@@ -599,7 +607,7 @@ const TeamRoomPage = () => {
                           <div>
                             <div className={`font-semibold ${themeClasses.text} flex items-center gap-2`}>
                               {member.username}
-                              {member._id === user._id && (
+                              {member._id === user?._id && (
                                 <span className="px-2 py-1 bg-indigo-500/20 text-indigo-400 text-xs rounded-full">
                                   You
                                 </span>
@@ -610,7 +618,7 @@ const TeamRoomPage = () => {
                             </div>
                           </div>
                         </div>
-                        {userTeam.leader._id === user._id && member._id !== user._id && (
+                        {userTeam.leader?._id === user?._id && member._id !== user?._id && (
                           <button
                             onClick={() => removeMember(member._id)}
                             className="p-2 text-red-400 hover:text-red-300 hover:bg-red-500/10 rounded-lg transition-all"
@@ -639,22 +647,21 @@ const TeamRoomPage = () => {
 
                   {/* Team Actions */}
                   <div className="space-y-3">
-                    {userTeam.members.length >= event.teamMin ? (
+                    {(userTeam?.members?.length || 0) >= (event?.teamMin || 0) ? (
                       <button
                         onClick={registerTeam}
-                        disabled={userTeam.leader._id !== user._id || isRegistering}
-                        className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${
-                          userTeam.leader._id === user._id && !isRegistering
-                            ? themeClasses.successButton + " transform hover:scale-105"
-                            : "bg-gray-600 text-gray-400 cursor-not-allowed"
-                        }`}
+                        disabled={userTeam.leader?._id?.toString() !== user?._id?.toString() || isRegistering}
+                        className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${userTeam.leader?._id?.toString() === user?._id?.toString() && !isRegistering
+                          ? themeClasses.successButton + " transform hover:scale-105"
+                          : "bg-gray-600 text-gray-400 cursor-not-allowed"
+                          }`}
                       >
                         {isRegistering ? (
                           <>
                             <Loader2 className="w-5 h-5 animate-spin" />
                             Registering...
                           </>
-                        ) : userTeam.leader._id === user._id ? (
+                        ) : userTeam.leader?._id?.toString() === user?._id?.toString() ? (
                           <>
                             <CheckCircle className="w-5 h-5" />
                             Register Team for Event
@@ -670,12 +677,12 @@ const TeamRoomPage = () => {
                           <span className={`font-semibold ${themeClasses.text}`}>Need More Members</span>
                         </div>
                         <p className={`text-sm ${themeClasses.textMuted}`}>
-                          You need {event.teamMin - userTeam.members.length} more member
-                          {event.teamMin - userTeam.members.length > 1 ? "s" : ""} to register for this event.
+                          You need {(event?.teamMin || 0) - (userTeam?.members?.length || 0)} more member
+                          {((event?.teamMin || 0) - (userTeam?.members?.length || 0)) > 1 ? "s" : ""} to register for this event.
                         </p>
                       </div>
                     )}
-                    {userTeam.leader._id !== user._id && (
+                    {userTeam.leader?._id?.toString() !== user?._id?.toString() && (
                       <button
                         onClick={leaveTeam}
                         className={`w-full py-3 rounded-xl font-semibold transition-all ${themeClasses.dangerButton} flex items-center justify-center gap-2`}
@@ -899,15 +906,14 @@ const TeamRoomPage = () => {
                           <div className="flex items-center gap-4 mb-4">
                             <div className="relative">
                               <div
-                                className={`w-16 h-16 rounded-full bg-gradient-to-r ${
-                                  index % 4 === 0
-                                    ? "from-indigo-500 to-purple-500"
-                                    : index % 4 === 1
-                                      ? "from-purple-500 to-pink-500"
-                                      : index % 4 === 2
-                                        ? "from-pink-500 to-red-500"
-                                        : "from-red-500 to-orange-500"
-                                } flex items-center justify-center text-white font-bold text-xl shadow-lg`}
+                                className={`w-16 h-16 rounded-full bg-gradient-to-r ${index % 4 === 0
+                                  ? "from-indigo-500 to-purple-500"
+                                  : index % 4 === 1
+                                    ? "from-purple-500 to-pink-500"
+                                    : index % 4 === 2
+                                      ? "from-pink-500 to-red-500"
+                                      : "from-red-500 to-orange-500"
+                                  } flex items-center justify-center text-white font-bold text-xl shadow-lg`}
                               >
                                 {availableUser.username.charAt(0).toUpperCase()}
                               </div>
@@ -938,7 +944,7 @@ const TeamRoomPage = () => {
                               </div>
                             )}
                           </div>
-                          {userTeam && userTeam.leader._id === user._id && userTeam.members.length < event.teamMax ? (
+                          {userTeam && userTeam.leader?._id?.toString() === user?._id?.toString() && (userTeam.members?.length || 0) < (event?.teamMax || 0) ? (
                             isRequestSent ? (
                               <button
                                 disabled
@@ -965,7 +971,7 @@ const TeamRoomPage = () => {
                                 <>
                                   <Plus className="w-4 h-4" /> Create Team First
                                 </>
-                              ) : userTeam.leader._id !== user._id ? (
+                              ) : userTeam.leader?._id?.toString() !== user?._id?.toString() ? (
                                 <>
                                   <Info className="w-4 h-4" /> Not Team Leader
                                 </>
