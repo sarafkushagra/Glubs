@@ -270,12 +270,12 @@ export default function LandingPage() {
             {
               img: img2,
               text: '"Finally, I never miss events. The dashboard keeps me updated on everything happening on campus."',
-              name: "Katrina Kaif",
+              name: "Karan Kaif",
             },
             {
               img: img2,
               text: '"This platform made it so easy to find and join events. Highly recommended!"',
-              name: "Johny Bhai",
+              name: "Manoj Malhotra",
             },
           ].map((item, idx) => (
             <div
