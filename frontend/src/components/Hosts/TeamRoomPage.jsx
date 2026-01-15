@@ -1,6 +1,8 @@
 import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import axios from "axios"
+import { loadRazorpay } from "../../utils/razorpay"
+import { useAuth } from "../Context/userStore"
 import Navbar from "../Pages/Navbar"
 import Footer from "../Pages/Footer"
 import {
@@ -40,6 +42,7 @@ const TeamRoomPage = () => {
   const [teamRequests, setTeamRequests] = useState([])
   const [sentRequests, setSentRequests] = useState([])
   const [user, setUser] = useState(null)
+  const { token, user: authUser } = useAuth()
   const [loading, setLoading] = useState(true)
   const [searchTerm, setSearchTerm] = useState("")
   const [filterYear, setFilterYear] = useState("All")
@@ -120,7 +123,7 @@ const TeamRoomPage = () => {
   // Fetch data on component mount
   useEffect(() => {
     fetchData()
-  }, [eventId])
+  }, [eventId, token])
 
   // Show success alert
   const showSuccess = (message) => {
@@ -142,9 +145,20 @@ const TeamRoomPage = () => {
       setLoading(true)
 
       // Fetch current user
-      const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true })
-      const currentUser = userRes.data.user
-      setUser(currentUser)
+      if (token) {
+        try {
+          const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          const currentUser = userRes.data.user
+          setUser(currentUser)
+
+          // Use this currentUser for subsequent calls in this function if needed
+        } catch (err) {
+          console.error("User fetching failed", err)
+        }
+      }
 
       // Fetch event details
       const eventRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
@@ -359,10 +373,88 @@ const TeamRoomPage = () => {
 
     try {
       setIsRegistering(true)
+
+      // If event is paid, handle Razorpay payment first
+      if (event.registrationFee && event.registrationFee > 0) {
+        const res = await loadRazorpay();
+        if (!res) {
+          showError("Razorpay SDK failed to load. Please check your connection.");
+          setIsRegistering(false);
+          return;
+        }
+
+        // 1. Create Order on Backend
+        const orderRes = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/payments/create-order`,
+          {
+            eventId,
+            registrationType: "team",
+            teamId: userTeam._id
+          },
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        const order = orderRes.data.order;
+
+        // 2. Open Razorpay Checkout
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: order.amount,
+          currency: order.currency,
+          name: "Glubs Events",
+          description: `Team Registration for ${event.title}`,
+          order_id: order.id,
+          handler: async (response) => {
+            try {
+              // 3. Verify Payment on Backend
+              const verifyRes = await axios.post(
+                `${import.meta.env.VITE_API_BASE_URL}/api/payments/verify-payment`,
+                {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                },
+                {
+                  withCredentials: true,
+                  headers: { Authorization: `Bearer ${token}` }
+                }
+              );
+
+              if (verifyRes.data.message === "Team registered successfully! QR codes sent to all members.") {
+                showSuccess("Payment successful and team registered!");
+                setTimeout(() => navigate(`/events/${eventId}`), 1500);
+              }
+            } catch (err) {
+              console.error(err);
+              showError("Payment verification failed. Please contact support.");
+            }
+          },
+          prefill: {
+            name: user?.username || authUser?.username || "",
+            email: user?.email || authUser?.email || "",
+          },
+          theme: {
+            color: "#6366f1",
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+        setIsRegistering(false);
+        return;
+      }
+
+      // Existing team registration logic for FREE events
       await axios.post(
         `${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register-team`,
         { teamId: userTeam._id },
-        { withCredentials: true },
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        },
       )
 
       showSuccess("Team registered successfully!")

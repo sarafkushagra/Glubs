@@ -41,6 +41,7 @@ const adminRouter = require("./routers/admin")
 const teamRouter = require("./routers/team")
 const clubAdminRouter = require("./routers/clubAdmin")
 const attendanceRouter = require("./routers/attendance")
+const paymentRouter = require("./routers/payment")
 const notificationRouter = require("./routers/notification")
 const globalErrorHandler = require("./utils/globalErrorHandler")
 
@@ -52,7 +53,8 @@ app.use("/admin", adminRouter)
 app.use("/teams", teamRouter)
 app.use("/club-admin", clubAdminRouter)
 app.use("/attendance", attendanceRouter)
-app.use("/notifications", notificationRouter)
+app.use("/api/notifications", notificationRouter)
+app.use("/api/payments", paymentRouter)
 
 app.use(globalErrorHandler)
 

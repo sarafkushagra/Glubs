@@ -19,8 +19,8 @@ const createSendToken = (user, statusCode, res, message) => {
       Number(process.env.JWT_COOKIE_EXPIRES_IN) * 24 * 60 * 60 * 1000
     ),
     httpOnly: true,
-    secure: true, //only secure in production
-    sameSite: "None", //process.env.NODE_ENV === "production" ? "none" :
+    secure: process.env.NODE_ENV === "production", //only secure in production
+    sameSite: process.env.NODE_ENV === "production" ? "None" : "Lax",
   };
 
   res.cookie("token", token, cookieOptions);
@@ -288,33 +288,33 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
-  try{
-  const { email, otp, password, passwordConfirm } = req.body;
+  try {
+    const { email, otp, password, passwordConfirm } = req.body;
 
-  const user = await User.findOne({
-    email,
-    resetPasswordOTP: otp,
-    resetPasswordOTPExpires: { $gt: Date.now() },
-  });
+    const user = await User.findOne({
+      email,
+      resetPasswordOTP: otp,
+      resetPasswordOTPExpires: { $gt: Date.now() },
+    });
 
-  if (!user) {
-    return next(new AppError("No user found", 400));
-  }
+    if (!user) {
+      return next(new AppError("No user found", 400));
+    }
 
-  user.password = password;
-  user.passwordConfirm = passwordConfirm;
-  user.resetPasswordOTP = undefined;
-  user.resetPasswordOTPExpires = undefined;
+    user.password = password;
+    user.passwordConfirm = passwordConfirm;
+    user.resetPasswordOTP = undefined;
+    user.resetPasswordOTPExpires = undefined;
 
-  await user.save({ validateBeforeSave: false });
+    await user.save({ validateBeforeSave: false });
 
-  // createSendToken(user, 200, res, "Password reset Successfully");
-  // No token here — force login after password reset
-  res.status(200).json({
-    status: "success",
-    message: "Password reset successfully. Please login.",
-  });
-} catch (error) {
+    // createSendToken(user, 200, res, "Password reset Successfully");
+    // No token here — force login after password reset
+    res.status(200).json({
+      status: "success",
+      message: "Password reset successfully. Please login.",
+    });
+  } catch (error) {
     console.log(error);
-}
+  }
 });
