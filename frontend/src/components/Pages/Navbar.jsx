@@ -6,7 +6,7 @@ import axios from "axios"
 import img1 from "../images/Adobe Express - file (1).png"
 import { CgProfile } from "react-icons/cg"
 import { BiLogIn } from "react-icons/bi"
-import { QrCode, Bell, Moon, Sun, Menu, X } from "lucide-react"
+import { QrCode, Bell, Moon, Sun, Menu, X, Plus } from "lucide-react"
 import { RiLogoutCircleLine } from "react-icons/ri"
 import { useTheme } from "../Context/ThemeContext"
 
@@ -84,7 +84,7 @@ const Navbar = React.memo(function Navbar() {
     const userData = localStorage.getItem("glubsUser")
     if (userData) {
       const role = JSON.parse(userData).role
-      if (role === "student" ) return "/profile"
+      if (role === "student") return "/profile"
       if (role === "admin") return "/admin/dash"
       if (role === "club-admin") return "/clubadmin"
     }
@@ -245,10 +245,23 @@ const Navbar = React.memo(function Navbar() {
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
               </Link>
 
-              {/* QR Scan */}
-              {
-                user?.role !== "student" &&
+              {/* FeedBack/Create Event - Admin & Club Admin */}
+              {(user?.role === "admin" || user?.role === "club-admin") && (
+                <Link
+                  to="/events/add"
+                  className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
+                    ? "bg-gradient-to-r from-cyan-900/30 to-blue-900/30 hover:from-cyan-800/40 hover:to-blue-800/40 text-cyan-400 hover:text-cyan-300 border border-cyan-500/30 hover:border-cyan-400/50"
+                    : "bg-gradient-to-r from-cyan-100/50 to-blue-100/50 hover:from-cyan-200/50 hover:to-blue-200/50 text-cyan-600 hover:text-blue-600 border border-cyan-200/50 hover:border-blue-300/50"
+                    } hover:scale-110 hover:shadow-lg hover:shadow-cyan-500/20`}
+                  title="Create Event"
+                >
+                  <Plus className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-90" />
+                  <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
+                </Link>
+              )}
 
+              {/* QR Scan - Club Admin Only */}
+              {user?.role === "club-admin" && (
                 <Link
                   to="/qr-scan"
                   className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
@@ -260,7 +273,7 @@ const Navbar = React.memo(function Navbar() {
                   <QrCode className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" />
                   <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                 </Link>
-              }
+              )}
 
               {/* Logout */}
               <button
@@ -365,18 +378,28 @@ const Navbar = React.memo(function Navbar() {
                     <CgProfile className="w-5 h-5" /> Profile
                   </Link>
                 </li>
-                <li>{
-                  user?.role !== "student" &&
-                  <Link
-                    to="/qr-scan"
-                    onClick={() => setMenuOpen(false)}
-                    className="flex items-center gap-2 text-gray-300 hover:text-white"
-                  >
-                    <QrCode className="w-5 h-5" /> QR Scan
-                  </Link>
-                }
-
-                </li>
+                {(user?.role === "admin" || user?.role === "club-admin") && (
+                  <li>
+                    <Link
+                      to="/events/add"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-gray-300 hover:text-white"
+                    >
+                      <Plus className="w-5 h-5" /> Create Event
+                    </Link>
+                  </li>
+                )}
+                {user?.role === "club-admin" && (
+                  <li>
+                    <Link
+                      to="/qr-scan"
+                      onClick={() => setMenuOpen(false)}
+                      className="flex items-center gap-2 text-gray-300 hover:text-white"
+                    >
+                      <QrCode className="w-5 h-5" /> QR Scan
+                    </Link>
+                  </li>
+                )}
                 <li>
                   <button
                     onClick={() => {

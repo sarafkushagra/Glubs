@@ -10,7 +10,7 @@ app.use(express.json({ limit: "20mb" }))
 app.use(express.urlencoded({ extended: true, limit: "20mb" }))
 
 // Middleware
-app.use(cors({ origin: ["http://localhost:5173","https://glubs.vercel.app"], credentials: true }));
+app.use(cors({ origin: ["http://localhost:5173", "https://glubs.vercel.app"], credentials: true }));
 // app.use(express.json());
 // app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -41,6 +41,7 @@ const feedbackRouter = require("./routers/feedback");
 const adminRouter = require("./routers/admin")
 const teamRouter = require("./routers/team");
 const clubAdminRouter = require("./routers/clubAdmin");
+const attendanceRouter = require("./routers/attendance");
 const globalErrorHandler = require("./utils/globalErrorHandler");
 
 app.use("/users", userRouter);
@@ -50,6 +51,7 @@ app.use("/feedback", feedbackRouter);
 app.use("/admin", adminRouter);
 app.use("/teams", teamRouter);
 app.use("/club-admin", clubAdminRouter);
+app.use("/attendance", attendanceRouter);
 
 // Global Error Handler
 app.use(globalErrorHandler);
