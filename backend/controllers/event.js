@@ -2,6 +2,9 @@ const Event = require("../schema/event");
 const Feedback = require("../schema/feedback")
 const mongoose = require("mongoose");
 const Club = require("../schema/club");
+const EventAttendance = require("../schema/eventAttendance");
+const { generateQRToken, generateQRCodeImage, generateQRCodeBuffer } = require("../utils/qrCode");
+const sendEmail = require("../utils/email");
 
 // 📌 Show All Events
 module.exports.showAllEvents = async (req, res) => {
@@ -37,13 +40,19 @@ module.exports.createEvent = async (req, res) => {
       return res.status(404).json({ message: "Club not found" });
     }
 
-    const isCreator = clubDoc.createdBy.toString() === req.user._id.toString();
-    if (!isCreator) {
+    // Check if user is admin of this specific club
+    const isClubAdmin = req.user.adminOfClubs?.some(
+      adminClubId => adminClubId.toString() === club.toString()
+    );
+
+    // System admins can create events for any club
+    const isSystemAdmin = req.user.role === 'admin';
+
+    if (!isClubAdmin && !isSystemAdmin) {
       await session.abortTransaction();
       session.endSession();
       return res.status(403).json({
-        message: "You are not authorized to create events for this club",
-        debug: { isCreator, isMember, userId: req.user, clubCreator: clubDoc.createdBy }
+        message: "Only club admins can create events for this club"
       });
     }
 
@@ -81,12 +90,31 @@ module.exports.createEvent = async (req, res) => {
 // 📌 Update Event
 module.exports.updateEvent = async (req, res) => {
   try {
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // Check if user is the event creator
+    const isCreator = event.createdBy.toString() === req.user._id.toString();
+
+    // Check if user is admin of the event's club
+    const isClubAdmin = event.club && req.user.adminOfClubs?.some(
+      adminClubId => adminClubId.toString() === event.club.toString()
+    );
+
+    // System admins can update any event
+    const isSystemAdmin = req.user.role === 'admin';
+
+    if (!isCreator && !isClubAdmin && !isSystemAdmin) {
+      return res.status(403).json({
+        message: "You don't have permission to update this event"
+      });
+    }
+
     const updatedEvent = await Event.findByIdAndUpdate(
       req.params.id,
       req.body,
       { new: true, runValidators: true }
     );
-    if (!updatedEvent) return res.status(404).json({ message: "Event not found" });
     res.json({ message: "Event updated successfully!", event: updatedEvent });
   } catch (error) {
     console.error("Error updating event:", error);
@@ -97,8 +125,27 @@ module.exports.updateEvent = async (req, res) => {
 // 📌 Delete Event
 module.exports.deleteEvent = async (req, res) => {
   try {
-    const deletedEvent = await Event.findByIdAndDelete(req.params.id);
-    if (!deletedEvent) return res.status(404).json({ message: "Event not found" });
+    const event = await Event.findById(req.params.id);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // Check if user is the event creator
+    const isCreator = event.createdBy.toString() === req.user._id.toString();
+
+    // Check if user is admin of the event's club
+    const isClubAdmin = event.club && req.user.adminOfClubs?.some(
+      adminClubId => adminClubId.toString() === event.club.toString()
+    );
+
+    // System admins can delete any event
+    const isSystemAdmin = req.user.role === 'admin';
+
+    if (!isCreator && !isClubAdmin && !isSystemAdmin) {
+      return res.status(403).json({
+        message: "You don't have permission to delete this event"
+      });
+    }
+
+    await Event.findByIdAndDelete(req.params.id);
     res.json({ message: "Event deleted successfully!" });
   } catch (error) {
     console.error("Error deleting event:", error);
@@ -172,50 +219,81 @@ module.exports.getUserUpcomingEvents = async (req, res) => {
   }
 };
 
-// 📌 Register User to Event
+// 📌 Register User to Event (with QR Code Generation)
 exports.registerUserToEvent = async (req, res) => {
   try {
-    const event = await Event.findById(req.params.id);
+    const event = await Event.findById(req.params.id).populate('club', 'name');
     if (!event) return res.status(404).json({ message: "Event not found" });
-    if (event.registeredUsers.includes(req.user._id)) {
-      return res.status(400).json({ message: "User already registered" });
-    }
+
+    // Generate unique QR token for this registration
+    const qrToken = generateQRToken(event._id.toString(), req.user._id.toString());
+
+    // Create attendance record
+    const attendance = new EventAttendance({
+      event: event._id,
+      user: req.user._id,
+      qrToken,
+      registrationType: 'individual',
+    });
+
+    await attendance.save();
+
+    // Add user to event's registered users
     event.registeredUsers.push(req.user._id);
     await event.save();
-    res.json({ message: "User registered successfully", updatedEvent: event });
+
+    // Send email with QR code via Public API (100% compatible with all email clients)
+    try {
+      const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrToken)}`;
+
+      await sendEmail({
+        email: req.user.email,
+        subject: `Registration Confirmed: ${event.title}`,
+        html: `
+          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 8px; background-color: #f9f9f9; color: #333; border: 1px solid #ddd;">
+            <h2 style="color: #569c9fff;">🎉 Registration Confirmed!</h2>
+            <p>Hello ${req.user.username},</p>
+            <p>You have successfully registered for <strong>${event.title}</strong>.</p>
+            
+            <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+              <h3 style="color: #528b83ff; margin-top: 0;">Your Event QR Code</h3>
+              <p>Present this QR code at the event for attendance verification:</p>
+              <img src="${qrCodeUrl}" alt="Event QR Code" style="max-width: 300px; margin: 20px auto; display: block;" />
+              <p style="font-size: 0.9em; color: #666; margin-top: 20px;">
+                <strong>Event Details:</strong><br/>
+                📅 Date: ${event.date ? new Date(event.date).toLocaleDateString() : 'TBA'}<br/>
+                📍 Venue: ${event.venue || 'TBA'}<br/>
+                🏢 Club: ${event.club?.name || 'N/A'}
+              </p>
+            </div>
+
+            <p style="font-size: 0.9em; color: #666;">
+              <strong>Important:</strong> Save this QR code or present this email at the event entrance for check-in.
+            </p>
+            
+            <hr style="margin: 30px 0;" />
+            <p style="font-size: 0.9em; color: #888;">— The Glubs Team</p>
+          </div>
+        `,
+      });
+
+      console.log(`✅ QR code email sent to ${req.user.email}`);
+    } catch (emailError) {
+      console.error('Error sending QR code email:', emailError);
+      // Don't fail the registration if email fails
+    }
+
+    res.json({
+      message: "User registered successfully",
+      updatedEvent: event,
+      qrToken // Return token for immediate display if needed
+    });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Server error", error: err.message });
   }
 };
 
-// Enhanced share event functionality
-module.exports.shareEventToWhatsApp = (event) => {
-  const eventUrl = `${window.location.origin}/events/${event._id}`
-  const message = `🎉 *${event.title}* - Amazing Event Alert! 🎉
-📅 *Date:* ${new Date(event.date).toLocaleDateString("en-US", {
-    weekday: "long",
-    year: "numeric",
-    month: "long",
-    day: "numeric",
-  })}
-
-📍 *Mode:* ${event.mode || "Online"}
-${event.venue ? `🏢 *Venue:* ${event.venue}\n` : ""}
-${event.prizePool ? `💰 *Prize Pool:* ₹${event.prizePool.toLocaleString()}\n` : ""}
-👥 *Participation:* ${event.participationType || "Individual"}
-${event.participationType === "Team" ? `👥 *Team Size:* ${event.teamMin}-${event.teamMax} members\n` : ""}
-
-📝 *Description:*
-${event.description ? event.description.substring(0, 150) + "..." : "Join this exciting event!"}
-
-🔗 *Register Now:* ${eventUrl}
-
-#Glubs #Events #${event.eventType || "Competition"} #StudentLife`
-
-  const whatsappUrl = `https://wa.me/?text=${encodeURIComponent(message)}`
-  window.open(whatsappUrl, "_blank")
-}
 
 module.exports.registerTeamToEvent = async (req, res) => {
   try {
@@ -224,9 +302,10 @@ module.exports.registerTeamToEvent = async (req, res) => {
     const userId = req.user._id
     const Event = require("../schema/event")
     const Team = require("../schema/team")
+    const User = require("../schema/user")
 
     // Find the event
-    const event = await Event.findById(eventId)
+    const event = await Event.findById(eventId).populate('club', 'name')
     if (!event) {
       return res.status(404).json({ message: "Event not found" })
     }
@@ -265,14 +344,83 @@ module.exports.registerTeamToEvent = async (req, res) => {
       return res.status(400).json({ message: "One or more team members are already registered" })
     }
 
+    // Register all team members and generate QR codes
+    const qrCodePromises = [];
+
+    for (const member of team.members) {
+      // Generate unique QR token for each team member
+      const qrToken = generateQRToken(event._id.toString(), member._id.toString());
+
+      // Create attendance record for each member
+      const attendance = new EventAttendance({
+        event: event._id,
+        user: member._id,
+        qrToken,
+        registrationType: 'team',
+        teamId: team._id,
+      });
+
+      await attendance.save();
+
+      // Generate and send QR code email to each member
+      qrCodePromises.push(
+        (async () => {
+          try {
+            const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(qrToken)}`;
+
+            await sendEmail({
+              email: member.email,
+              subject: `Team Registration Confirmed: ${event.title}`,
+              html: `
+                <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; border-radius: 8px; background-color: #f9f9f9; color: #333; border: 1px solid #ddd;">
+                  <h2 style="color: #569c9fff;">🎉 Team Registration Confirmed!</h2>
+                  <p>Hello ${member.username},</p>
+                  <p>Your team <strong>${team.name}</strong> has been successfully registered for <strong>${event.title}</strong>.</p>
+                  
+                  <div style="background: white; padding: 20px; border-radius: 8px; margin: 20px 0; text-align: center;">
+                    <h3 style="color: #528b83ff; margin-top: 0;">Your Personal Event QR Code</h3>
+                    <p>Present this QR code at the event for attendance verification:</p>
+                    <img src="${qrCodeUrl}" alt="Event QR Code" style="max-width: 300px; margin: 20px auto; display: block;" />
+                    <p style="font-size: 0.9em; color: #666; margin-top: 20px;">
+                      <strong>Event Details:</strong><br/>
+                      📅 Date: ${event.date ? new Date(event.date).toLocaleDateString() : 'TBA'}<br/>
+                      📍 Venue: ${event.venue || 'TBA'}<br/>
+                      🏢 Club: ${event.club?.name || 'N/A'}<br/>
+                      👥 Team: ${team.name}
+                    </p>
+                  </div>
+
+                  <p style="font-size: 0.9em; color: #666;">
+                    <strong>Important:</strong> Each team member has a unique QR code. Save this QR code or present this email at the event entrance for check-in.
+                  </p>
+                  
+                  <hr style="margin: 30px 0;" />
+                  <p style="font-size: 0.9em; color: #888;">— The Glubs Team</p>
+                </div>
+              `,
+            });
+
+            console.log(`✅ QR code email sent to ${member.email}`);
+          } catch (emailError) {
+            console.error(`Error sending QR code email to ${member.email}:`, emailError);
+          }
+        })()
+      );
+    }
+
     // Register all team members
     event.registeredUsers.push(...memberIds)
     event.registrations = (event.registrations || 0) + team.members.length
 
     await event.save()
 
+    // Wait for all emails to be sent (don't block response)
+    Promise.all(qrCodePromises).catch(err =>
+      console.error('Error sending some QR code emails:', err)
+    );
+
     res.json({
-      message: "Team registered successfully!",
+      message: "Team registered successfully! QR codes sent to all members.",
       registeredMembers: team.members.length,
     })
   } catch (error) {

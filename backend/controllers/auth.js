@@ -40,11 +40,14 @@ const createSendToken = (user, statusCode, res, message) => {
 };
 
 exports.signup = catchAsync(async (req, res, next) => {
+
   const { email, password, passwordConfirm, username } = req.body;
 
   const existingUser = await User.findOne({ email });
 
-  if (existingUser) return next(new AppError("Email already registerd", 400));
+  if (existingUser) {
+    return next(new AppError("Email already registerd", 400));
+  }
 
   const otp = generateOtp();
 
@@ -85,10 +88,9 @@ exports.signup = catchAsync(async (req, res, next) => {
           `
     });
 
+    console.log("✅ Email sent successfully!");
     createSendToken(newUser, 200, res, "Registration successful");
   } catch (error) {
-    console.error("❌ Error sending email:", error);
-    await User.findByIdAndDelete(newUser.id);
     return next(
       new AppError("There is an error sending the email, Try Again", 500)
     );
@@ -286,6 +288,7 @@ exports.forgetPassword = catchAsync(async (req, res, next) => {
 });
 
 exports.resetPassword = catchAsync(async (req, res, next) => {
+  try{
   const { email, otp, password, passwordConfirm } = req.body;
 
   const user = await User.findOne({
@@ -303,7 +306,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
   user.resetPasswordOTP = undefined;
   user.resetPasswordOTPExpires = undefined;
 
-  await user.save();
+  await user.save({ validateBeforeSave: false });
 
   // createSendToken(user, 200, res, "Password reset Successfully");
   // No token here — force login after password reset
@@ -311,4 +314,7 @@ exports.resetPassword = catchAsync(async (req, res, next) => {
     status: "success",
     message: "Password reset successfully. Please login.",
   });
+} catch (error) {
+    console.log(error);
+}
 });

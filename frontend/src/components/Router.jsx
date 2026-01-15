@@ -35,7 +35,7 @@ import TeamRoomPage from "./Hosts/TeamRoomPage";
 import Notifications from "./Notifications";
 import DashboardPage from "./Features/Features";
 
-{/*Explore Features */}
+{/*Explore Features */ }
 import AttendancePage from "./Features/Explore_Features/AttendancePage";
 import EngagementPage from "./Features/Explore_Features/EngagementPage";
 import BehaviorPage from "./Features/Explore_Features/BehaviorPage";
@@ -72,9 +72,8 @@ export default function Router() {
       <Route path="/role-selection" element={<RoleSelectionDialog />} />
 
       {/* All users allowed but after verification  */}
-      <Route element={<ProtectedRoute allowedRoles={["student","club-admin","admin","pending-club-admin"]} />}>
+      <Route element={<ProtectedRoute allowedRoles={["student", "club-admin", "admin", "pending-club-admin"]} />}>
         <Route path="/qr-gen" element={<QRCodeGenerator />} />
-        <Route path="/qr-scan" element={<QRScanner />} />
         <Route path="/events/:eventId" element={<EventDetails />} />
         <Route path="/clubs/:clubId" element={<ClubDetails />} />
         <Route path="/users/edit/:id" element={<EditUser />} />
@@ -108,6 +107,7 @@ export default function Router() {
 
       <Route element={<ProtectedRoute allowedRoles={"club-admin"} />}>
         <Route path="/clubadmin" element={<ClubAdminDashboard />} />
+        <Route path="/qr-scan" element={<QRScanner />} />
       </Route>
 
       {/* Explore Features */}

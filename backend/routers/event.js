@@ -18,3 +18,4 @@ router.get('/club/:clubId',isAuthenticated, eventController.getEventsByClub);
 
 module.exports = router;
 
+
