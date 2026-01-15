@@ -17,4 +17,8 @@ router.patch("/requests/:requestId", isAuthenticated, isClubAdmin, clubAdminCont
 router.get("/clubs/:clubId/members", isAuthenticated, isClubAdmin, clubAdminController.getClubMembers)
 router.delete("/clubs/:clubId/members/:memberId", isAuthenticated, isClubAdmin, clubAdminController.removeMember)
 
+// Event Statistics & Participants
+router.get("/events/:eventId/stats", isAuthenticated, isClubAdmin, clubAdminController.getEventStats)
+router.get("/events/:eventId/participants", isAuthenticated, isClubAdmin, clubAdminController.getEventParticipants)
+
 module.exports = router

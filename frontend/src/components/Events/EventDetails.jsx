@@ -688,7 +688,7 @@ const EventDetails = () => {
               </div>
               <button
                 onClick={handleRegister}
-                disabled={isUserRegistered() || registering || daysLeft < 0}
+                disabled={isUserRegistered() || registering || daysLeft < 0 || (user && user.role !== "student")}
                 className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${isUserRegistered()
                   ? isDarkMode
                     ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
@@ -710,9 +710,11 @@ const EventDetails = () => {
                     ? "Registering..."
                     : daysLeft < 0
                       ? "Registration Closed"
-                      : event.participationType === "Team"
-                        ? "Find Team"
-                        : "Register Now"}
+                      : (user && user.role !== "student")
+                        ? "Restricted for Admins"
+                        : event.participationType === "Team"
+                          ? "Find Team"
+                          : "Register Now"}
               </button>
 
               <div className="flex gap-2 mt-4">

@@ -19,6 +19,11 @@ module.exports.createOrder = catchAsync(async (req, res, next) => {
     const event = await Event.findById(eventId);
     if (!event) return next(new AppError("Event not found", 404));
 
+    // Restrict payments to Student role only
+    if (req.user.role !== "student") {
+        return next(new AppError("Only students can register and pay for events.", 403));
+    }
+
     if (event.registrationFee <= 0) {
         return next(new AppError("This event is free. Please register directly.", 400));
     }
@@ -118,4 +123,117 @@ module.exports.verifyPayment = catchAsync(async (req, res, next) => {
         req.params.eventId = payment.event.toString();
         return eventController.registerTeamToEvent(req, res);
     }
+});
+
+module.exports.getClubPaymentAnalytics = catchAsync(async (req, res, next) => {
+    // 1. Find the club managed by this user
+    // Assuming 1-to-1 mapping for Club Admin -> Club as per existing schema patterns
+    const Club = require("../schema/club");
+    // If global admin, maybe show all (but for now focus on club admin logic)
+
+    // Check if user is authorized (Club Admin or Admin)
+    if (!["club-admin", "admin"].includes(req.user.role)) {
+        return next(new AppError("You are not authorized to view this data", 403));
+    }
+
+    let adminClubIds = [];
+    if (req.user.role === "club-admin") {
+        adminClubIds = req.user.adminOfClubs || [];
+        if (adminClubIds.length === 0) {
+            // Fallback find clubs created by user
+            const foundClubs = await Club.find({ createdBy: req.user._id }).select("_id");
+            adminClubIds = foundClubs.map(c => c._id);
+        }
+    } else if (req.user.role === "admin") {
+        // Global admin sees all? Or we can keep it empty to fetch nothing until they select a club context. 
+        // For simplicity, if global admin, let's fetch all events (or we might need a specific club query param later).
+        // For now, let's assume global admin acts as a super-viewer.
+        // But the dashboard is likely "Club Admin Dashboard", so maybe just return 0 if no specific club context.
+        // However, existing code implies we want to show data. Let's fetch all clubs for admin.
+        const allClubs = await Club.find({}).select("_id");
+        adminClubIds = allClubs.map(c => c._id);
+    }
+
+    if (adminClubIds.length === 0) {
+        return res.status(200).json({
+            status: "success",
+            data: {
+                totalRevenue: 0,
+                totalTransactions: 0,
+                eventAnalytics: [],
+                recentTransactions: []
+            }
+        });
+    }
+
+    // Find all events for these clubs directly
+    const events = await Event.find({ club: { $in: adminClubIds } }).select("_id");
+    const eventIds = events.map(e => e._id);
+
+    // 2. Aggregate Payments for these events
+    // Overall Stats
+    const totalStats = await Payment.aggregate([
+        { $match: { event: { $in: eventIds }, status: "captured" } },
+        {
+            $group: {
+                _id: null,
+                totalRevenue: { $sum: "$amount" }, // stored as simple number? schema says Number. 
+                // Wait, controller createOrder says: amount = event.registrationFee * 100
+                // Schema says amount: type Number. 
+                // We should check if stored amount is in paise or rupees. 
+                // In createOrder: payment.amount = event.registrationFee (Line 74)
+                // In razorpay options: amount (line 64) is fee * 100.
+                // So stored amount in DB is likely the raw Rupee value (lines 74).
+                // "payment.amount = event.registrationFee" -> This is simple rupees.
+                count: { $sum: 1 }
+            }
+        }
+    ]);
+
+    // Event-wise Stats
+    const eventStats = await Payment.aggregate([
+        { $match: { event: { $in: eventIds }, status: "captured" } },
+        {
+            $group: {
+                _id: "$event",
+                revenue: { $sum: "$amount" },
+                count: { $sum: 1 }
+            }
+        },
+        {
+            $lookup: {
+                from: "events",
+                localField: "_id",
+                foreignField: "_id",
+                as: "eventDetails"
+            }
+        },
+        { $unwind: "$eventDetails" },
+        {
+            $project: {
+                eventId: "$_id",
+                title: "$eventDetails.title",
+                revenue: 1,
+                count: 1
+            }
+        }
+    ]);
+
+    // Recent Transactions (Detailed)
+    // We want "person pay how much n total"
+    const recentTransactions = await Payment.find({ event: { $in: eventIds }, status: "captured" })
+        .sort({ createdAt: -1 })
+        .limit(50)
+        .populate("user", "username email")
+        .populate("event", "title");
+
+    res.status(200).json({
+        status: "success",
+        data: {
+            totalRevenue: totalStats[0]?.totalRevenue || 0,
+            totalTransactions: totalStats[0]?.count || 0,
+            eventAnalytics: eventStats,
+            recentTransactions
+        }
+    });
 });

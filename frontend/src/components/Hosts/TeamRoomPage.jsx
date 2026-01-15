@@ -742,8 +742,8 @@ const TeamRoomPage = () => {
                     {(userTeam?.members?.length || 0) >= (event?.teamMin || 0) ? (
                       <button
                         onClick={registerTeam}
-                        disabled={userTeam.leader?._id?.toString() !== user?._id?.toString() || isRegistering}
-                        className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${userTeam.leader?._id?.toString() === user?._id?.toString() && !isRegistering
+                        disabled={userTeam.leader?._id?.toString() !== user?._id?.toString() || isRegistering || (user && user.role !== "student")}
+                        className={`w-full py-4 rounded-xl font-bold transition-all flex items-center justify-center gap-2 ${userTeam.leader?._id?.toString() === user?._id?.toString() && !isRegistering && user?.role === "student"
                           ? themeClasses.successButton + " transform hover:scale-105"
                           : "bg-gray-600 text-gray-400 cursor-not-allowed"
                           }`}
@@ -753,6 +753,8 @@ const TeamRoomPage = () => {
                             <Loader2 className="w-5 h-5 animate-spin" />
                             Registering...
                           </>
+                        ) : (user && user.role !== "student") ? (
+                          "Registration Restricted for Admins"
                         ) : userTeam.leader?._id?.toString() === user?._id?.toString() ? (
                           <>
                             <CheckCircle className="w-5 h-5" />
@@ -794,15 +796,18 @@ const TeamRoomPage = () => {
                   </div>
                   <h3 className={`text-2xl font-bold ${themeClasses.text} mb-2`}>No Team Yet</h3>
                   <p className={`${themeClasses.textMuted} mb-6`}>
-                    Create a team to start building your dream squad for this event.
+                    {user?.role !== "student"
+                      ? "Administrators cannot create or join teams."
+                      : "Create a team to start building your dream squad for this event."}
                   </p>
                 </div>
                 <button
                   onClick={() => setShowCreateTeam(true)}
-                  className={`${themeClasses.primaryButton} px-8 py-4 rounded-xl font-bold transition-all transform hover:scale-105 flex items-center gap-3 mx-auto`}
+                  disabled={user?.role !== "student"}
+                  className={`${user?.role === "student" ? themeClasses.primaryButton : "bg-gray-600 text-gray-400 cursor-not-allowed"} px-8 py-4 rounded-xl font-bold transition-all transform hover:scale-105 flex items-center gap-3 mx-auto`}
                 >
                   <Plus className="w-5 h-5" />
-                  Create Team
+                  {user?.role !== "student" ? "Registration Restricted" : "Create Team"}
                 </button>
               </div>
             )}

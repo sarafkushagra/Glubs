@@ -225,6 +225,13 @@ exports.registerUserToEvent = async (req, res) => {
     const event = await Event.findById(req.params.id).populate('club', 'name');
     if (!event) return res.status(404).json({ message: "Event not found" });
 
+    // Restrict registration to Student role only
+    if (req.user.role !== "student") {
+      return res.status(403).json({
+        message: "Only students can register for events. Administrators can view and manage events but cannot participate."
+      });
+    }
+
     // Payment Enforcement for Paid Events
     if (event.registrationFee > 0) {
       const Payment = require("../schema/payment");
@@ -326,6 +333,13 @@ module.exports.registerTeamToEvent = async (req, res) => {
     const event = await Event.findById(eventId).populate('club', 'name')
     if (!event) {
       return res.status(404).json({ message: "Event not found" })
+    }
+
+    // Restrict registration to Student role only
+    if (req.user.role !== "student") {
+      return res.status(403).json({
+        message: "Only students can register for events."
+      });
     }
 
     // Payment Enforcement for Paid Events (Team)

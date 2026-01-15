@@ -105,7 +105,7 @@ exports.getUnregisteredUsers = async (req, res) => {
         $nin: [...event.registeredUsers, ...usersInTeams.map(id => new mongoose.Types.ObjectId(id))],
       },
       isVerified: true,
-      role: { $in: ["student", "club-admin"] },
+      role: "student",
     }).select("username email yearOfStudy department age");
 
     res.json({ users: unregisteredUsers });
@@ -130,7 +130,7 @@ exports.getAvailableUsers = async (req, res) => {
         $nin: usersInTeams.map(id => new mongoose.Types.ObjectId(id)),
       },
       isVerified: true,
-      role: { $in: ["student", "club-admin"] },
+      role: "student",
     }).select("username email yearOfStudy department age _id");
 
     res.json({ users: availableUsers });

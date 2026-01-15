@@ -1182,7 +1182,8 @@ const EventLanding = () => {
                               disabled={
                                 isUserRegistered(selectedEvent) ||
                                 registering[selectedEvent._id] ||
-                                getDaysLeft(selectedEvent.date) < 0
+                                getDaysLeft(selectedEvent.date) < 0 ||
+                                (user && user.role !== "student")
                               }
                               className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${isUserRegistered(selectedEvent)
                                 ? isDarkMode
@@ -1205,9 +1206,11 @@ const EventLanding = () => {
                                   ? "Registering..."
                                   : getDaysLeft(selectedEvent.date) < 0
                                     ? "Registration Closed"
-                                    : selectedEvent.participationType === "Team"
-                                      ? "Find Team"
-                                      : "Register Now"}
+                                    : (user && user.role !== "student")
+                                      ? "Restricted for Admins"
+                                      : selectedEvent.participationType === "Team"
+                                        ? "Find Team"
+                                        : "Register Now"}
                             </button>
                             {/* {selectedEvent.participationType === "Team" && (
                               <button
