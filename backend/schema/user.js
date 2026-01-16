@@ -67,6 +67,33 @@ const userSchema = new mongoose.Schema(
       type: String,
     },
 
+    gender: {
+      type: String,
+      enum: ["Male", "Female", "Other", "Prefer not to say"],
+    },
+
+    phone: {
+      type: String,
+    },
+
+    college: {
+      type: String,
+    },
+
+    location: {
+      type: String,
+    },
+
+    interests: [
+      {
+        type: String,
+      },
+    ],
+
+    avatar: {
+      type: String,
+    },
+
     isClubMember: {
       type: Boolean,
       default: false,

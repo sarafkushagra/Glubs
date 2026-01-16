@@ -38,6 +38,8 @@ import {
 import ShareButtons from "./ShareModel"
 import { useTheme } from "../Context/ThemeContext"
 import ShareModal from "./ShareModel"
+import { loadRazorpay } from "../../utils/razorpay"
+import { useAuth } from "../Context/userStore"
 
 // Custom styles for hiding scrollbars
 const scrollbarHideStyles = `
@@ -70,6 +72,7 @@ const EventLanding = () => {
   const [registering, setRegistering] = useState({})
   const [currentUserId, setCurrentUserId] = useState(null)
   const [user, setUser] = useState(null)
+  const { token, user: authUser } = useAuth()
   const [filters, setFilters] = useState({
     eventType: "All",
     mode: "All",
@@ -169,19 +172,23 @@ const EventLanding = () => {
     return () => window.removeEventListener("resize", checkMobile)
   }, [])
 
-  // Fetch current user
+  // Fetch current user details if token exists
   useEffect(() => {
     const fetchUser = async () => {
+      if (!token) return;
       try {
-        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true })
+        const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        })
         setCurrentUserId(res.data.user._id)
         setUser(res.data.user)
       } catch {
-        console.error("User not logged in")
+        console.error("User not logged in or token invalid")
       }
     }
     fetchUser()
-  }, [])
+  }, [token])
 
   // Fetch events
   useEffect(() => {
@@ -244,10 +251,100 @@ const EventLanding = () => {
       return
     }
 
-    // Existing individual registration logic
     try {
       setRegistering((prev) => ({ ...prev, [eventId]: true }))
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register`, {}, { withCredentials: true })
+
+      // If event is paid, handle Razorpay payment first
+      if (event.registrationFee && event.registrationFee > 0) {
+        const res = await loadRazorpay();
+        if (!res) {
+          alert("Razorpay SDK failed to load. Please check your connection.");
+          setRegistering((prev) => ({ ...prev, [eventId]: false }));
+          return;
+        }
+
+        // 1. Create Order on Backend
+        const orderRes = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/payments/create-order`,
+          {
+            eventId,
+            registrationType: "individual"
+          },
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        const order = orderRes.data.order;
+
+        // 2. Open Razorpay Checkout
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: order.amount,
+          currency: order.currency,
+          name: "Glubs Events",
+          description: `Registration for ${event.title}`,
+          order_id: order.id,
+          handler: async (response) => {
+            try {
+              // 3. Verify Payment on Backend
+              const verifyRes = await axios.post(
+                `${import.meta.env.VITE_API_BASE_URL}/api/payments/verify-payment`,
+                {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                },
+                {
+                  withCredentials: true,
+                  headers: { Authorization: `Bearer ${token}` }
+                }
+              );
+
+              if (verifyRes.data.message === "User registered successfully") {
+                setEvents((prev) =>
+                  prev.map((e) =>
+                    e._id === eventId ? { ...e, registeredUsers: [...(e.registeredUsers || []), user._id] } : e,
+                  ),
+                )
+                if (selectedEvent && selectedEvent._id === eventId) {
+                  setSelectedEvent((prev) => ({
+                    ...prev,
+                    registeredUsers: [...(prev.registeredUsers || []), user._id],
+                  }))
+                }
+                alert("Payment successful and registered!");
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Payment verification failed. Please contact support.");
+            }
+          },
+          prefill: {
+            name: user?.username || authUser?.username || "",
+            email: user?.email || authUser?.email || "",
+          },
+          theme: {
+            color: "#6366f1",
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+        setRegistering((prev) => ({ ...prev, [eventId]: false }));
+        return;
+      }
+
+      // Existing individual registration logic for FREE events
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register`,
+        {},
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      )
       setEvents((prev) =>
         prev.map((e) =>
           e._id === eventId ? { ...e, registeredUsers: [...(e.registeredUsers || []), currentUserId] } : e,
@@ -451,7 +548,7 @@ const EventLanding = () => {
             )}
             {/* In mobile view, update the <hr> to span the full width: */}
             {(!showFilters || true) && (
-              <hr className="my-4 border-t border-gray-300 dark:border-gray-700 w-[100vw] relative left-1/2 right-1/2 -translate-x-1/2" style={{marginLeft:0, marginRight:0}} />
+              <hr className="my-4 border-t border-gray-300 dark:border-gray-700 w-[100vw] relative left-1/2 right-1/2 -translate-x-1/2" style={{ marginLeft: 0, marginRight: 0 }} />
             )}
           </div>
           {/* Events Grid */}
@@ -538,17 +635,16 @@ const EventLanding = () => {
                             handleRegister(event._id)
                           }}
                           disabled={isUserRegistered(event) || registering[event._id]}
-                          className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${
-                            isUserRegistered(event)
+                          className={`w-full py-3 rounded-lg font-semibold transition-all duration-300 text-sm ${isUserRegistered(event)
+                            ? isDarkMode
+                              ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
+                              : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
+                            : registering[event._id]
                               ? isDarkMode
-                                ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
-                                : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
-                              : registering[event._id]
-                                ? isDarkMode
-                                  ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
-                                  : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
-                                : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
-                          }`}
+                                ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
+                                : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
+                              : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
+                            }`}
                         >
                           {isUserRegistered(event)
                             ? "✓ Registered"
@@ -697,7 +793,7 @@ const EventLanding = () => {
               )}
               {/* In desktop view, update the <hr> to span the full width: */}
               {(!showFilters || true) && (
-                <hr className="my-6 border-t border-gray-300 dark:border-gray-700 w-[100vw] relative left-1/2 right-1/2 -translate-x-1/2" style={{marginLeft:0, marginRight:0}} />
+                <hr className="my-6 border-t border-gray-300 dark:border-gray-700 w-[100vw] relative left-1/2 right-1/2 -translate-x-1/2" style={{ marginLeft: 0, marginRight: 0 }} />
               )}
             </div>
           </div>
@@ -707,89 +803,88 @@ const EventLanding = () => {
             {/* Left Panel - Events List (30%) */}
 
 
-  <div className={`w-[30%] overflow-y-auto hide-scrollbar border-r rounded-2xl border-gray-200 dark:border-gray-700 ${themeClasses.background}`}>
+            <div className={`w-[30%] overflow-y-auto hide-scrollbar border-r rounded-2xl border-gray-200 dark:border-gray-700 ${themeClasses.background}`}>
 
-    <div className="p-6 space-y-3">
-      {filteredEvents.length === 0 ? (
-        <div className="text-center text-gray-500 dark:text-gray-400">No events found</div>
-      ) : (
-        filteredEvents.map((event) => {
-          const config = eventTypeConfig[event.eventType] || eventTypeConfig.Other
-          const IconComponent = config.icon
-          const daysLeft = getDaysLeft(event.date)
-          const isSelected = selectedEvent && selectedEvent._id === event._id
-
-          return (
-            <div
-              key={event._id}
-              onClick={() => handleEventClick(event)}
-              title={event.title}
-              className={`flex items-start gap-4 p-4 rounded-2xl border shadow-sm transition-all duration-200 cursor-pointer group hover:shadow-md hover:-translate-y-0.5 
-                ${
-                  isSelected
-                    ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-400 dark:border-indigo-600"
-                    : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
-                }`}
-            >
-              <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
-                {event.image ? (
-                  <img src={event.image} alt="Event" className="w-full h-full object-cover" />
+              <div className="p-6 space-y-3">
+                {filteredEvents.length === 0 ? (
+                  <div className="text-center text-gray-500 dark:text-gray-400">No events found</div>
                 ) : (
-                  <IconComponent className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                  filteredEvents.map((event) => {
+                    const config = eventTypeConfig[event.eventType] || eventTypeConfig.Other
+                    const IconComponent = config.icon
+                    const daysLeft = getDaysLeft(event.date)
+                    const isSelected = selectedEvent && selectedEvent._id === event._id
+
+                    return (
+                      <div
+                        key={event._id}
+                        onClick={() => handleEventClick(event)}
+                        title={event.title}
+                        className={`flex items-start gap-4 p-4 rounded-2xl border shadow-sm transition-all duration-200 cursor-pointer group hover:shadow-md hover:-translate-y-0.5 
+                ${isSelected
+                            ? "bg-indigo-50 dark:bg-indigo-900/30 border-indigo-400 dark:border-indigo-600"
+                            : "bg-white dark:bg-gray-900 border-gray-200 dark:border-gray-700"
+                          }`}
+                      >
+                        <div className="w-16 h-16 rounded-xl overflow-hidden border border-gray-300 dark:border-gray-700 bg-gray-100 dark:bg-gray-800 flex items-center justify-center">
+                          {event.image ? (
+                            <img src={event.image} alt="Event" className="w-full h-full object-cover" />
+                          ) : (
+                            <IconComponent className="w-6 h-6 text-gray-500 dark:text-gray-400" />
+                          )}
+                        </div>
+
+                        <div className="flex-1">
+                          <div className="mb-1">
+                            <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">
+                              {event.title}
+                            </h3>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                              {event.host || "Unknown Host"}
+                            </p>
+                          </div>
+
+                          <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mt-1">
+                            <div className="flex items-center gap-1">
+                              <Users className="w-4 h-4 text-indigo-500" />
+                              {event.registeredUsers?.length || 0} Registered
+                            </div>
+                            <div className="flex items-center gap-1">
+                              <Clock className="w-4 h-4 text-yellow-500" />
+                              {daysLeft > 0 ? `${daysLeft} days left` : "Closed"}
+                            </div>
+                          </div>
+
+                          {event.prizePool && (
+                            <div className="mt-2">
+                              <span className="inline-block bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-[11px] font-semibold px-2 py-0.5 rounded-full">
+                                🏆 ₹{event.prizePool.toLocaleString()}
+                              </span>
+                            </div>
+                          )}
+
+                          <div className="flex flex-wrap gap-2 mt-2">
+                            {(event.tags || []).slice(0, 3).map((tag, index) => (
+                              <span
+                                key={index}
+                                className="text-xs px-2 py-0.5 border rounded-full text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 bg-transparent"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {event.tags?.length > 3 && (
+                              <span className="text-xs px-2 py-0.5 text-gray-400 border border-gray-300 dark:border-gray-600 rounded-full">
+                                +{event.tags.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        </div>
+                      </div>
+                    )
+                  })
                 )}
-              </div>
-
-              <div className="flex-1">
-                <div className="mb-1">
-                  <h3 className="text-sm font-semibold text-gray-900 dark:text-white line-clamp-2">
-                    {event.title}
-                  </h3>
-                  <p className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
-                    {event.host || "Unknown Host"}
-                  </p>
-                </div>
-
-                <div className="flex items-center gap-4 text-xs text-gray-600 dark:text-gray-400 mt-1">
-                  <div className="flex items-center gap-1">
-                    <Users className="w-4 h-4 text-indigo-500" />
-                    {event.registeredUsers?.length || 0} Registered
-                  </div>
-                  <div className="flex items-center gap-1">
-                    <Clock className="w-4 h-4 text-yellow-500" />
-                    {daysLeft > 0 ? `${daysLeft} days left` : "Closed"}
-                  </div>
-                </div>
-
-                {event.prizePool && (
-                  <div className="mt-2">
-                    <span className="inline-block bg-yellow-100 dark:bg-yellow-900/30 text-yellow-800 dark:text-yellow-300 text-[11px] font-semibold px-2 py-0.5 rounded-full">
-                      🏆 ₹{event.prizePool.toLocaleString()}
-                    </span>
-                  </div>
-                )}
-
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {(event.tags || []).slice(0, 3).map((tag, index) => (
-                    <span
-                      key={index}
-                      className="text-xs px-2 py-0.5 border rounded-full text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-600 bg-transparent"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {event.tags?.length > 3 && (
-                    <span className="text-xs px-2 py-0.5 text-gray-400 border border-gray-300 dark:border-gray-600 rounded-full">
-                      +{event.tags.length - 3}
-                    </span>
-                  )}
-                </div>
               </div>
             </div>
-          )
-        })
-      )}
-    </div>
-  </div>
 
             {/* Right Panel - Event Details (70%) */}
             <div className="w-full lg:w-[70%] h-full overflow-y-auto hide-scrollbar">
@@ -1087,23 +1182,23 @@ const EventLanding = () => {
                               disabled={
                                 isUserRegistered(selectedEvent) ||
                                 registering[selectedEvent._id] ||
-                                getDaysLeft(selectedEvent.date) < 0
+                                getDaysLeft(selectedEvent.date) < 0 ||
+                                (user && user.role !== "student")
                               }
-                              className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${
-                                isUserRegistered(selectedEvent)
+                              className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${isUserRegistered(selectedEvent)
+                                ? isDarkMode
+                                  ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
+                                  : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
+                                : registering[selectedEvent._id]
                                   ? isDarkMode
-                                    ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
-                                    : "bg-green-100 border border-green-300 text-green-700 cursor-not-allowed"
-                                  : registering[selectedEvent._id]
+                                    ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
+                                    : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
+                                  : getDaysLeft(selectedEvent.date) < 0
                                     ? isDarkMode
-                                      ? "bg-indigo-900/30 border border-indigo-500/30 text-indigo-300 cursor-not-allowed animate-pulse"
-                                      : "bg-indigo-100 border border-indigo-300 text-indigo-700 cursor-not-allowed animate-pulse"
-                                    : getDaysLeft(selectedEvent.date) < 0
-                                      ? isDarkMode
-                                        ? "bg-gray-800/30 border border-gray-600/30 text-gray-500 cursor-not-allowed"
-                                        : "bg-gray-200 border border-gray-300 text-gray-500 cursor-not-allowed"
-                                      : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
-                              }`}
+                                      ? "bg-gray-800/30 border border-gray-600/30 text-gray-500 cursor-not-allowed"
+                                      : "bg-gray-200 border border-gray-300 text-gray-500 cursor-not-allowed"
+                                    : themeClasses.primaryButton + " shadow-lg hover:shadow-indigo-500/25"
+                                }`}
                             >
                               {isUserRegistered(selectedEvent)
                                 ? "✓ Already Registered"
@@ -1111,9 +1206,11 @@ const EventLanding = () => {
                                   ? "Registering..."
                                   : getDaysLeft(selectedEvent.date) < 0
                                     ? "Registration Closed"
-                                    : selectedEvent.participationType === "Team"
-                                      ? "Find Team"
-                                      : "Register Now"}
+                                    : (user && user.role !== "student")
+                                      ? "Restricted for Admins"
+                                      : selectedEvent.participationType === "Team"
+                                        ? "Find Team"
+                                        : "Register Now"}
                             </button>
                             {/* {selectedEvent.participationType === "Team" && (
                               <button
@@ -1126,27 +1223,27 @@ const EventLanding = () => {
                                 {isUserRegistered(selectedEvent) ? "Team Room" : "Find Team"} 
                               </button>
                             )} */}
-              <div className="flex gap-2 mt-4">
-                <button
-                  onClick={() => setShowShareModal(true)}
+                            <div className="flex gap-2 mt-4">
+                              <button
+                                onClick={() => setShowShareModal(true)}
 
-                  className="w-35 py-2 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
-                >
-                  <Share2 className="w-4 h-4 inline mr-2" />
-                  Share Event
-                </button>
+                                className="w-35 py-2 rounded-lg font-semibold transition-all duration-300 text-sm bg-blue-600 text-white hover:bg-blue-700"
+                              >
+                                <Share2 className="w-4 h-4 inline mr-2" />
+                                Share Event
+                              </button>
 
-                {showShareModal && (
-                  <ShareModal event={event} onClose={() => setShowShareModal(false)} />
-                )}
+                              {showShareModal && (
+                                <ShareModal event={event} onClose={() => setShowShareModal(false)} />
+                              )}
 
-                <button
-                  className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
-                >
-                  <Bookmark className="w-4 h-4" />
-                  Save
-                </button>
-              </div>
+                              <button
+                                className={`flex-1 flex items-center justify-center gap-2 py-3 ${themeClasses.button} rounded-lg transition-colors`}
+                              >
+                                <Bookmark className="w-4 h-4" />
+                                Save
+                              </button>
+                            </div>
                           </div>
                           {/* Quick Stats */}
                           <div className={`${themeClasses.card} border rounded-2xl p-6`}>

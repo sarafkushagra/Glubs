@@ -1,5 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
-import { Html5QrcodeScanner } from "html5-qrcode";
+import { Html5Qrcode } from "html5-qrcode";
 import axios from "axios";
 
 const QRScanner = () => {
@@ -7,16 +7,21 @@ const QRScanner = () => {
   const [status, setStatus] = useState("");
   const [attendeeInfo, setAttendeeInfo] = useState(null);
   const scannerRef = useRef(null);
+  const containerRef = useRef(null);
+  const autoRestartTimer = useRef(null);
 
   const startScanner = () => {
     if (!scannerRef.current) {
-      scannerRef.current = new Html5QrcodeScanner(
-        "qr-reader",
-        { fps: 10, qrbox: { width: 250, height: 250 } },
-        false
-      );
+      scannerRef.current = new Html5Qrcode("qr-reader");
+    }
 
-      scannerRef.current.render(
+    const config = { fps: 10, qrbox: { width: 250, height: 250 } };
+
+    // Prefer rear camera (environment), fallback to front (user)
+    scannerRef.current
+      .start(
+        { facingMode: "environment" },
+        config,
         async (decodedText) => {
           try {
             setStatus("Verifying...");
@@ -29,41 +34,100 @@ const QRScanner = () => {
             if (response.data.valid) {
               setAttendeeInfo(response.data.attendance);
               setStatus(response.data.alreadyVerified ? "⚠️ Already Verified" : "✅ Access Granted");
+              // Schedule auto-restart after 3 seconds for successful verification
+              autoRestartTimer.current = setTimeout(() => {
+                handleReset();
+              }, 3000);
             } else {
               setStatus("❌ Access Denied: " + response.data.message);
+              // No auto-restart on error - user can manually reset
             }
           } catch (error) {
             setStatus("❌ " + (error.response?.data?.message || "Invalid QR Code or Network Error"));
             console.error(error);
+            // No auto-restart on error
           }
 
           setScanResult(decodedText);
-          if (scannerRef.current) {
-            scannerRef.current.clear().catch(err => console.error("Failed to clear scanner", err));
+          if (scannerRef.current && scannerRef.current.isScanning) {
+            await scannerRef.current.stop().catch((err) => console.error("Failed to stop scanner", err));
           }
         },
-        (error) => {
-          // Warning callback
+        (errorMessage) => {
+          // Ignore scan errors (e.g., no code found)
         }
-      );
-    }
+      )
+      .catch((err) => {
+        // Fallback to user-facing camera if environment fails
+        scannerRef.current
+          .start(
+            { facingMode: "user" },
+            config,
+            async (decodedText) => {
+              try {
+                setStatus("Verifying...");
+                const response = await axios.post(
+                  `${import.meta.env.VITE_API_BASE_URL}/attendance/verify`,
+                  { qrToken: decodedText },
+                  { withCredentials: true }
+                );
+
+                if (response.data.valid) {
+                  setAttendeeInfo(response.data.attendance);
+                  setStatus(response.data.alreadyVerified ? "⚠️ Already Verified" : "✅ Access Granted");
+                  // Schedule auto-restart after 3 seconds for successful verification
+                  autoRestartTimer.current = setTimeout(() => {
+                    handleReset();
+                  }, 3000);
+                } else {
+                  setStatus("❌ Access Denied: " + response.data.message);
+                  // No auto-restart on error
+                }
+              } catch (error) {
+                setStatus("❌ " + (error.response?.data?.message || "Invalid QR Code or Network Error"));
+                console.error(error);
+                // No auto-restart on error
+              }
+
+              setScanResult(decodedText);
+              if (scannerRef.current && scannerRef.current.isScanning) {
+                await scannerRef.current.stop().catch((err) => console.error("Failed to stop scanner", err));
+              }
+            },
+            (errorMessage) => {
+              // Ignore scan errors
+            }
+          )
+          .catch((err) => {
+            setStatus("❌ Camera access denied or no camera available");
+            console.error("Camera start failed", err);
+          });
+      });
   };
 
   useEffect(() => {
     startScanner();
     return () => {
-      if (scannerRef.current) {
-        scannerRef.current.clear().catch(err => console.error("Cleanup error", err));
-        scannerRef.current = null;
+      if (scannerRef.current && scannerRef.current.isScanning) {
+        scannerRef.current.stop().catch((err) => console.error("Cleanup error", err));
+      }
+      if (autoRestartTimer.current) {
+        clearTimeout(autoRestartTimer.current);
       }
     };
   }, []);
 
   const handleReset = () => {
+    if (autoRestartTimer.current) {
+      clearTimeout(autoRestartTimer.current);
+    }
     setScanResult(null);
     setStatus("");
     setAttendeeInfo(null);
-    // Give DOM a moment to re-render the div
+    // Clear the container and restart scanner
+    if (containerRef.current) {
+      containerRef.current.innerHTML = "";
+    }
     setTimeout(() => {
       startScanner();
     }, 100);
@@ -81,6 +145,7 @@ const QRScanner = () => {
 
         {!scanResult ? (
           <div
+            ref={containerRef}
             id="qr-reader"
             className="w-full overflow-hidden rounded-2xl border-2 border-dashed border-gray-200"
           />

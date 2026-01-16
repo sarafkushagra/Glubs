@@ -4,6 +4,7 @@ import { useState, useEffect } from "react"
 import Router from "./components/Router"
 import LogoWithRipples from "./components/ui/LogoWithRipples"
 import { ThemeProvider } from "./components/Context/ThemeContext"
+import { NotificationProvider } from "./Context/NotificationContext"
 import "./splash.css"
 
 function App() {
@@ -24,7 +25,9 @@ function App() {
 
   return (
     <ThemeProvider>
-      <Router />
+      <NotificationProvider>
+        <Router />
+      </NotificationProvider>
     </ThemeProvider>
   )
 }

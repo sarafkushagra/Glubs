@@ -31,7 +31,7 @@ module.exports.createEvent = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { title, description, details, eventType, date, venue, mode, visibility, categories, skillsToBeAssessed, website, festival, participationType, teamMin, teamMax, registrationStart, registrationEnd, registrationLimit, hideContact, prizePool, eligibility, rules, contactEmail, contactPhone, logo, club } = req.body;
+    const { title, description, details, eventType, date, venue, mode, visibility, categories, skillsToBeAssessed, website, festival, participationType, teamMin, teamMax, registrationStart, registrationEnd, registrationLimit, hideContact, prizePool, eligibility, rules, contactEmail, contactPhone, logo, club, registrationFee } = req.body;
 
     const clubDoc = await Club.findById(club).session(session);
     if (!clubDoc) {
@@ -57,7 +57,7 @@ module.exports.createEvent = async (req, res) => {
     }
 
     // Create the event
-    const event = new Event({ title, description, details, eventType, date, venue, mode, visibility, categories, skillsToBeAssessed, website, festival, participationType, teamMin: participationType === "Individual" ? null : teamMin, teamMax: participationType === "Individual" ? null : teamMax, registrationStart, registrationEnd, registrationLimit, hideContact, prizePool, eligibility, rules, contactEmail, contactPhone, logo, createdBy: req.user, club: club });
+    const event = new Event({ title, description, details, eventType, date, venue, mode, visibility, categories, skillsToBeAssessed, website, festival, participationType, teamMin: participationType === "Individual" ? null : teamMin, teamMax: participationType === "Individual" ? null : teamMax, registrationStart, registrationEnd, registrationLimit, hideContact, prizePool, eligibility, rules, contactEmail, contactPhone, logo, createdBy: req.user, club: club, registrationFee });
 
     const savedEvent = await event.save({ session });
 
@@ -225,6 +225,31 @@ exports.registerUserToEvent = async (req, res) => {
     const event = await Event.findById(req.params.id).populate('club', 'name');
     if (!event) return res.status(404).json({ message: "Event not found" });
 
+    // Restrict registration to Student role only
+    if (req.user.role !== "student") {
+      return res.status(403).json({
+        message: "Only students can register for events. Administrators can view and manage events but cannot participate."
+      });
+    }
+
+    // Payment Enforcement for Paid Events
+    if (event.registrationFee > 0) {
+      const Payment = require("../schema/payment");
+      const paymentRecord = await Payment.findOne({
+        user: req.user._id,
+        event: event._id,
+        status: "captured",
+        registrationType: "individual"
+      });
+
+      if (!paymentRecord) {
+        return res.status(402).json({
+          message: "Payment required. Please complete the transaction via Razorpay.",
+          requiresPayment: true
+        });
+      }
+    }
+
     // Generate unique QR token for this registration
     const qrToken = generateQRToken(event._id.toString(), req.user._id.toString());
 
@@ -308,6 +333,32 @@ module.exports.registerTeamToEvent = async (req, res) => {
     const event = await Event.findById(eventId).populate('club', 'name')
     if (!event) {
       return res.status(404).json({ message: "Event not found" })
+    }
+
+    // Restrict registration to Student role only
+    if (req.user.role !== "student") {
+      return res.status(403).json({
+        message: "Only students can register for events."
+      });
+    }
+
+    // Payment Enforcement for Paid Events (Team)
+    if (event.registrationFee > 0) {
+      const Payment = require("../schema/payment");
+      const paymentRecord = await Payment.findOne({
+        user: userId, // The leader pays
+        event: event._id,
+        team: teamId,
+        status: "captured",
+        registrationType: "team"
+      });
+
+      if (!paymentRecord) {
+        return res.status(402).json({
+          message: "Payment required for team registration. Please complete the transaction.",
+          requiresPayment: true
+        });
+      }
     }
 
     // Find the team

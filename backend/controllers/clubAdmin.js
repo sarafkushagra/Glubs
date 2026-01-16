@@ -2,32 +2,45 @@ const Club = require("../schema/club")
 const User = require("../schema/user")
 const ClubJoinRequest = require("../schema/clubJoinRequest") // Fixed import path
 const Event = require("../schema/event")
+const Payment = require("../schema/payment")
+const Team = require("../schema/team")
 const sendEmail = require("../utils/email")
 const { request } = require("express")
 
 // Get club admin dashboard data
 exports.getDashboardData = async (req, res) => {
   try {
-    const userId = req.user._id
+    const isAdmin = req.user.role === "admin"
 
-    // Get clubs this user administers
-    const adminClubs = await Club.find({
-      _id: { $in: req.user.adminOfClubs || [] },
-    }).populate("members", "username email yearOfStudy department")
+    // Self-healing: If club-admin has no clubs in adminOfClubs, check createdBy
+    if (!isAdmin && (!req.user.adminOfClubs || req.user.adminOfClubs.length === 0)) {
+      const createdClubs = await Club.find({ createdBy: req.user._id });
+      if (createdClubs.length > 0) {
+        req.user.adminOfClubs = createdClubs.map(c => c._id);
+        await User.findByIdAndUpdate(req.user._id, { adminOfClubs: req.user.adminOfClubs });
+        console.log(`[Dashboard] Auto-fixed adminOfClubs for ${req.user.username}: Found ${createdClubs.length} clubs`);
+      }
+    }
 
-    // Get pending join requests for admin's clubs
-    const pendingRequests = await ClubJoinRequest.find({
-      club: { $in: req.user.adminOfClubs || [] },
-      status: "pending",
-    })
+    console.log(`[Dashboard] User: ${req.user.username}, Role: ${req.user.role}, AdminOfClubs:`, req.user.adminOfClubs);
+
+    const adminClubsFilter = isAdmin ? {} : { _id: { $in: req.user.adminOfClubs || [] } }
+    const clubIdList = isAdmin ? null : (req.user.adminOfClubs || [])
+
+    // Get clubs
+    const adminClubs = await Club.find(adminClubsFilter)
+      .populate("members", "username email yearOfStudy department")
+
+    // Get pending join requests
+    const requestFilter = isAdmin ? { status: "pending" } : { club: { $in: clubIdList }, status: "pending" }
+    const pendingRequests = await ClubJoinRequest.find(requestFilter)
       .populate("user", "username email yearOfStudy department")
       .populate("club", "name")
       .sort({ createdAt: -1 })
 
-    // Get recent events for admin's clubs
-    const recentEvents = await Event.find({
-      club: { $in: req.user.adminOfClubs || [] },
-    })
+    // Get recent events
+    const eventFilter = isAdmin ? {} : { club: { $in: clubIdList } }
+    const recentEvents = await Event.find(eventFilter)
       .populate("createdBy", "username")
       .sort({ createdAt: -1 })
       .limit(5)
@@ -37,14 +50,61 @@ exports.getDashboardData = async (req, res) => {
       totalClubs: adminClubs.length,
       totalMembers: adminClubs.reduce((sum, club) => sum + club.members.length, 0),
       pendingRequests: pendingRequests.length,
-      totalEvents: await Event.countDocuments({ club: { $in: req.user.adminOfClubs || [] } }),
+      totalEvents: await Event.countDocuments(eventFilter),
     }
+
+    // Calculate Registration Trend (Last 7 Days)
+    const trend = []
+    const now = new Date()
+    const managedEvents = await Event.find(eventFilter).select("_id eventType")
+    const managedEventIds = managedEvents.map(e => e._id)
+
+    // Aggregate payments/registrations for these events
+    // We'll use Payments as a proxy for "Verified Registrations", or we could use Event.registeredUsers if populated with joined dates
+    // For simplicity and accuracy with the requested graph, let's use Payments created in the last 7 days for these events
+    const recentPayments = await Payment.find({
+      event: { $in: managedEventIds },
+      createdAt: { $gte: new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000) }
+    })
+
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now)
+      d.setDate(d.getDate() - i)
+      const startOfDay = new Date(d.setHours(0, 0, 0, 0))
+      const endOfDay = new Date(d.setHours(23, 59, 59, 999))
+
+      const dayName = startOfDay.toLocaleDateString("en-US", { weekday: "short" })
+      const count = recentPayments.filter(p => {
+        const pDate = new Date(p.createdAt)
+        return pDate >= startOfDay && pDate <= endOfDay
+      }).length
+
+      trend.push({ date: dayName, registrations: count })
+    }
+
+    // Calculate Event Types Distribution
+    const typeDist = {}
+    managedEvents.forEach(e => {
+      typeDist[e.eventType] = (typeDist[e.eventType] || 0) + 1
+    })
+
+    // Format for Recharts PieChart (name, value, color)
+    const eventTypes = Object.entries(typeDist).map(([name, value], index) => ({
+      name,
+      value: Math.round((value / managedEvents.length) * 100), // percentage
+      count: value,
+      color: ["#3B82F6", "#10B981", "#F59E0B", "#EF4444", "#8B5CF6", "#06B6D4"][index % 6]
+    }))
 
     res.json({
       clubs: adminClubs,
       pendingRequests,
       recentEvents,
       stats,
+      trends: {
+        registration: trend,
+        eventTypes
+      }
     })
   } catch (error) {
     console.error("Error fetching dashboard data:", error)
@@ -57,14 +117,15 @@ exports.getJoinRequests = async (req, res) => {
   try {
     const { status = "pending", clubId } = req.query
 
-    let clubFilter = req.user.adminOfClubs || []
+    const isAdmin = req.user.role === "admin"
+    let clubFilter = isAdmin ? null : (req.user.adminOfClubs || [])
 
-    if (clubId && clubFilter.includes(clubId)) {
-      clubFilter = [clubId] // only fetch for this club if admin manages it
+    if (clubId && (isAdmin || clubFilter.includes(clubId))) {
+      clubFilter = [clubId]
     }
 
     const query = {
-      club: { $in: clubFilter },
+      ...(clubFilter && { club: { $in: clubFilter } }),
       status,
     }
 
@@ -98,7 +159,10 @@ exports.handleJoinRequest = async (req, res) => {
     }
 
     // Check if admin manages this club
-    if (!req.user.adminOfClubs?.includes(request.club._id.toString())) {
+    const isAdmin = req.user.role === "admin"
+    const isClubAdmin = req.user.adminOfClubs?.some(id => id.toString() === request.club._id.toString())
+
+    if (!isAdmin && !isClubAdmin) {
       return res.status(403).json({ message: "You don't have permission to manage this club" })
     }
 
@@ -206,6 +270,14 @@ exports.removeMember = async (req, res) => {
     const club = await Club.findById(clubId);
     if (!club) return res.status(404).json({ message: "Club not found" });
 
+    // Check permissions
+    const isAdmin = req.user.role === "admin"
+    const isClubAdmin = req.user.adminOfClubs?.some(id => id.toString() === clubId)
+
+    if (!isAdmin && !isClubAdmin) {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+    }
+
     // Remove member
     club.members = club.members.filter(
       (id) => id.toString() !== memberId
@@ -224,8 +296,11 @@ exports.getClubMembers = async (req, res) => {
   try {
     const { clubId } = req.params
 
-    // Check if admin manages this club
-    if (!req.user.adminOfClubs?.includes(clubId)) {
+    // Check permissions
+    const isAdmin = req.user.role === "admin"
+    const isClubAdmin = req.user.adminOfClubs?.some(id => id.toString() === clubId)
+
+    if (!isAdmin && !isClubAdmin) {
       return res.status(403).json({ message: "You don't have permission to view this club's members" })
     }
 
@@ -248,3 +323,123 @@ exports.getClubMembers = async (req, res) => {
     res.status(500).json({ message: "Error fetching club members", error: error.message })
   }
 }
+
+// Get detailed event statistics
+exports.getEventStats = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const event = await Event.findById(eventId).populate("registeredUsers");
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // Check if user is admin or club-admin of the club that owns this event
+    const isAdmin = req.user.role === "admin";
+    const isClubAdmin = req.user.adminOfClubs?.some(id => id.toString() === event.club.toString());
+
+    if (!isAdmin && !isClubAdmin) {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+    }
+
+    const totalRegistrations = event.registeredUsers.length;
+
+    // Fetch all related payments including incomplete ones
+    const payments = await Payment.find({ event: eventId }).populate("user");
+
+    const completeRegistrations = payments.filter(p => p.status === "captured").length;
+    // Incomplete are those who initiated payment but didn't finish, or registered but didn't pay
+    const incompleteRegistrations = Math.max(0, payments.length - completeRegistrations);
+
+    // Calculate daily trend for the last 7 days
+    const trend = [];
+    const now = new Date();
+    for (let i = 6; i >= 0; i--) {
+      const d = new Date(now);
+      d.setDate(d.getDate() - i);
+      d.setHours(0, 0, 0, 0);
+      const nextD = new Date(d);
+      nextD.setDate(d.getDate() + 1);
+
+      // We use payment creation as a proxy for registration intent/action
+      const dayPayments = payments.filter(p => {
+        const pDate = new Date(p.createdAt);
+        return pDate >= d && pDate < nextD;
+      });
+
+      trend.push({
+        date: d.toLocaleDateString("en-US", { month: "short", day: "numeric" }),
+        total: dayPayments.length,
+        male: dayPayments.filter(p => p.user?.gender === "Male").length,
+        female: dayPayments.filter(p => p.user?.gender === "Female").length,
+      });
+    }
+
+    // Demographics
+    const yearStats = {};
+    const interestStats = {};
+
+    event.registeredUsers.forEach(user => {
+      yearStats[user.yearOfStudy] = (yearStats[user.yearOfStudy] || 0) + 1;
+      if (user.interests && Array.isArray(user.interests)) {
+        user.interests.forEach(interest => {
+          interestStats[interest] = (interestStats[interest] || 0) + 1;
+        });
+      }
+    });
+
+    res.json({
+      success: true,
+      stats: {
+        totalRegistrations,
+        completeRegistrations,
+        incompleteRegistrations,
+        views: event.views || 0,
+      },
+      trend,
+      demographics: {
+        yearStats,
+        interestStats,
+      }
+    });
+  } catch (error) {
+    console.error("Error in getEventStats:", error);
+    res.status(500).json({ message: "Error fetching event statistics", error: error.message });
+  }
+};
+
+// Get detailed list of participants for an event (for CSV and detailed view)
+exports.getEventParticipants = async (req, res) => {
+  try {
+    const { eventId } = req.params;
+    const event = await Event.findById(eventId);
+    if (!event) return res.status(404).json({ message: "Event not found" });
+
+    // Check permissions
+    const isAdmin = req.user.role === "admin";
+    const isClubAdmin = req.user.adminOfClubs?.some(id => id.toString() === event.club.toString());
+
+    if (!isAdmin && !isClubAdmin) {
+      return res.status(403).json({ message: "Access denied. Insufficient permissions." });
+    }
+
+    // Fetch participants with all fields
+    const participants = await User.find({
+      _id: { $in: event.registeredUsers }
+    }).select("-password");
+
+    // Fetch payment status for each participant
+    const payments = await Payment.find({ event: eventId, status: "captured" });
+    const paidUserIds = new Set(payments.map(p => p.user.toString()));
+
+    const detailedParticipants = participants.map(user => ({
+      ...user.toObject(),
+      paymentStatus: paidUserIds.has(user._id.toString()) ? "Complete" : (event.registrationFee > 0 ? "Incomplete" : "Complete"),
+    }));
+
+    res.json({
+      success: true,
+      participants: detailedParticipants
+    });
+  } catch (error) {
+    console.error("Error in getEventParticipants:", error);
+    res.status(500).json({ message: "Error fetching event participants", error: error.message });
+  }
+};

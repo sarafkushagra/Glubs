@@ -20,6 +20,7 @@ export default function EditHostBasicDetails() {
   const [eventType, setEventType] = useState("Hackathon");
   const [venue, setVenue] = useState("");
   const [date, setDate] = useState("");
+  const [registrationFee, setRegistrationFee] = useState(0);
 
   const [participationType, setParticipationType] = useState("Individual");
   const [teamMin, setTeamMin] = useState(1);
@@ -67,6 +68,7 @@ export default function EditHostBasicDetails() {
         setRegistrationEnd(e.registrationEnd ? new Date(e.registrationEnd).toISOString().slice(0, 16) : "");
         setRegistrationLimit(e.registrationLimit || "");
         setHideContact(e.hideContact || false);
+        setRegistrationFee(e.registrationFee || 0);
       } catch (err) {
         console.error("Error fetching event:", err);
         alert("Failed to load event details.");
@@ -101,6 +103,7 @@ export default function EditHostBasicDetails() {
       registrationEnd,
       registrationLimit,
       hideContact,
+      registrationFee,
     };
 
     try {
@@ -214,10 +217,21 @@ export default function EditHostBasicDetails() {
             <input type="checkbox" checked={hideContact} onChange={() => setHideContact(!hideContact)} />
             Hide Contact Details
           </label>
+
+          <label className="block mb-2">Registration Fee (INR)</label>
+          <input
+            type="number"
+            min="0"
+            value={registrationFee}
+            onChange={(e) => setRegistrationFee(Number.parseFloat(e.target.value) || 0)}
+            placeholder="Registration Fee"
+            className="w-full border rounded p-2"
+          />
+          <p className="text-xs text-gray-500">Set to 0 if the event is free.</p>
         </div>
 
         <button type="submit" className="bg-purple-600 text-white px-6 py-3 rounded-full">Update Event</button>
-      </form>
+      </form >
       <Footer />
     </>
   );

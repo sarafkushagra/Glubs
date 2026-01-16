@@ -9,17 +9,18 @@ import { BiLogIn } from "react-icons/bi"
 import { QrCode, Bell, Moon, Sun, Menu, X, Plus } from "lucide-react"
 import { RiLogoutCircleLine } from "react-icons/ri"
 import { useTheme } from "../Context/ThemeContext"
+import { useNotifications } from "../../Context/NotificationContext"
 
 // Uses DM Sans Thin for a modern, thin navbar font
 const Navbar = React.memo(function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false)
   const [isLoggedIn, setIsLoggedIn] = useState(false)
   const [user, setUser] = useState(null)
-  const [notificationCount, setNotificationCount] = useState(0)
   const [scrolled, setScrolled] = useState(false)
   const location = useLocation()
   const navigate = useNavigate()
   const { theme, toggleTheme } = useTheme()
+  const { unreadCount } = useNotifications()
 
   // Handle scroll effect
   useEffect(() => {
@@ -45,9 +46,6 @@ const Navbar = React.memo(function Navbar() {
         })
         setIsLoggedIn(!!res.data.user)
         setUser(res.data.user)
-        if (res.data.user) {
-          fetchNotificationCount()
-        }
       } catch {
         setIsLoggedIn(false)
         setUser(null)
@@ -56,29 +54,6 @@ const Navbar = React.memo(function Navbar() {
     checkAuth()
   }, [location.pathname])
 
-  // Fetch notification count
-  const fetchNotificationCount = async () => {
-    try {
-      const eventsRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event`, { withCredentials: true })
-      const events = eventsRes.data
-
-      let totalCount = 0
-      for (const event of events) {
-        try {
-          const requestsRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/teams/requests/${event._id}`, {
-            withCredentials: true,
-          })
-          const pendingRequests = requestsRes.data.requests.filter((req) => req.status === "pending")
-          totalCount += pendingRequests.length
-        } catch (err) {
-          // Ignore errors for events with no requests
-        }
-      }
-      setNotificationCount(totalCount)
-    } catch (err) {
-      console.error("Error fetching notifications:", err)
-    }
-  }
 
   const getProfileLink = () => {
     const userData = localStorage.getItem("glubsUser")
@@ -98,6 +73,7 @@ const Navbar = React.memo(function Navbar() {
       setUser(null);
       localStorage.removeItem("glubsUser");
       localStorage.removeItem("glubsToken");
+      window.dispatchEvent(new Event("authUpdate"));
       navigate("/");
       window.location.reload();
     } catch (err) {
@@ -224,9 +200,9 @@ const Navbar = React.memo(function Navbar() {
                 title="Notifications"
               >
                 <Bell className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-12" />
-                {notificationCount > 0 && (
+                {unreadCount > 0 && (
                   <span className="mt-2 mr-2 absolute -top-1 -right-1 bg-gradient-to-r from-red-500 via-pink-500 to-red-500 text-white text-xs font-bold rounded-full w-6 h-6 flex items-center justify-center shadow-lg animate-bounce border-2 border-white dark:border-gray-900">
-                    {notificationCount > 9 ? "9+" : notificationCount}
+                    {unreadCount > 9 ? "9+" : unreadCount}
                   </span>
                 )}
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
@@ -362,9 +338,9 @@ const Navbar = React.memo(function Navbar() {
                   >
                     <Bell className="w-5 h-5" />
                     Notifications
-                    {notificationCount > 0 && (
+                    {unreadCount > 0 && (
                       <span className="bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
-                        {notificationCount}
+                        {unreadCount}
                       </span>
                     )}
                   </Link>

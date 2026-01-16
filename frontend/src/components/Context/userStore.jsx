@@ -32,23 +32,24 @@ export const AuthProvider = ({ children }) => {
     } else {
       console.warn("Token not saved – not a valid string:", token);
     }
+    window.dispatchEvent(new Event("authUpdate"));
   };
 
-  // Function to update user data and persist it in localStorage
   const updateUser = (newData) => {
     setUser((prev) => {
       const updated = { ...prev, ...newData };
       localStorage.setItem("glubsUser", JSON.stringify(updated));
+      window.dispatchEvent(new Event("authUpdate"));
       return updated;
     });
   };
 
-  // Function to clear user and token from state and localStorage
   const logout = () => {
     setUser(null);
     setToken(null);
     localStorage.removeItem("glubsUser");
     localStorage.removeItem("glubsToken");
+    window.dispatchEvent(new Event("authUpdate"));
   };
 
   return (

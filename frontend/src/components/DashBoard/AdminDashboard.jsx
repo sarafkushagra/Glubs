@@ -1,6 +1,6 @@
 
 import { useState, useEffect } from "react"
-import { ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, AreaChart, Area } from "recharts";
+import { ResponsiveContainer, XAxis, YAxis, Tooltip, PieChart, Pie, Cell, AreaChart, Area, CartesianGrid, BarChart, Bar, Legend, LineChart, Line } from "recharts";
 
 import { CgProfile } from "react-icons/cg";
 import {
@@ -24,6 +24,7 @@ import {
   Menu,
   X,
   ChevronRight,
+  ChevronLeft,
   MoreHorizontal,
   RefreshCw,
   AlertCircle,
@@ -42,7 +43,7 @@ import { Link } from "react-router-dom";
 // If you deploy the backend elsewhere (e.g. Render, Railway) set NEXT_PUBLIC_API_BASE_URL.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
-  const userss = JSON.parse(localStorage.getItem("glubsUser") || "null")
+const userss = JSON.parse(localStorage.getItem("glubsUser") || "null")
 const ClubAdminDashboard = () => {
   // State management
   const [activeTab, setActiveTab] = useState("dashboard")
@@ -79,6 +80,55 @@ const ClubAdminDashboard = () => {
   const [editingEvent, setEditingEvent] = useState(null)
   const [editingClub, setEditingClub] = useState(null)
   const [showCreateForm, setShowCreateForm] = useState({ user: false, event: false, club: false })
+
+  // Analytics states
+  const [selectedEvent, setSelectedEvent] = useState(null)
+  const [eventStats, setEventStats] = useState(null)
+  const [participants, setParticipants] = useState([])
+
+  const fetchEventStats = async (eventId) => {
+    setLoading((prev) => ({ ...prev, events: true }))
+    try {
+      const statsData = await apiRequest(`/club-admin/events/${eventId}/stats`)
+      const participantsData = await apiRequest(`/club-admin/events/${eventId}/participants`)
+      setEventStats(statsData)
+      setParticipants(participantsData.participants)
+      setSelectedEvent(eventId)
+      setActiveTab("analytics")
+    } catch (error) {
+      console.error("Fetch event stats error:", error)
+      alert("Failed to load event statistics")
+    } finally {
+      setLoading((prev) => ({ ...prev, events: false }))
+    }
+  }
+
+  const exportToCSV = (eventId) => {
+    const event = events.find((e) => e._id === eventId) || { name: "Event", title: "Event" }
+    const eventName = event.name || event.title
+    const headers = ["Username", "Email", "Gender", "College", "Phone", "Year", "Department", "Interests", "Payment Status"]
+    const rows = participants.map((p) => [
+      `"${p.username}"`,
+      `"${p.email}"`,
+      `"${p.gender || "N/A"}"`,
+      `"${p.college || "N/A"}"`,
+      `"${p.phone || "N/A"}"`,
+      `"${p.yearOfStudy || "N/A"}"`,
+      `"${p.department || "N/A"}"`,
+      `"${(p.interests || []).join(", ")}"`,
+      `"${p.paymentStatus || "N/A"}"`,
+    ])
+
+    const csvContent = [headers, ...rows].map((e) => e.join(",")).join("\n")
+    const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" })
+    const url = URL.createObjectURL(blob)
+    const link = document.createElement("a")
+    link.setAttribute("href", url)
+    link.setAttribute("download", `${eventName}_Participants.csv`)
+    document.body.appendChild(link)
+    link.click()
+    document.body.removeChild(link)
+  }
 
   // API Functions
   const apiRequest = async (endpoint, options = {}) => {
@@ -147,19 +197,19 @@ const ClubAdminDashboard = () => {
       setLoading((prev) => ({ ...prev, clubs: false }))
     }
   }
-const fetchPendingRequests = async () => {
-  setLoading((prev) => ({ ...prev, requests: true }));
-  setErrors((prev) => ({ ...prev, requests: null }));
-  try {
-    const data = await apiRequest("/admin/admin-requests");
-   setPendingRequests(Array.isArray(data.users) ? data.users : []);
-  } catch (error) {
-    setErrors((prev) => ({ ...prev, requests: error.message }));
-    setPendingRequests([]);
-  } finally {
-    setLoading((prev) => ({ ...prev, requests: false }));
-  }
-};
+  const fetchPendingRequests = async () => {
+    setLoading((prev) => ({ ...prev, requests: true }));
+    setErrors((prev) => ({ ...prev, requests: null }));
+    try {
+      const data = await apiRequest("/admin/admin-requests");
+      setPendingRequests(Array.isArray(data.users) ? data.users : []);
+    } catch (error) {
+      setErrors((prev) => ({ ...prev, requests: error.message }));
+      setPendingRequests([]);
+    } finally {
+      setLoading((prev) => ({ ...prev, requests: false }));
+    }
+  };
 
   // Action functions
   const approveClubAdmin = async (requestId) => {
@@ -471,6 +521,7 @@ const fetchPendingRequests = async () => {
           user: event.createdBy || "Admin",
           event: event.name || event.title,
           time: getTimeAgo(event.createdAt),
+          eventId: event._id,
         })
       })
 
@@ -1103,7 +1154,16 @@ const fetchPendingRequests = async () => {
                       {activity.type === "registration" && " registered for "}
                       {activity.type === "event_created" && " created event "}
                       {activity.type === "club_request" && " requested admin access for "}
-                      <span className="font-semibold text-blue-600">{activity.event || activity.club}</span>
+                      {activity.eventId ? (
+                        <button
+                          onClick={() => fetchEventStats(activity.eventId)}
+                          className="font-semibold text-blue-600 hover:underline"
+                        >
+                          {activity.event || activity.club}
+                        </button>
+                      ) : (
+                        <span className="font-semibold text-blue-600">{activity.event || activity.club}</span>
+                      )}
                     </p>
                     <p className="text-xs text-gray-500 mt-1">{activity.time}</p>
                   </div>
@@ -1242,24 +1302,22 @@ const fetchPendingRequests = async () => {
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                            user.role === "admin"
-                              ? "bg-red-100 text-red-800"
-                              : user.role === "club_admin"
-                                ? "bg-purple-100 text-purple-800"
-                                : user.role === "host"
-                                  ? "bg-green-100 text-green-800"
-                                  : "bg-blue-100 text-blue-800"
-                          }`}
+                          className={`px-3 py-1 text-xs font-semibold rounded-full ${user.role === "admin"
+                            ? "bg-red-100 text-red-800"
+                            : user.role === "club_admin"
+                              ? "bg-purple-100 text-purple-800"
+                              : user.role === "host"
+                                ? "bg-green-100 text-green-800"
+                                : "bg-blue-100 text-blue-800"
+                            }`}
                         >
                           {user.role || "Student"}
                         </span>
                       </td>
                       <td className="px-6 py-4 whitespace-nowrap">
                         <span
-                          className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                            user.isActive !== false ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                          }`}
+                          className={`px-3 py-1 text-xs font-semibold rounded-full ${user.isActive !== false ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                            }`}
                         >
                           {user.isActive !== false ? "Active" : "Inactive"}
                         </span>
@@ -1387,17 +1445,16 @@ const fetchPendingRequests = async () => {
                     <div className="flex-1">
                       <div className="flex items-center gap-3 mb-3">
                         <span
-                          className={`px-3 py-1 text-xs font-semibold rounded-full ${
-                            event.eventType === "Workshop"
-                              ? "bg-blue-100 text-blue-800"
-                              : event.eventType === "Seminar"
-                                ? "bg-green-100 text-green-800"
-                                : event.eventType === "Hackathon"
-                                  ? "bg-purple-100 text-purple-800"
-                                  : event.eventType === "Webinar"
-                                    ? "bg-orange-100 text-orange-800"
-                                    : "bg-gray-100 text-gray-800"
-                          }`}
+                          className={`px-3 py-1 text-xs font-semibold rounded-full ${event.eventType === "Workshop"
+                            ? "bg-blue-100 text-blue-800"
+                            : event.eventType === "Seminar"
+                              ? "bg-green-100 text-green-800"
+                              : event.eventType === "Hackathon"
+                                ? "bg-purple-100 text-purple-800"
+                                : event.eventType === "Webinar"
+                                  ? "bg-orange-100 text-orange-800"
+                                  : "bg-gray-100 text-gray-800"
+                            }`}
                         >
                           {event.eventType || event.type}
                         </span>
@@ -1420,10 +1477,12 @@ const fetchPendingRequests = async () => {
                     </div>
                     <div className="flex items-center gap-2 ml-4">
                       <button
-                        onClick={() => alert(`Viewing event: ${event.title}`)}
-                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
+                        onClick={() => fetchEventStats(event._id)}
+                        className="p-2 text-blue-600 hover:bg-blue-50 rounded-lg transition-colors flex items-center gap-1 font-semibold"
+                        title="View Analytics"
                       >
-                        <Eye className="w-4 h-4" />
+                        <TrendingUp className="w-4 h-4" />
+                        <span className="text-xs">Analytics</span>
                       </button>
                       <button
                         onClick={() => setEditingEvent(event)}
@@ -1559,9 +1618,8 @@ const fetchPendingRequests = async () => {
                     </div>
                     <div className="flex items-center gap-2">
                       <span
-                        className={`px-2 py-1 text-xs font-semibold rounded-full ${
-                          club.isActive !== false ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
-                        }`}
+                        className={`px-2 py-1 text-xs font-semibold rounded-full ${club.isActive !== false ? "bg-green-100 text-green-800" : "bg-red-100 text-red-800"
+                          }`}
                       >
                         {club.isActive !== false ? "Active" : "Inactive"}
                       </span>
@@ -1724,6 +1782,290 @@ const fetchPendingRequests = async () => {
     { id: "settings", label: "Settings", icon: Settings },
   ]
 
+  const renderEventAnalytics = () => {
+    if (!eventStats) return <LoadingSpinner />
+
+    const event = events.find((e) => e._id === selectedEvent) || { name: "Event Analytics", title: "Event Analytics" }
+
+    return (
+      <div className="space-y-8 animate-in fade-in duration-500">
+        {/* Analytics Header */}
+        <div className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <button
+              onClick={() => {
+                setSelectedEvent(null)
+                setActiveTab("events")
+              }}
+              className="p-2 hover:bg-gray-200 rounded-full transition-colors"
+            >
+              <ChevronLeft className="w-6 h-6 text-gray-600" />
+            </button>
+            <div>
+              <h1 className="text-3xl font-bold text-gray-900">{event.name || event.title}</h1>
+              <p className="text-gray-600">Real-time participation and demographic insights</p>
+            </div>
+          </div>
+          <div className="flex gap-3">
+            <button
+              onClick={() => exportToCSV(selectedEvent)}
+              className="flex items-center gap-2 px-6 py-2 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-lg hover:from-green-700 hover:to-green-800 transition-all duration-200 shadow-md hover:shadow-lg"
+            >
+              <Download className="w-4 h-4" />
+              Download CSV
+            </button>
+            <button
+              onClick={() => fetchEventStats(selectedEvent)}
+              className="p-2 bg-white border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors shadow-sm"
+              title="Refresh Data"
+            >
+              <RefreshCw className={`w-5 h-5 text-gray-600 ${loading.events ? "animate-spin" : ""}`} />
+            </button>
+          </div>
+        </div>
+
+        {/* Analytics Stats Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          <div className="bg-blue-900 rounded-2xl shadow-xl p-6 text-white transform hover:scale-105 transition-transform">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-blue-800/50 rounded-xl">
+                <Users className="w-6 h-6" />
+              </div>
+              <span className="font-medium opacity-90">Complete Registrations</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold">{eventStats.stats.completeRegistrations}</span>
+            </div>
+            <p className="mt-4 text-sm opacity-75">Total Registrations: {eventStats.stats.totalRegistrations}</p>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6 transform hover:scale-105 transition-transform">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="p-3 bg-blue-100 rounded-xl">
+                <Eye className="w-6 h-6 text-blue-600" />
+              </div>
+              <span className="font-medium text-gray-600">Total Views</span>
+            </div>
+            <div className="flex items-baseline gap-2">
+              <span className="text-4xl font-bold text-gray-900">{eventStats.stats.views}</span>
+              <span className="text-green-500 text-sm font-medium">+16</span>
+            </div>
+            <div className="w-full bg-gray-100 h-1.5 rounded-full mt-6">
+              <div className="bg-blue-600 h-1.5 rounded-full" style={{ width: "70%" }}></div>
+            </div>
+          </div>
+
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center gap-4 mb-2">
+              <span className="font-semibold text-gray-800 text-lg">Registration Overview</span>
+            </div>
+            <div className="flex items-center gap-8 mt-4">
+              <div>
+                <p className="text-2xl font-bold text-gray-900">
+                  {eventStats.stats.totalRegistrations}{" "}
+                  <span className="text-green-500 text-sm">{eventStats.stats.totalRegistrations > 0 ? "+2" : ""}</span>
+                </p>
+                <p className="text-xs text-gray-500 uppercase font-medium">Total Registrations</p>
+              </div>
+              <div className="w-px h-10 bg-gray-200"></div>
+              <div>
+                <p className="text-2xl font-bold text-gray-900">{eventStats.stats.incompleteRegistrations}</p>
+                <p className="text-xs text-gray-500 uppercase font-medium">Incomplete Registrations</p>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+          {/* Registration Trend Chart */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-lg font-bold text-gray-900">Registration Trend</h3>
+              <div className="flex gap-2 text-xs font-medium">
+                <span className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-sm bg-blue-900"></div> Total
+                </span>
+                <span className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-sm bg-blue-500"></div> Male
+                </span>
+                <span className="flex items-center gap-1">
+                  <div className="w-3 h-3 rounded-sm bg-pink-500"></div> Female
+                </span>
+              </div>
+            </div>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <AreaChart data={eventStats.trend}>
+                  <defs>
+                    <linearGradient id="colorTotal" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#1e3a8a" stopOpacity={0.1} />
+                      <stop offset="95%" stopColor="#1e3a8a" stopOpacity={0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" />
+                  <XAxis dataKey="date" axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12 }} />
+                  <YAxis axisLine={false} tickLine={false} tick={{ fill: "#64748b", fontSize: 12 }} />
+                  <Tooltip
+                    contentStyle={{
+                      borderRadius: "12px",
+                      border: "none",
+                      boxShadow: "0 10px 15px -3px rgba(0,0,0,0.1)",
+                    }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="total"
+                    stroke="#1e3a8a"
+                    strokeWidth={3}
+                    fillOpacity={1}
+                    fill="url(#colorTotal)"
+                  />
+                  <Area type="monotone" dataKey="male" stroke="#3b82f6" strokeWidth={2} fill="transparent" />
+                  <Area type="monotone" dataKey="female" stroke="#ec4899" strokeWidth={2} fill="transparent" />
+                </AreaChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+
+          {/* Demographic Breakdown */}
+          <div className="bg-white rounded-2xl shadow-sm border border-gray-100 p-6">
+            <div className="flex items-center justify-between mb-8">
+              <h3 className="text-lg font-bold text-gray-900">Year of Study Distribution</h3>
+            </div>
+            <div className="h-[300px] w-full">
+              <ResponsiveContainer width="100%" height="100%">
+                <BarChart
+                  data={Object.entries(eventStats.demographics.yearStats).map(([year, count]) => ({ year, count }))}
+                >
+                  <XAxis dataKey="year" axisLine={false} tickLine={false} />
+                  <YAxis hide />
+                  <Tooltip cursor={{ fill: "#f8fafc" }} />
+                  <Bar dataKey="count" radius={[8, 8, 0, 0]} barSize={40}>
+                    {Object.entries(eventStats.demographics.yearStats).map((entry, index) => (
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={["#6366f1", "#8b5cf6", "#ec4899", "#f97316", "#10b981"][index % 5]}
+                      />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          </div>
+        </div>
+
+        {/* Detailed Participants List */}
+        <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
+          <div className="p-6 border-b border-gray-100 flex items-center justify-between">
+            <h3 className="text-xl font-bold text-gray-900">Registered Participants</h3>
+            <div className="flex items-center gap-2">
+              <span className="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-sm font-semibold">
+                {participants.length} total
+              </span>
+            </div>
+          </div>
+
+          <div className="p-6 grid grid-cols-1 md:grid-cols-2 gap-6">
+            {participants.map((p) => (
+              <div
+                key={p._id}
+                className="border border-gray-100 rounded-2xl p-6 hover:shadow-lg transition-shadow bg-white relative overflow-hidden group"
+              >
+                <div className="absolute top-0 left-0 w-1 h-full bg-blue-600 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                <div className="flex gap-6">
+                  <div className="relative">
+                    <div className="w-20 h-20 rounded-full bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center text-white text-3xl font-bold shadow-lg">
+                      {p.avatar ? (
+                        <img src={p.avatar} alt="" className="w-full h-full rounded-full object-cover" />
+                      ) : (
+                        p.username.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    {p.paymentStatus === "Complete" ? (
+                      <div
+                        className="absolute -bottom-1 -right-1 bg-green-500 border-4 border-white rounded-full p-1"
+                        title="Verified Member"
+                      >
+                        <CheckCircle className="w-4 h-4 text-white" />
+                      </div>
+                    ) : (
+                      <div
+                        className="absolute -bottom-1 -right-1 bg-orange-500 border-4 border-white rounded-full p-1"
+                        title="Pending Payment"
+                      >
+                        <Clock className="w-4 h-4 text-white" />
+                      </div>
+                    )}
+                  </div>
+
+                  <div className="flex-1 space-y-4">
+                    <div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs font-bold text-indigo-600 uppercase tracking-widest bg-indigo-50 px-2 py-0.5 rounded">
+                          Student
+                        </span>
+                      </div>
+                      <h4 className="text-2xl font-bold text-gray-900 mt-1 flex items-center gap-2">
+                        {p.username}
+                        {p.isVerified && (
+                          <div className="w-5 h-5 bg-green-500 rounded-full flex items-center justify-center">
+                            <CheckCircle className="w-3 h-3 text-white" />
+                          </div>
+                        )}
+                      </h4>
+                    </div>
+
+                    <div className="space-y-2 text-gray-600">
+                      <div className="flex items-center gap-3">
+                        <Home className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm font-medium">{p.college || "Global Institute of Tech"}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Activity className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm font-medium">{p.phone || "+91 999 000 0000"}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <Mail className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm font-medium">{p.email}</span>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <MapPin className="w-4 h-4 text-gray-400" />
+                        <span className="text-sm font-medium">{p.location || "Delhi, India"}</span>
+                      </div>
+                    </div>
+
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full">
+                        {p.yearOfStudy}
+                      </span>
+                      <span className="px-3 py-1 bg-gray-100 text-gray-700 text-xs font-bold rounded-full">
+                        {p.department || "Engineering"}
+                      </span>
+                      {p.gender && (
+                        <span className="px-3 py-1 bg-blue-50 text-blue-700 text-xs font-bold rounded-full">
+                          {p.gender}
+                        </span>
+                      )}
+                    </div>
+
+                    <div className="pt-4 border-t border-gray-50 flex items-center justify-between">
+                      <button className="flex items-center gap-2 px-4 py-2 border border-gray-200 rounded-xl text-sm font-bold text-gray-700 hover:bg-gray-50 transition-colors">
+                        <Mail className="w-4 h-4" /> Message
+                      </button>
+                      <span className="text-xs text-gray-400 font-medium font-sans italic">
+                        Registered on: {new Date(p.createdAt).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const renderContent = () => {
     switch (activeTab) {
       case "dashboard":
@@ -1737,15 +2079,7 @@ const fetchPendingRequests = async () => {
       case "requests":
         return renderRequests()
       case "analytics":
-        return (
-          <div className="flex items-center justify-center h-96">
-            <div className="text-center">
-              <Activity className="w-16 h-16 text-gray-400 mx-auto mb-4" />
-              <h2 className="text-2xl font-semibold text-gray-900 mb-2">Analytics Coming Soon</h2>
-              <p className="text-gray-600">Advanced analytics and reporting features will be available here.</p>
-            </div>
-          </div>
-        )
+        return renderEventAnalytics()
       case "settings":
         return (
           <div className="flex items-center justify-center h-96">
@@ -1790,11 +2124,10 @@ const fetchPendingRequests = async () => {
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${
-                  activeTab === item.id
-                    ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-                }`}
+                className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 ${activeTab === item.id
+                  ? "bg-gradient-to-r from-blue-500 to-blue-600 text-white shadow-lg"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                  }`}
               >
                 <Icon className="w-5 h-5 flex-shrink-0" />
                 {sidebarOpen && (
@@ -1829,20 +2162,18 @@ const fetchPendingRequests = async () => {
         <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link to="/" ><Home className="w-6 h-6 "/></Link>
+              <Link to="/"><Home className="w-6 h-6" /></Link>
               <h2 className="text-2xl font-semibold text-gray-900">
                 {sidebarItems.find((item) => item.id === activeTab)?.label}
               </h2>
             </div>
             <div className="flex items-center gap-4">
-              <button className="relative p-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors"  onClick={() => setActiveTab("requests")}>
+              <button className="relative p-3 text-gray-600 hover:bg-gray-100 rounded-xl transition-colors" onClick={() => setActiveTab("requests")}>
                 <Bell className="w-5 h-5" />
               </button>
-              <span className="font-semibold text-gray-700">Hi, {userss?.username || "Club Admin"}
-               
-              </span>
+              <span className="font-semibold text-gray-700">Hi, {userss?.username || "Club Admin"}</span>
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
-                <span className="text-white font-semibold"><CgProfile size={30}/></span>
+                <span className="text-white font-semibold"><CgProfile size={30} /></span>
               </div>
             </div>
           </div>
@@ -1856,3 +2187,4 @@ const fetchPendingRequests = async () => {
 }
 
 export default ClubAdminDashboard;
+

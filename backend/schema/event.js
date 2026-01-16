@@ -71,6 +71,11 @@ const eventSchema = new mongoose.Schema({
   rules: { type: String },
   contactEmail: { type: String },
   contactPhone: { type: String },
+  registrationFee: {
+    type: Number,
+    default: 0,
+    min: [0, "Registration fee cannot be negative"]
+  },
 
 }, { timestamps: true });
 

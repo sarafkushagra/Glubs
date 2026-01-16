@@ -38,6 +38,8 @@ import {
 import ShareButtons from "./ShareModel"
 import ShareModal from "./ShareModel"
 import FeedbackSection from "./FeedbackSection"
+import { loadRazorpay } from "../../utils/razorpay"
+import { useAuth } from "../Context/userStore"
 
 const EventDetails = () => {
   // Custom styles for hiding scrollbars
@@ -63,6 +65,7 @@ const EventDetails = () => {
   const [event, setEvent] = useState(null)
   const [feedbacks, setFeedbacks] = useState([])
   const [user, setUser] = useState(null)
+  const { token, user: authUser } = useAuth()
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [registering, setRegistering] = useState(false)
@@ -115,18 +118,23 @@ const EventDetails = () => {
 
   useEffect(() => {
     fetchData()
-  }, [eventId])
+  }, [eventId, token])
 
   const fetchData = async () => {
     try {
       const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       setEvent(res.data.event)
       setFeedbacks(res.data.feedbacks || [])
-      try {
-        const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, { withCredentials: true })
-        setUser(userRes.data.user)
-      } catch {
-        console.log("User not logged in")
+      if (token) {
+        try {
+          const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` }
+          })
+          setUser(userRes.data.user)
+        } catch {
+          console.log("User not logged in or token invalid")
+        }
       }
     } catch (err) {
       console.error(err)
@@ -138,50 +146,133 @@ const EventDetails = () => {
 
 
   const fetchFeedbacks = async () => {
-  try {
-    const res = await axios.get(`http://localhost:3000/feedback/event/${eventId}`);
-    setFeedbacks(res.data);
-  } catch (err) {
-    console.error("Error fetching feedbacks:", err);
-  }
-};
+    try {
+      const res = await axios.get(`http://localhost:3000/feedback/event/${eventId}`);
+      setFeedbacks(res.data);
+    } catch (err) {
+      console.error("Error fetching feedbacks:", err);
+    }
+  };
 
 
-const handleSubmit = async () => {
-  setSubmitting(true);
-  try {
-    await axios.post("http://localhost:3000/feedback", {
-      event: eventId,
-      rating,
-      review,
-    });
+  const handleSubmit = async () => {
+    setSubmitting(true);
+    try {
+      await axios.post("http://localhost:3000/feedback", {
+        event: eventId,
+        rating,
+        review,
+      });
 
-    // ✅ Refresh feedbacks after submit
-    fetchFeedbacks();
+      // ✅ Refresh feedbacks after submit
+      fetchFeedbacks();
 
-    // Optionally clear the form
-    setReview("");
-    setRating(0);
-    setShowFeedbackForm(false);
-  } catch (err) {
-    console.error("Error submitting feedback:", err);
-  } finally {
-    setSubmitting(false);
-  }
-};
+      // Optionally clear the form
+      setReview("");
+      setRating(0);
+      setShowFeedbackForm(false);
+    } catch (err) {
+      console.error("Error submitting feedback:", err);
+    } finally {
+      setSubmitting(false);
+    }
+  };
 
 
   const handleRegister = async () => {
-    // If it's a team event, redirect to team room instead of direct registration
+    // If it's a team event, redirect to team room
     if (event.participationType === "Team") {
       navigate(`/events/${eventId}/team-room`)
       return
     }
 
-    // Existing individual registration logic
     try {
       setRegistering(true)
-      await axios.post(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register`, {}, { withCredentials: true })
+
+      // If event is paid, handle Razorpay payment first
+      if (event.registrationFee && event.registrationFee > 0) {
+        const res = await loadRazorpay();
+        if (!res) {
+          alert("Razorpay SDK failed to load. Please check your connection.");
+          setRegistering(false);
+          return;
+        }
+
+        // 1. Create Order on Backend
+        const orderRes = await axios.post(
+          `${import.meta.env.VITE_API_BASE_URL}/api/payments/create-order`,
+          {
+            eventId,
+            registrationType: "individual"
+          },
+          {
+            withCredentials: true,
+            headers: { Authorization: `Bearer ${token}` }
+          }
+        );
+
+        const order = orderRes.data.order;
+
+        // 2. Open Razorpay Checkout
+        const options = {
+          key: import.meta.env.VITE_RAZORPAY_KEY_ID,
+          amount: order.amount,
+          currency: order.currency,
+          name: "Glubs Events",
+          description: `Registration for ${event.title}`,
+          order_id: order.id,
+          handler: async (response) => {
+            try {
+              // 3. Verify Payment on Backend
+              const verifyRes = await axios.post(
+                `${import.meta.env.VITE_API_BASE_URL}/api/payments/verify-payment`,
+                {
+                  razorpay_order_id: response.razorpay_order_id,
+                  razorpay_payment_id: response.razorpay_payment_id,
+                  razorpay_signature: response.razorpay_signature,
+                },
+                {
+                  withCredentials: true,
+                  headers: { Authorization: `Bearer ${token}` }
+                }
+              );
+
+              if (verifyRes.data.message === "User registered successfully") {
+                setEvent((prev) => ({
+                  ...prev,
+                  registeredUsers: [...(prev.registeredUsers || []), user._id],
+                }));
+                alert("Payment successful and registered!");
+              }
+            } catch (err) {
+              console.error(err);
+              alert("Payment verification failed. Please contact support.");
+            }
+          },
+          prefill: {
+            name: user?.username || authUser?.username || "",
+            email: user?.email || authUser?.email || "",
+          },
+          theme: {
+            color: "#6366f1", // Indigo
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.open();
+        setRegistering(false); // Razorpay is handled in the handler
+        return;
+      }
+
+      // Existing individual registration logic for FREE events
+      await axios.post(
+        `${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register`,
+        {},
+        {
+          withCredentials: true,
+          headers: { Authorization: `Bearer ${token}` }
+        }
+      )
       setEvent((prev) => ({
         ...prev,
         registeredUsers: [...(prev.registeredUsers || []), user._id],
@@ -526,25 +617,25 @@ const handleSubmit = async () => {
               )}
             </div>
 
-           
-    <FeedbackSection
-      eventId={eventId}
-      feedbacks={feedbacks}
-      user={user}
-      isDarkMode={isDarkMode}
-      themeClasses={{
-        card: isDarkMode ? "bg-gray-900" : "bg-white",
-        text: isDarkMode ? "text-white" : "text-gray-900",
-        textMuted: isDarkMode ? "text-gray-400" : "text-gray-600",
-        textSecondary: isDarkMode ? "text-gray-300" : "text-gray-700",
-      }}
-      renderStars={(rating) =>
-        [...Array(rating)].map((_, i) => (
-          <Star key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" />
-        ))
-      }
-      // fetchFeedbacks={fetchFeedbacks} // passed to FeedbackSection so it can refresh
-    />
+
+            <FeedbackSection
+              eventId={eventId}
+              feedbacks={feedbacks}
+              user={user}
+              isDarkMode={isDarkMode}
+              themeClasses={{
+                card: isDarkMode ? "bg-gray-900" : "bg-white",
+                text: isDarkMode ? "text-white" : "text-gray-900",
+                textMuted: isDarkMode ? "text-gray-400" : "text-gray-600",
+                textSecondary: isDarkMode ? "text-gray-300" : "text-gray-700",
+              }}
+              renderStars={(rating) =>
+                [...Array(rating)].map((_, i) => (
+                  <Star key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" />
+                ))
+              }
+            // fetchFeedbacks={fetchFeedbacks} // passed to FeedbackSection so it can refresh
+            />
 
           </div>
 
@@ -576,6 +667,14 @@ const handleSubmit = async () => {
                     {event.registrationEnd ? new Date(event.registrationEnd).toLocaleDateString() : "Open"}
                   </span>
                 </div>
+                <div
+                  className={`flex justify-between items-center p-3 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-lg border ${event.registrationFee > 0 ? "border-indigo-500/30" : "border-transparent"}`}
+                >
+                  <span className={themeClasses.textMuted}>Registration Fee</span>
+                  <span className={`font-bold ${event.registrationFee > 0 ? "text-indigo-500" : themeClasses.text}`}>
+                    {event.registrationFee > 0 ? `₹${event.registrationFee.toLocaleString()}` : "Free"}
+                  </span>
+                </div>
                 {event.teamMin && event.teamMax && (
                   <div
                     className={`flex justify-between items-center p-3 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-lg`}
@@ -589,7 +688,7 @@ const handleSubmit = async () => {
               </div>
               <button
                 onClick={handleRegister}
-                disabled={isUserRegistered() || registering || daysLeft < 0}
+                disabled={isUserRegistered() || registering || daysLeft < 0 || (user && user.role !== "student")}
                 className={`w-full py-4 rounded-xl font-semibold transition-all duration-300 ${isUserRegistered()
                   ? isDarkMode
                     ? "bg-green-900/30 border border-green-500/30 text-green-300 cursor-not-allowed"
@@ -611,9 +710,11 @@ const handleSubmit = async () => {
                     ? "Registering..."
                     : daysLeft < 0
                       ? "Registration Closed"
-                      : event.participationType === "Team"
-                        ? "Find Team"
-                        : "Register Now"}
+                      : (user && user.role !== "student")
+                        ? "Restricted for Admins"
+                        : event.participationType === "Team"
+                          ? "Find Team"
+                          : "Register Now"}
               </button>
 
               <div className="flex gap-2 mt-4">

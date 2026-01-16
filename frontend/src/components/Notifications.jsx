@@ -22,6 +22,7 @@ import {
   Trash2,
 } from "lucide-react"
 import { useTheme } from './Context/ThemeContext';
+import { useNotifications } from '../Context/NotificationContext'
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const Notifications = () => {
@@ -30,17 +31,18 @@ const Notifications = () => {
   // State variables
   const [loading, setLoading] = useState(true)
   const [user, setUser] = useState(null)
-  const [teamRequests, setTeamRequests] = useState([])
+  const [processingRequestId, setProcessingRequestId] = useState(null)
+  const [allEvents, setAllEvents] = useState([])
+  const [selectedEvent, setSelectedEvent] = useState("all")
   const [showSuccessAlert, setShowSuccessAlert] = useState(false)
   const [successMessage, setSuccessMessage] = useState("")
   const [showErrorAlert, setShowErrorAlert] = useState(false)
   const [errorMessage, setErrorMessage] = useState("")
-  const [filterStatus, setFilterStatus] = useState("pending")
+  const [filterStatus, setFilterStatus] = useState("all")
   const [searchTerm, setSearchTerm] = useState("")
   const [showFilters, setShowFilters] = useState(false)
-  const [processingRequestId, setProcessingRequestId] = useState(null)
-  const [allEvents, setAllEvents] = useState([])
-  const [selectedEvent, setSelectedEvent] = useState("all")
+
+  const { notifications: teamRequests, markAsRead, markAllAsRead, refreshNotifications } = useNotifications()
 
   const { theme } = useTheme();
   const isDarkMode = theme === 'dark';
@@ -103,33 +105,9 @@ const Notifications = () => {
       const userRes = await axios.get(`${API_BASE_URL}/users/me`, { withCredentials: true })
       setUser(userRes.data.user)
 
-      // Fetch all events for filtering
+      // Also fetch events for filter if needed
       const eventsRes = await axios.get(`${API_BASE_URL}/event`, { withCredentials: true })
       setAllEvents(eventsRes.data)
-
-      // Fetch all team requests across all events
-      const allRequests = []
-
-      // For each event, fetch team requests
-      for (const event of eventsRes.data) {
-        try {
-          const requestsRes = await axios.get(`${API_BASE_URL}/teams/requests/${event._id}`, {
-            withCredentials: true,
-          })
-
-          // Add event details to each request
-          const requestsWithEvent = requestsRes.data.requests.map((req) => ({
-            ...req,
-            eventDetails: event,
-          }))
-
-          allRequests.push(...requestsWithEvent)
-        } catch (err) {
-          console.log(`No requests for event ${event._id}`)
-        }
-      }
-
-      setTeamRequests(allRequests)
     } catch (err) {
       console.error("Error fetching data:", err)
       showError("Failed to load notifications. Please try again.")
@@ -139,29 +117,19 @@ const Notifications = () => {
   }
 
   // Respond to team request
-  const respondToRequest = async (requestId, action) => {
+  const respondToRequest = async (requestId, action, notificationId) => {
     try {
       setProcessingRequestId(requestId)
       await axios.put(`${API_BASE_URL}/teams/request/${requestId}`, { action }, { withCredentials: true })
 
-      // Update local state to reflect the change
-      setTeamRequests((prevRequests) =>
-        prevRequests.map((req) =>
-          req._id === requestId ? { ...req, status: action === "accept" ? "accepted" : "rejected" } : req,
-        ),
-      )
+      // Mark notification as read
+      if (notificationId) {
+        await markAsRead(notificationId)
+      }
 
       showSuccess(`Request ${action === "accept" ? "accepted" : "rejected"} successfully!`)
 
-      // If accepted, we might want to navigate to the team room
-      if (action === "accept") {
-        const request = teamRequests.find((req) => req._id === requestId)
-        if (request) {
-          setTimeout(() => {
-            navigate(`/events/${request.event}/team-room`)
-          }, 1500)
-        }
-      }
+      refreshNotifications(); // Refresh to get updated state
     } catch (err) {
       console.error("Error responding to request:", err)
       showError(err.response?.data?.message || "Error responding to request. Please try again.")
@@ -170,15 +138,34 @@ const Notifications = () => {
     }
   }
 
+  const handleMarkAllAsRead = async () => {
+    try {
+      await markAllAsRead()
+      showSuccess("All notifications marked as read")
+    } catch (err) {
+      showError("Failed to mark all as read")
+    }
+  }
+
+  const deleteNotification = async (id) => {
+    try {
+      await axios.delete(`${API_BASE_URL}/notifications/${id}`, { withCredentials: true })
+      refreshNotifications() // We don't have a local delete in context yet, but refresh is fine
+      showSuccess("Notification deleted")
+    } catch (err) {
+      showError("Failed to delete notification")
+    }
+  }
+
   // Filter requests based on search, status, and event
   const filteredRequests = teamRequests.filter((req) => {
     const matchesSearch =
-      req.team?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.from?.username?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      req.eventDetails?.title?.toLowerCase().includes(searchTerm.toLowerCase())
+      req.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.message?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      req.sender?.username?.toLowerCase().includes(searchTerm.toLowerCase())
 
-    const matchesStatus = filterStatus === "all" || req.status === filterStatus
-    const matchesEvent = selectedEvent === "all" || req.event === selectedEvent
+    const matchesStatus = filterStatus === "all" || (filterStatus === "unread" ? !req.isRead : req.isRead)
+    const matchesEvent = selectedEvent === "all" || req.metadata?.eventId === selectedEvent
 
     return matchesSearch && matchesStatus && matchesEvent
   })
@@ -214,29 +201,16 @@ const Notifications = () => {
   }
 
   // Status badge styles
-  const getStatusBadge = (status) => {
-    switch (status) {
-      case "pending":
-        return (
-          <span className="flex items-center gap-1 px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-medium">
-            <Clock className="w-3 h-3" /> Pending
-          </span>
-        )
-      case "accepted":
-        return (
-          <span className="flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium">
-            <CheckCircle className="w-3 h-3" /> Accepted
-          </span>
-        )
-      case "rejected":
-        return (
-          <span className="flex items-center gap-1 px-3 py-1 bg-red-500/20 text-red-400 rounded-full text-xs font-medium">
-            <X className="w-3 h-3" /> Rejected
-          </span>
-        )
-      default:
-        return null
-    }
+  const getStatusBadge = (isRead) => {
+    return isRead ? (
+      <span className="flex items-center gap-1 px-3 py-1 bg-green-500/20 text-green-400 rounded-full text-xs font-medium">
+        <CheckCircle className="w-3 h-3" /> Read
+      </span>
+    ) : (
+      <span className="flex items-center gap-1 px-3 py-1 bg-yellow-500/20 text-yellow-400 rounded-full text-xs font-medium">
+        <Clock className="w-3 h-3" /> New
+      </span>
+    )
   }
 
   // Loading state
@@ -345,10 +319,9 @@ const Notifications = () => {
                     onChange={(e) => setFilterStatus(e.target.value)}
                     className={`w-full px-4 py-3 ${themeClasses.input} border rounded-xl focus:ring-2 focus:ring-indigo-500 transition-all`}
                   >
-                    <option value="all">All Statuses</option>
-                    <option value="pending">Pending</option>
-                    <option value="accepted">Accepted</option>
-                    <option value="rejected">Rejected</option>
+                    <option value="all">All</option>
+                    <option value="unread">Unread</option>
+                    <option value="read">Read</option>
                   </select>
                 </div>
                 <div>
@@ -378,23 +351,30 @@ const Notifications = () => {
               </div>
               <h3 className={`text-2xl font-bold ${themeClasses.text} mb-4`}>No Notifications</h3>
               <p className={`${themeClasses.textMuted} text-lg`}>
-                You don't have any team invitations or notifications at the moment.
+                You don't have any notifications at the moment.
               </p>
             </div>
           ) : (
             <div className="space-y-6">
+              <div className="flex justify-end mb-4">
+                <button
+                  onClick={handleMarkAllAsRead}
+                  className={`flex items-center gap-2 px-4 py-2 ${themeClasses.button} rounded-lg text-sm transition-all hover:text-indigo-400`}
+                >
+                  <CheckCircle className="w-4 h-4" />
+                  Mark all as read
+                </button>
+              </div>
               {filteredRequests.map((request) => (
                 <div
                   key={request._id}
-                  className={`p-6 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${
-                    isDarkMode ? "border-gray-700/50" : "border-gray-200"
-                  } transition-all hover:scale-[1.01] ${
-                    request.status === "pending"
+                  className={`p-6 ${isDarkMode ? "bg-gray-800/30" : "bg-gray-50"} rounded-xl border ${isDarkMode ? "border-gray-700/50" : "border-gray-200"
+                    } transition-all hover:scale-[1.01] ${request.status === "pending"
                       ? "border-l-4 border-l-yellow-500"
                       : request.status === "accepted"
                         ? "border-l-4 border-l-green-500"
                         : "border-l-4 border-l-red-500"
-                  }`}
+                    }`}
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-4">
                     <div className="flex items-center gap-4">
@@ -413,7 +393,7 @@ const Notifications = () => {
                             <Calendar className="w-4 h-4" /> {new Date(request.createdAt).toLocaleDateString()}
                           </span>
                           <span className="flex items-center gap-1">
-                            <MessageSquare className="w-4 h-4" /> {request.eventDetails?.title || "Unknown Event"}
+                            <MessageSquare className="w-4 h-4" /> {request.event?.title || "Unknown Event"}
                           </span>
                         </div>
                       </div>
@@ -428,55 +408,54 @@ const Notifications = () => {
                   )}
 
                   <div className="flex flex-wrap items-center justify-between gap-4">
+                    <div className="flex gap-3">
+                      {request.link && (
+                        <button
+                          onClick={() => navigate(request.link)}
+                          className={`flex items-center gap-2 px-4 py-2 ${themeClasses.button} rounded-lg transition-all hover:scale-105`}
+                        >
+                          <ExternalLink className="w-4 h-4" />
+                          View
+                        </button>
+                      )}
+
+                      {request.type === "team_invitation" && !request.isRead && (
+                        <div className="flex gap-3">
+                          <button
+                            onClick={() => respondToRequest(request.metadata.requestId, "accept", request._id)}
+                            disabled={processingRequestId === request.metadata.requestId}
+                            className={`flex items-center gap-2 px-4 py-2 ${themeClasses.successButton} rounded-lg transition-all hover:scale-105`}
+                          >
+                            {processingRequestId === request.metadata.requestId ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <CheckCircle className="w-4 h-4" />
+                            )}
+                            Accept Invitation
+                          </button>
+                          <button
+                            onClick={() => respondToRequest(request.metadata.requestId, "reject", request._id)}
+                            disabled={processingRequestId === request.metadata.requestId}
+                            className={`flex items-center gap-2 px-4 py-2 ${themeClasses.dangerButton} rounded-lg transition-all hover:scale-105`}
+                          >
+                            {processingRequestId === request.metadata.requestId ? (
+                              <Loader2 className="w-4 h-4 animate-spin" />
+                            ) : (
+                              <X className="w-4 h-4" />
+                            )}
+                            Reject
+                          </button>
+                        </div>
+                      )}
+                    </div>
+
                     <button
-                      onClick={() => navigate(`/events/${request.event._id}/team-room`)}
-                      className={`flex items-center gap-2 px-4 py-2 ${themeClasses.button} rounded-lg transition-all hover:scale-105`}
+                      onClick={() => deleteNotification(request._id)}
+                      className={`flex items-center gap-2 px-4 py-2 ${themeClasses.button} rounded-lg transition-all hover:scale-105 hover:text-red-400`}
                     >
-                      <ExternalLink className="w-4 h-4" />
-                      View Team Room
+                      <Trash2 className="w-4 h-4" />
+                      Dismiss
                     </button>
-
-                    {request.status === "pending" && (
-                      <div className="flex gap-3">
-                        <button
-                          onClick={() => respondToRequest(request._id, "accept")}
-                          disabled={processingRequestId === request._id}
-                          className={`flex items-center gap-2 px-4 py-2 ${themeClasses.successButton} rounded-lg transition-all hover:scale-105`}
-                        >
-                          {processingRequestId === request._id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <CheckCircle className="w-4 h-4" />
-                          )}
-                          Accept
-                        </button>
-                        <button
-                          onClick={() => respondToRequest(request._id, "reject")}
-                          disabled={processingRequestId === request._id}
-                          className={`flex items-center gap-2 px-4 py-2 ${themeClasses.dangerButton} rounded-lg transition-all hover:scale-105`}
-                        >
-                          {processingRequestId === request._id ? (
-                            <Loader2 className="w-4 h-4 animate-spin" />
-                          ) : (
-                            <X className="w-4 h-4" />
-                          )}
-                          Reject
-                        </button>
-                      </div>
-                    )}
-
-                    {request.status !== "pending" && (
-                      <button
-                        onClick={() => {
-                          setTeamRequests((prevRequests) => prevRequests.filter((req) => req._id !== request._id))
-                          showSuccess("Notification dismissed")
-                        }}
-                        className={`flex items-center gap-2 px-4 py-2 ${themeClasses.button} rounded-lg transition-all hover:scale-105 hover:text-red-400`}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                        Dismiss
-                      </button>
-                    )}
                   </div>
                 </div>
               ))}
