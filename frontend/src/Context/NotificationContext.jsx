@@ -4,8 +4,9 @@ import axios from "axios"
 
 const NotificationContext = createContext()
 
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL
-const SOCKET_URL = API_BASE_URL.replace("/api", "") // Assuming API is like http://localhost:3000
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"
+const NOTIFICATION_API_URL = `${API_BASE_URL}/api/notifications`
+const SOCKET_URL = API_BASE_URL.replace(/\/api\/?$/, "")
 
 export const NotificationProvider = ({ children }) => {
     const [notifications, setNotifications] = useState([])
@@ -14,7 +15,7 @@ export const NotificationProvider = ({ children }) => {
 
     const fetchNotifications = useCallback(async () => {
         try {
-            const res = await axios.get(`${API_BASE_URL}/notifications`, { withCredentials: true })
+            const res = await axios.get(NOTIFICATION_API_URL, { withCredentials: true })
             const notifs = res.data.data?.notifications || []
             setNotifications(notifs)
             setUnreadCount(notifs.filter((n) => !n.isRead).length)
@@ -83,7 +84,7 @@ export const NotificationProvider = ({ children }) => {
 
     const markAsRead = async (id) => {
         try {
-            await axios.put(`${API_BASE_URL}/notifications/${id}/read`, {}, { withCredentials: true })
+            await axios.put(`${NOTIFICATION_API_URL}/${id}/read`, {}, { withCredentials: true })
             setNotifications((prev) =>
                 prev.map((n) => (n._id === id ? { ...n, isRead: true } : n))
             )
@@ -95,7 +96,7 @@ export const NotificationProvider = ({ children }) => {
 
     const markAllAsRead = async () => {
         try {
-            await axios.put(`${API_BASE_URL}/notifications/mark-all-read`, {}, { withCredentials: true })
+            await axios.put(`${NOTIFICATION_API_URL}/mark-all-read`, {}, { withCredentials: true })
             setNotifications((prev) => prev.map((n) => ({ ...n, isRead: true })))
             setUnreadCount(0)
         } catch (err) {

@@ -2,7 +2,9 @@ import { useState } from "react";
 import { MessageSquare, Plus, Star } from "lucide-react";
 import axios from "axios";
 
-const FeedbackSection = ({ eventId, feedbacks, user, isDarkMode, themeClasses, renderStars, fetchFeedbacks }) => {
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+
+const FeedbackSection = ({ eventId, feedbacks, user, isDarkMode, themeClasses, renderStars, fetchFeedbacks, handleDeleteFeedback }) => {
   const [showForm, setShowForm] = useState(false);
   const [rating, setRating] = useState(0);
   const [review, setReview] = useState("");
@@ -13,17 +15,21 @@ const FeedbackSection = ({ eventId, feedbacks, user, isDarkMode, themeClasses, r
 
     setSubmitting(true);
     try {
-      await axios.post("http://localhost:3000/feedback", {
-        event: eventId,
-        rating,
-        review,
-        user: user._id,
-      });
+      await axios.post(
+        `${API_BASE_URL}/feedback`,
+        {
+          event: eventId,
+          rating,
+          review,
+          user: user._id,
+        },
+        { withCredentials: true },
+      );
 
       setShowForm(false);
       setRating(0);
       setReview("");
-      fetchFeedbacks(); // Refresh list
+      fetchFeedbacks?.();
     } catch (error) {
       console.error("Error submitting feedback:", error);
     } finally {

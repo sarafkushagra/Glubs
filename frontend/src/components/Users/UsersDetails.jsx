@@ -5,7 +5,7 @@ import { Link } from "react-router-dom";
 import img1 from "../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp";
 import Footer from "../Pages/Footer";
 import Navbar from "../Pages/Navbar";
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 export default function UsersDetails() {
   const { id } = useParams();
@@ -18,7 +18,7 @@ export default function UsersDetails() {
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await axios.get(`${process.env.API_BASE_URL}/users/details/${id}`, { withCredentials: true });
+        const res = await axios.get(`${API_BASE_URL}/users/details/${id}`, { withCredentials: true });
         setUser(res.data);
       } catch (error) {
         console.error(error);
@@ -29,7 +29,7 @@ export default function UsersDetails() {
     };
 
     fetchUser();
-  }, []);
+  }, [id]);
 
   useEffect(() => {
     if (!id) {
@@ -39,9 +39,9 @@ export default function UsersDetails() {
     const fetchEvents = async () => {
       try {
         const [participatedRes, upcomingRes, completedRes] = await Promise.all([
-          axios.get(`${process.env.API_BASE_URL}/event/participated/${id}`, { withCredentials: true }),
-          axios.get(`${process.env.API_BASE_URL}/event/upcoming/${id}`, { withCredentials: true }),
-          axios.get(`${process.env.API_BASE_URL}/event/completed/${id}`, { withCredentials: true }),
+          axios.get(`${API_BASE_URL}/event/participated/${id}`, { withCredentials: true }),
+          axios.get(`${API_BASE_URL}/event/upcoming/${id}`, { withCredentials: true }),
+          axios.get(`${API_BASE_URL}/event/completed/${id}`, { withCredentials: true }),
         ]);
 
         setParticipatedEvents(participatedRes.data || []);
@@ -53,7 +53,7 @@ export default function UsersDetails() {
     };
 
     fetchEvents();
-  }, [user]);
+  }, [id]);
 
 
   if (loading) return <div>Loading...</div>;

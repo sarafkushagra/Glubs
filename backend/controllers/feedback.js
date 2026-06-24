@@ -13,7 +13,7 @@ exports.createFeedback = async (req, res) => {
 exports.getFeedbacksByEvent = async (req, res) => {
   try {
     const { eventId } = req.params;
-    const feedbacks = await Feedback.find({ eventId });
+    const feedbacks = await Feedback.find({ event: eventId }).populate("user", "username email");
     res.status(200).json(feedbacks);
   } catch (err) {
     res.status(500).json({ message: "Failed to fetch feedbacks", error: err.message });
