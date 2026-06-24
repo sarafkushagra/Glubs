@@ -41,6 +41,8 @@ import FeedbackSection from "./FeedbackSection"
 import { loadRazorpay } from "../../utils/razorpay"
 import { useAuth } from "../Context/userStore"
 
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000"
+
 const EventDetails = () => {
   // Custom styles for hiding scrollbars
   const scrollbarHideStyles = `
@@ -69,7 +71,7 @@ const EventDetails = () => {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
   const [registering, setRegistering] = useState(false)
-  const [isDarkMode, setIsDarkMode] = useState(true)
+  const [isDarkMode] = useState(true)
 
   const [showShareModal, setShowShareModal] = useState(false)
 
@@ -122,12 +124,12 @@ const EventDetails = () => {
 
   const fetchData = async () => {
     try {
-      const res = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
+      const res = await axios.get(`${API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       setEvent(res.data.event)
       setFeedbacks(res.data.feedbacks || [])
       if (token) {
         try {
-          const userRes = await axios.get(`${import.meta.env.VITE_API_BASE_URL}/users/me`, {
+          const userRes = await axios.get(`${API_BASE_URL}/users/me`, {
             withCredentials: true,
             headers: { Authorization: `Bearer ${token}` }
           })
@@ -147,34 +149,10 @@ const EventDetails = () => {
 
   const fetchFeedbacks = async () => {
     try {
-      const res = await axios.get(`http://localhost:3000/feedback/event/${eventId}`);
-      setFeedbacks(res.data);
+      const res = await axios.get(`${API_BASE_URL}/feedback/event/${eventId}`, { withCredentials: true });
+      setFeedbacks(res.data.feedbacks || res.data || []);
     } catch (err) {
       console.error("Error fetching feedbacks:", err);
-    }
-  };
-
-
-  const handleSubmit = async () => {
-    setSubmitting(true);
-    try {
-      await axios.post("http://localhost:3000/feedback", {
-        event: eventId,
-        rating,
-        review,
-      });
-
-      // ✅ Refresh feedbacks after submit
-      fetchFeedbacks();
-
-      // Optionally clear the form
-      setReview("");
-      setRating(0);
-      setShowFeedbackForm(false);
-    } catch (err) {
-      console.error("Error submitting feedback:", err);
-    } finally {
-      setSubmitting(false);
     }
   };
 
@@ -200,7 +178,7 @@ const EventDetails = () => {
 
         // 1. Create Order on Backend
         const orderRes = await axios.post(
-          `${import.meta.env.VITE_API_BASE_URL}/api/payments/create-order`,
+          `${API_BASE_URL}/api/payments/create-order`,
           {
             eventId,
             registrationType: "individual"
@@ -225,7 +203,7 @@ const EventDetails = () => {
             try {
               // 3. Verify Payment on Backend
               const verifyRes = await axios.post(
-                `${import.meta.env.VITE_API_BASE_URL}/api/payments/verify-payment`,
+                `${API_BASE_URL}/api/payments/verify-payment`,
                 {
                   razorpay_order_id: response.razorpay_order_id,
                   razorpay_payment_id: response.razorpay_payment_id,
@@ -266,7 +244,7 @@ const EventDetails = () => {
 
       // Existing individual registration logic for FREE events
       await axios.post(
-        `${import.meta.env.VITE_API_BASE_URL}/event/${eventId}/register`,
+        `${API_BASE_URL}/event/${eventId}/register`,
         {},
         {
           withCredentials: true,
@@ -289,7 +267,7 @@ const EventDetails = () => {
   const handleDelete = async () => {
     if (!window.confirm("Are you sure you want to delete this event?")) return
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/event/${eventId}`, { withCredentials: true })
+      await axios.delete(`${API_BASE_URL}/event/${eventId}`, { withCredentials: true })
       navigate("/events")
     } catch {
       alert("Failed to delete event.")
@@ -299,7 +277,7 @@ const EventDetails = () => {
   const handleDeleteFeedback = async (feedbackId) => {
     if (!window.confirm("Delete this feedback?")) return
     try {
-      await axios.delete(`${import.meta.env.VITE_API_BASE_URL}/feedback/${feedbackId}`, { withCredentials: true })
+      await axios.delete(`${API_BASE_URL}/feedback/${feedbackId}`, { withCredentials: true })
       setFeedbacks(feedbacks.filter((fb) => fb._id !== feedbackId))
     } catch {
       alert("Failed to delete feedback.")
@@ -634,7 +612,8 @@ const EventDetails = () => {
                   <Star key={i} className="w-4 h-4 text-yellow-400" fill="currentColor" />
                 ))
               }
-            // fetchFeedbacks={fetchFeedbacks} // passed to FeedbackSection so it can refresh
+              fetchFeedbacks={fetchFeedbacks}
+              handleDeleteFeedback={handleDeleteFeedback}
             />
 
           </div>

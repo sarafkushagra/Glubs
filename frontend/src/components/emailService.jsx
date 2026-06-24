@@ -1,5 +1,6 @@
 import axios from "axios"
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const APP_BASE_URL = import.meta.env.VITE_APP_BASE_URL || window.location.origin;
 
 /**
  * Service for sending email notifications
@@ -45,7 +46,7 @@ export const emailService = {
           </div>
           
           <div style="text-align: center; margin-bottom: 20px;">
-            <a href="http://localhost:3000/notifications" style="display: inline-block; background-color: #6366f1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold;">
+            <a href="${APP_BASE_URL}/notifications" style="display: inline-block; background-color: #6366f1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold;">
               View Invitation
             </a>
           </div>
@@ -59,7 +60,7 @@ export const emailService = {
 
       // Send the email using the backend API
       const response = await axios.post(
-        `${process.env.API_BASE_URL}/api/send-email`,
+        `${API_BASE_URL}/api/send-email`,
         {
           email: recipientEmail,
           subject: `Team Invitation: ${teamName} for ${eventName}`,
@@ -123,7 +124,7 @@ export const emailService = {
           </div>
           
           <div style="text-align: center; margin-bottom: 20px;">
-            <a href="http://localhost:3000/events/${options.eventId}/team-room" style="display: inline-block; background-color: #6366f1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold;">
+            <a href="${APP_BASE_URL}/events/${options.eventId}/team-room" style="display: inline-block; background-color: #6366f1; color: white; text-decoration: none; padding: 12px 24px; border-radius: 6px; font-weight: bold;">
               Go to Team Room
             </a>
           </div>
@@ -136,7 +137,7 @@ export const emailService = {
 
       // Send the email using the backend API
       const response = await axios.post(
-        `${process.env.API_BASE_URL}/api/send-email`,
+        `${API_BASE_URL}/api/send-email`,
         {
           email: recipientEmail,
           subject: `Team Invitation ${isAccepted ? "Accepted" : "Rejected"}: ${teamName}`,

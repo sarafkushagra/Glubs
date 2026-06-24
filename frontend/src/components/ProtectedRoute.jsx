@@ -14,7 +14,7 @@ const ProtectedRoute = ({ allowedRoles }) => {
   const token = localStorage.getItem("glubsToken") || getCookie("glubsToken");
   const userData = JSON.parse(localStorage.getItem("glubsUser") || "null");
 
-  const [redirectPath, setRedirectPath] = useState(null); // null = allow route
+  const [redirectPath, setRedirectPath] = useState(null);
 
   useEffect(() => {
     if (!userData && !token) {
@@ -33,13 +33,15 @@ const ProtectedRoute = ({ allowedRoles }) => {
       return;
     }
 
-    if (allowedRoles && !allowedRoles.includes(userData?.role)) {
+    const roles = Array.isArray(allowedRoles) ? allowedRoles : [allowedRoles];
+
+    if (allowedRoles && !roles.includes(userData?.role)) {
       toast.error("You are not authorized to access this page");
       setRedirectPath("/unauthorized");
       return;
     }
 
-    // if verified and authorized, store path just in case
+    setRedirectPath(null);
     localStorage.setItem("redirectAfterVerify", location.pathname);
   }, [userData, token, allowedRoles, location.pathname]);
 

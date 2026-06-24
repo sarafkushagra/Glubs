@@ -29,6 +29,12 @@ exports.getMe = async (req, res) => {
 // Get a specific user by ID
 exports.showUser = async (req, res) => {
   try {
+    const isSelf = req.user?._id?.toString() === req.params.id;
+    const isAdmin = req.user?.role === "admin";
+    if (!isSelf && !isAdmin) {
+      return res.status(403).json({ message: "You do not have permission to view this user" });
+    }
+
     const user = await User.findById(req.params.id);
     if (!user) return res.status(404).json({ message: "User not found" });
 
@@ -41,10 +47,34 @@ exports.showUser = async (req, res) => {
 // Update user profile
 exports.updateUser = async (req, res) => {
   try {
-    const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
+    const isSelf = req.user?._id?.toString() === req.params.id;
+    const isAdmin = req.user?.role === "admin";
+    if (!isSelf && !isAdmin) {
+      return res.status(403).json({ message: "You do not have permission to update this user" });
+    }
+
+    const allowedFields = [
+      "username",
+      "age",
+      "yearOfStudy",
+      "department",
+      "gender",
+      "phone",
+      "college",
+      "location",
+      "interests",
+      "avatar",
+    ];
+    if (isAdmin) allowedFields.push("role", "isVerified");
+
+    const update = Object.fromEntries(
+      Object.entries(req.body).filter(([key]) => allowedFields.includes(key))
+    );
+
+    const updatedUser = await User.findByIdAndUpdate(req.params.id, update, {
       new: true,
       runValidators: true,
-    });
+    }).select("-password -passwordConfirm -otp -resetPasswordOTP");
 
     if (!updatedUser) return res.status(404).json({ message: "User not found" });
 
@@ -70,8 +100,7 @@ exports.deleteUser = async (req, res) => {
 exports.requestClubAdmin = async (req, res) => {
   try {
     const { requestedRole } = req.body;
-    const validRoles = ["student", "club-admin"];
-    if (!validRoles.includes(requestedRole)) {
+    if (requestedRole !== "club-admin") {
       return res.status(400).json({ message: "Invalid role" });
     }
 
@@ -80,9 +109,11 @@ exports.requestClubAdmin = async (req, res) => {
       return res.status(401).json({ message: "Unauthorized or email not verified" });
     }
 
-    user.requestedRole === "club-admin"
-    await User.findByIdAndUpdate(req.user._id, { requestedRole: "pending-club-admin" }, { new: true })
+    if (user.role !== "student") {
+      return res.status(400).json({ message: "Only students can request club-admin access" });
+    }
 
+    await User.findByIdAndUpdate(req.user._id, { requestedRole: "pending-club-admin" }, { new: true })
 
     res.status(200).json({ message: "Role request submitted successfully." });
   } catch (err) {

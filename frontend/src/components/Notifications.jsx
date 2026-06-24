@@ -23,7 +23,8 @@ import {
 } from "lucide-react"
 import { useTheme } from './Context/ThemeContext';
 import { useNotifications } from '../Context/NotificationContext'
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
+const NOTIFICATION_API_URL = `${API_BASE_URL}/api/notifications`;
 
 const Notifications = () => {
   const navigate = useNavigate()
@@ -149,7 +150,7 @@ const Notifications = () => {
 
   const deleteNotification = async (id) => {
     try {
-      await axios.delete(`${API_BASE_URL}/notifications/${id}`, { withCredentials: true })
+      await axios.delete(`${NOTIFICATION_API_URL}/${id}`, { withCredentials: true })
       refreshNotifications() // We don't have a local delete in context yet, but refresh is fine
       showSuccess("Notification deleted")
     } catch (err) {

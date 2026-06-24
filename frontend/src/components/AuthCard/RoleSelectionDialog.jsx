@@ -30,7 +30,7 @@ const RoleSelectionDialog = () => {
       const gUser = localStorage.getItem("glubsUser");
       if (gUser) {
         const parsedUser = JSON.parse(gUser);
-        parsedUser.requestedRole = selected;
+        parsedUser.requestedRole = "pending-club-admin";
         localStorage.setItem("glubsUser", JSON.stringify(parsedUser));
       }
 

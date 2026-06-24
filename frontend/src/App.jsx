@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react"
 import Router from "./components/Router"
-import LogoWithRipples from "./components/ui/LogoWithRipples"
+import LogoWithRipples from "./components/UI/LogoWithRipples"
 import { ThemeProvider } from "./components/Context/ThemeContext"
 import { NotificationProvider } from "./Context/NotificationContext"
 import "./splash.css"
@@ -11,7 +11,7 @@ function App() {
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
-    const timer = setTimeout(() => setLoading(false), 100) // 5 seconds splash
+    const timer = setTimeout(() => setLoading(false), 100)
     return () => clearTimeout(timer)
   }, [])
 
