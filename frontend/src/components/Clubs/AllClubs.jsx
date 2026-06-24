@@ -8,7 +8,7 @@ import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Users, Heart, X } from 'lucide-react';
-import { useTheme } from '../Context/ThemeContext';
+import { useTheme } from '../../context/AppProvider';
 
 const categories = [
   'All',

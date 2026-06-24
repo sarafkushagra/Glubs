@@ -4,7 +4,7 @@ import { motion } from "framer-motion";
 import axios from "axios";
 import { toast } from "react-toastify";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/userStore";
+import { useAuth } from "../../context/AppProvider";
 import RoleSelectionDialog from "./RoleSelectionDialog";
 
 const EmailVerificationPage = () => {

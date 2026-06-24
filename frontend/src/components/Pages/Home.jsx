@@ -2,7 +2,7 @@
 
 import { useState } from "react"
 import { Link } from "react-router-dom"
-import { useTheme } from "../Context/ThemeContext"
+import { useTheme } from "../../context/AppProvider"
 import Navbar from "./Navbar"
 // import img2 from "../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp" // Not used in this section anymore
 import event1 from "../images/EventA.jpg"

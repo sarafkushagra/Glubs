@@ -93,7 +93,13 @@ const MyJoinRequests = () => {
         </div>
       ) : (
         <div className="space-y-4">
-          {requests.map((request) => (
+          {requests.map((request) => {
+            // Skip rendering if club data is missing
+            if (!request.club) {
+              return null;
+            }
+            
+            return (
             <div
               key={request._id}
               className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
@@ -105,10 +111,10 @@ const MyJoinRequests = () => {
                   </div>
 
                   <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{request.club.name}</h3>
-                    <p className="text-sm text-gray-600 mb-2">{request.club.description}</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-1">{request.club?.name || 'Unknown Club'}</h3>
+                    <p className="text-sm text-gray-600 mb-2">{request.club?.description || 'No description'}</p>
                     <div className="flex items-center gap-4 text-xs text-gray-500 mb-3">
-                      <span>Category: {request.club.category}</span>
+                      <span>Category: {request.club?.category || 'N/A'}</span>
                       <span>•</span>
                       <span>Requested: {new Date(request.createdAt).toLocaleDateString()}</span>
                     </div>
@@ -131,7 +137,7 @@ const MyJoinRequests = () => {
 
                     {request.reviewedBy && request.reviewedAt && (
                       <p className="text-xs text-gray-500 mt-2">
-                        Reviewed by {request.reviewedBy.username} on {new Date(request.reviewedAt).toLocaleDateString()}
+                        Reviewed by {request.reviewedBy?.username || 'Admin'} on {new Date(request.reviewedAt).toLocaleDateString()}
                       </p>
                     )}
                   </div>
@@ -145,7 +151,8 @@ const MyJoinRequests = () => {
                 </div>
               </div>
             </div>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

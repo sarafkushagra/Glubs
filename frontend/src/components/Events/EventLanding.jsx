@@ -36,10 +36,10 @@ import {
   Trophy,
 } from "lucide-react"
 import ShareButtons from "./ShareModel"
-import { useTheme } from "../Context/ThemeContext"
+import { useTheme } from "../../context/AppProvider"
 import ShareModal from "./ShareModel"
 import { loadRazorpay } from "../../utils/razorpay"
-import { useAuth } from "../Context/userStore"
+import { useAuth } from "../../context/AppProvider"
 
 // Custom styles for hiding scrollbars
 const scrollbarHideStyles = `

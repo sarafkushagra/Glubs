@@ -49,80 +49,83 @@ import RoleSelectionDialog from "./AuthCard/RoleSelectionDialog";
 import ClubAdminDashboard from "./DashBoard/ClubAdminDashboard";
 
 import MyJoinRequests from "./Clubs/MyJoinRequests"
+import AdminRouteGuard from "./AdminRouteGuard"
 
 export default function Router() {
   return (
-    <Routes>
-      <Route path="/" element={<LandingPage />} />
-      <Route path="/about" element={<About />} />
-      <Route path="/auth" element={<AuthCard />} />
-      <Route path="/auth/signin" element={<SignInForm />} />
-      <Route path="/auth/signup" element={<SignUpForm />} />
-      <Route path="/verify" element={<EmailVerificationPage />} />
-      <Route path="/forgot-password" element={<ForgotPasswordEmail />} />
-      <Route path="/verify-otp" element={<VerifyOTPAndReset />} />
-      <Route path="/reset-success" element={<ResetSuccess />} />
-      <Route path="/unauthorized" element={<UnauthorizedPage />} />
-      <Route path="*" element={<NotFound />} />
-      <Route path="/events" element={<EventLanding />} />
-      <Route path="/clubs" element={<AllClubs />} />
-      <Route path="/features" element={<DashboardPage />} />
-      <Route path="/events/:eventId/team-room" element={<TeamRoomPage />} />
-      <Route path="/notifications" element={<Notifications />} />
-      <Route path="/role-selection" element={<RoleSelectionDialog />} />
+    <AdminRouteGuard>
+      <Routes>
+        <Route path="/" element={<LandingPage />} />
+        <Route path="/about" element={<About />} />
+        <Route path="/auth" element={<AuthCard />} />
+        <Route path="/auth/signin" element={<SignInForm />} />
+        <Route path="/auth/signup" element={<SignUpForm />} />
+        <Route path="/verify" element={<EmailVerificationPage />} />
+        <Route path="/forgot-password" element={<ForgotPasswordEmail />} />
+        <Route path="/verify-otp" element={<VerifyOTPAndReset />} />
+        <Route path="/reset-success" element={<ResetSuccess />} />
+        <Route path="/unauthorized" element={<UnauthorizedPage />} />
+        <Route path="*" element={<NotFound />} />
+        <Route path="/events" element={<EventLanding />} />
+        <Route path="/clubs" element={<AllClubs />} />
+        <Route path="/features" element={<DashboardPage />} />
+        <Route path="/events/:eventId/team-room" element={<TeamRoomPage />} />
+        <Route path="/notifications" element={<Notifications />} />
+        <Route path="/role-selection" element={<RoleSelectionDialog />} />
 
-      {/* All users allowed but after verification  */}
-      <Route element={<ProtectedRoute allowedRoles={["student", "club-admin", "admin", "pending-club-admin"]} />}>
-        <Route path="/qr-gen" element={<QRCodeGenerator />} />
-        <Route path="/events/:eventId" element={<EventDetails />} />
-        <Route path="/clubs/:clubId" element={<ClubDetails />} />
-        <Route path="/users/edit/:id" element={<EditUser />} />
-        <Route path="/events/:eventId/add-feedback" element={<AddFeedback />} />
-        <Route path="/events/:eventId/edit-feedback/:feedbackId" element={<EditFeedback />} />
-        <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
-        <Route path="/profile" element={<MyProfile />} />
-        <Route path="/hosts" element={<HostOpportunityPage />} />
-        <Route path="/my-join-requests" element={<MyJoinRequests />} />
-      </Route>
+        {/* All users allowed but after verification  */}
+        <Route element={<ProtectedRoute allowedRoles={["student", "club-admin", "admin", "pending-club-admin"]} />}>
+          <Route path="/qr-gen" element={<QRCodeGenerator />} />
+          <Route path="/events/:eventId" element={<EventDetails />} />
+          <Route path="/clubs/:clubId" element={<ClubDetails />} />
+          <Route path="/users/edit/:id" element={<EditUser />} />
+          <Route path="/events/:eventId/add-feedback" element={<AddFeedback />} />
+          <Route path="/events/:eventId/edit-feedback/:feedbackId" element={<EditFeedback />} />
+          <Route path="/clubs/:clubId/events" element={<ClubEvents />} />
+          <Route path="/profile" element={<MyProfile />} />
+          <Route path="/hosts" element={<HostOpportunityPage />} />
+          <Route path="/my-join-requests" element={<MyJoinRequests />} />
+        </Route>
 
-      <Route element={<ProtectedRoute allowedRoles={["admin", "student"]} />}>
+        <Route element={<ProtectedRoute allowedRoles={["admin", "student"]} />}>
 
-      </Route>
+        </Route>
 
-      <Route
-        element={<ProtectedRoute allowedRoles={["admin", "club-admin"]} />}
-      >
-        <Route path="/events/add" element={<AddHostBasicDetails />} />
-        <Route path="/events/edit/:id" element={<EditHostBasicDetails />} />
-        <Route path="/clubs/edit/:clubId" element={<EditClub />} />
-        <Route path="/clubs/add" element={<AddClub />} />
-        <Route path="/clubs/:clubId/members" element={<ClubMembers />} />
-      </Route>
+        <Route
+          element={<ProtectedRoute allowedRoles={["admin", "club-admin"]} />}
+        >
+          <Route path="/events/add" element={<AddHostBasicDetails />} />
+          <Route path="/events/edit/:id" element={<EditHostBasicDetails />} />
+          <Route path="/clubs/edit/:clubId" element={<EditClub />} />
+          <Route path="/clubs/add" element={<AddClub />} />
+          <Route path="/clubs/:clubId/members" element={<ClubMembers />} />
+        </Route>
 
-      <Route element={<ProtectedRoute allowedRoles={"admin"} />}>
-        <Route path="/allusers" element={<AllUsers />} />
-        <Route path="/admin/dash" element={<AdminDashboard />} />
-        <Route path="/users/details/:id" element={<UsersDetails />} />
-      </Route>
+        <Route element={<ProtectedRoute allowedRoles={"admin"} />}>
+          <Route path="/allusers" element={<AllUsers />} />
+          <Route path="/admin/dash" element={<AdminDashboard />} />
+          <Route path="/users/details/:id" element={<UsersDetails />} />
+        </Route>
 
-      <Route element={<ProtectedRoute allowedRoles={"club-admin"} />}>
-        <Route path="/clubadmin" element={<ClubAdminDashboard />} />
-        <Route path="/qr-scan" element={<QRScanner />} />
-      </Route>
+        <Route element={<ProtectedRoute allowedRoles={"club-admin"} />}>
+          <Route path="/clubadmin" element={<ClubAdminDashboard />} />
+          <Route path="/qr-scan" element={<QRScanner />} />
+        </Route>
 
-      {/* Explore Features */}
-      <Route path="/AttendancePage" element={<AttendancePage />} />
-      <Route path="/EngagementPage" element={<EngagementPage />} />
-      <Route path="/BehaviorPage" element={<BehaviorPage />} />
-      <Route path="/ReachPage" element={<ReachPage />} />
-      <Route path="/FeedbackInsights" element={<FeedbackInsights />} />
-      <Route path="/EventTimeline" element={<EventTimeline />} />
-      <Route path="/LiveMetrics" element={<LiveMetrics />} />
-      <Route path="/GrowthAnalysis" element={<GrowthAnalysis />} />
-      <Route path="/UserDemographics" element={<UserDemographics />} />
+        {/* Explore Features */}
+        <Route path="/AttendancePage" element={<AttendancePage />} />
+        <Route path="/EngagementPage" element={<EngagementPage />} />
+        <Route path="/BehaviorPage" element={<BehaviorPage />} />
+        <Route path="/ReachPage" element={<ReachPage />} />
+        <Route path="/FeedbackInsights" element={<FeedbackInsights />} />
+        <Route path="/EventTimeline" element={<EventTimeline />} />
+        <Route path="/LiveMetrics" element={<LiveMetrics />} />
+        <Route path="/GrowthAnalysis" element={<GrowthAnalysis />} />
+        <Route path="/UserDemographics" element={<UserDemographics />} />
 
-      {/* For all users */}
+        {/* For all users */}
 
-    </Routes>
+      </Routes>
+    </AdminRouteGuard>
   );
 }

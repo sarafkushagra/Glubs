@@ -2,12 +2,13 @@ const express = require('express');
 const router = express.Router();
 const eventController = require('../controllers/event');
 const {isAuthenticated} = require('../middlewares/auth');
+const { eventValidation, handleValidationErrors } = require('../middlewares/validation');
 
 router.get('/', eventController.showAllEvents);
-router.post('/', isAuthenticated,eventController.createEvent);
+router.post('/', isAuthenticated, eventValidation.create, handleValidationErrors, eventController.createEvent);
 router.get('/:id', eventController.showEvent);
-router.put('/:id', eventController.updateEvent);
-router.delete('/:id', eventController.deleteEvent);
+router.put('/:id', isAuthenticated, eventValidation.update, handleValidationErrors, eventController.updateEvent);
+router.delete('/:id', isAuthenticated, eventController.deleteEvent);
 router.post('/:eventId/add-feedback', isAuthenticated, eventController.addFeedback);
 router.get('/participated/:userid', eventController.getUserParticipatedEvents);
 router.get('/upcoming/:userid', eventController.getUserUpcomingEvents);

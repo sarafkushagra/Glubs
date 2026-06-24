@@ -4,7 +4,7 @@ import { useState, useEffect } from "react"
 import { useNavigate, Link } from "react-router-dom"
 import axios from "axios"
 import { toast } from "react-toastify"
-import { Users, Calendar, Globe, UserCheck, CheckCircle, X, Trash2, Mail, Clock, Activity, Bell, Settings, Home, Menu, ChevronRight, RefreshCw, AlertCircle, Loader, Search, Download, ChevronLeft, LayoutDashboard, Share2, Eye, MapPin, TrendingUp, Filter, MoreHorizontal, UserPlus, Star, Edit, IndianRupee } from 'lucide-react'
+import { Users, Calendar, Globe, UserCheck, CheckCircle, X, Trash2, Mail, Clock, Activity, Bell, Settings, Home, Menu, ChevronRight, RefreshCw, AlertCircle, Loader, Search, Download, ChevronLeft, LayoutDashboard, Share2, Eye, MapPin, TrendingUp, Filter, MoreHorizontal, UserPlus, Star, Edit, IndianRupee, Plus, QrCode, LogOut } from 'lucide-react'
 import { ResponsiveContainer, XAxis, YAxis, Tooltip, CartesianGrid, AreaChart, Area, BarChart, Bar, Cell, PieChart, Pie, Legend } from 'recharts'
 import { CgProfile } from "react-icons/cg"
 
@@ -16,6 +16,20 @@ const ClubAdminDashboard = () => {
   const [sidebarOpen, setSidebarOpen] = useState(true)
   const [searchQuery, setSearchQuery] = useState("")
   const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      await axios.post(`${API_BASE_URL}/users/logout`, {}, { withCredentials: true })
+    } catch (err) {
+      console.error("Logout request failed", err)
+    } finally {
+      localStorage.removeItem("glubsUser")
+      localStorage.removeItem("glubsToken")
+      window.dispatchEvent(new Event("authUpdate"))
+      navigate("/")
+      window.location.reload()
+    }
+  }
 
   // Data states
   const [dashboardData, setDashboardData] = useState({
@@ -591,6 +605,13 @@ const ClubAdminDashboard = () => {
           >
             <RefreshCw className={`w-4 h-4 ${loading.events ? "animate-spin" : ""}`} />
             Refresh
+          </button>
+          <button
+            onClick={() => navigate("/events/add")}
+            className="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-lg hover:from-blue-700 hover:to-indigo-700 shadow-md hover:shadow-lg transition-all font-semibold"
+          >
+            <Plus className="w-4 h-4" />
+            Add Event
           </button>
         </div>
       </div>
@@ -1204,6 +1225,14 @@ const ClubAdminDashboard = () => {
             <TrendingUp className="w-5 h-5 flex-shrink-0" />
             {sidebarOpen && <span className="font-medium whitespace-nowrap">Analytics</span>}
           </button>
+
+          <button
+            onClick={() => navigate("/qr-scan")}
+            className="w-full flex items-center gap-3 px-4 py-3.5 rounded-xl transition-all duration-200 text-gray-500 hover:bg-blue-50 hover:text-blue-600"
+          >
+            <QrCode className="w-5 h-5 flex-shrink-0" />
+            {sidebarOpen && <span className="font-medium whitespace-nowrap">QR Scan</span>}
+          </button>
         </nav>
 
         {/* User Profile */}
@@ -1222,11 +1251,11 @@ const ClubAdminDashboard = () => {
 
             {sidebarOpen && (
               <button
-                onClick={() => navigate("/")}
+                onClick={handleLogout}
                 className="p-1.5 rounded-full hover:bg-red-50 text-gray-400 hover:text-red-600 transition-colors"
                 title="Logout"
               >
-                <Trash2 size={18} />
+                <LogOut size={18} />
               </button>
             )}
           </div>
@@ -1258,9 +1287,30 @@ const ClubAdminDashboard = () => {
               />
             </div>
 
-            <button className="p-2.5 rounded-xl bg-gray-50 text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-colors relative">
+            <button 
+              onClick={() => navigate("/qr-scan")}
+              className="p-2.5 rounded-xl bg-gray-50 text-gray-500 hover:bg-green-50 hover:text-green-600 transition-colors relative"
+              title="QR Scan"
+            >
+              <QrCode className="w-5 h-5" />
+            </button>
+
+            <button 
+              onClick={() => navigate("/notifications")}
+              className="p-2.5 rounded-xl bg-gray-50 text-gray-500 hover:bg-blue-50 hover:text-blue-600 transition-colors relative"
+              title="Notifications"
+            >
               <Bell className="w-5 h-5" />
               <span className="absolute top-2 right-2.5 w-2 h-2 bg-red-500 rounded-full border-2 border-white"></span>
+            </button>
+
+            <button 
+              onClick={handleLogout}
+              className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 rounded-xl transition-colors font-semibold text-sm"
+              title="Logout"
+            >
+              <LogOut className="w-4 h-4" />
+              <span className="hidden sm:inline">Logout</span>
             </button>
           </div>
         </header>

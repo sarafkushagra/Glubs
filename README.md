@@ -4,6 +4,15 @@ Glubs is a full-stack, feature-rich platform designed to streamline the manageme
 
 > Empowering Innovation, Elevating Experiences Seamlessly
 
+## 📚 Documentation
+
+**Important:** Please read the documentation files before starting development:
+
+- **[ARCHITECTURE.md](./ARCHITECTURE.md)** - Complete architectural overview and implementation guide (START HERE)
+- **[QUICK_START.md](./QUICK_START.md)** - Quick start guide for developers
+- **[SETUP.md](./SETUP.md)** - Detailed setup and installation instructions (if available)
+
+---
 
 ## 🚀 Built With
 
@@ -14,14 +23,10 @@ Glubs is a full-stack, feature-rich platform designed to streamline the manageme
   <img src="https://img.shields.io/badge/Node.js-339933?style=for-the-badge&logo=nodedotjs&logoColor=white" alt="Node.js"/>
   <img src="https://img.shields.io/badge/MongoDB-47A248?style=for-the-badge&logo=mongodb&logoColor=white" alt="MongoDB"/>
   <img src="https://img.shields.io/badge/Mongoose-880000?style=for-the-badge&logo=mongoose&logoColor=white" alt="Mongoose"/>
-  <img src="https://img.shields.io/badge/EJS-9B479F?style=for-the-badge&logo=ejs&logoColor=white" alt="EJS"/>
+  <img src="https://img.shields.io/badge/Tailwind-38B2AC?style=for-the-badge&logo=tailwindcss&logoColor=white" alt="Tailwind CSS"/>
   <img src="https://img.shields.io/badge/JavaScript-F7DF1E?style=for-the-badge&logo=javascript&logoColor=black" alt="JavaScript"/>
-  <img src="https://img.shields.io/badge/PostCSS-DD3A0A?style=for-the-badge&logo=postcss&logoColor=white" alt="PostCSS"/>
-  <img src="https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=eslint&logoColor=white" alt="ESLint"/>
-  <img src="https://img.shields.io/badge/npm-CB3837?style=for-the-badge&logo=npm&logoColor=white" alt="npm"/>
   <img src="https://img.shields.io/badge/Axios-5A29E4?style=for-the-badge&logo=axios&logoColor=white" alt="Axios"/>
-  <img src="https://img.shields.io/badge/Chart.js-FF6384?style=for-the-badge&logo=chartdotjs&logoColor=white" alt="Chart.js"/>
-  <img src="https://img.shields.io/badge/date--fns-5573F4?style=for-the-badge&logo=date-fns&logoColor=white" alt="date-fns"/>
+  <img src="https://img.shields.io/badge/Socket.io-010101?style=for-the-badge&logo=socketdotio&logoColor=white" alt="Socket.io"/>
 </p>
 
 ## ✨ Features
@@ -33,6 +38,9 @@ Glubs is a full-stack, feature-rich platform designed to streamline the manageme
 - 🔍 Member Search & Management
 - 📤 Share & Promote Events
 - 💬 Feedback Submission & Analysis
+- 🎨 Light & Dark Mode Support
+- ⚡ Real-time Notifications via Socket.io
+- 📱 Responsive Design
 
 ## Key Features
 
@@ -43,6 +51,8 @@ Glubs is a full-stack, feature-rich platform designed to streamline the manageme
 -   **In-depth Analytics Dashboard**: A powerful admin panel to visualize user registration trends, event type distribution, and manage all platform data including users, clubs, and events.
 -   **Interactive Feedback System**: Gather valuable feedback from event attendees with ratings and reviews to improve future events.
 -   **Real-time Notifications**: Keep users informed about team invitations and other important updates.
+-   **Consistent Design System**: Professional color palette with full dark mode support.
+-   **Input Validation**: Comprehensive client and server-side validation.
 
 ## Tech Stack
 

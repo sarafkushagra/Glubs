@@ -3,8 +3,6 @@
 import { useState, useEffect } from "react"
 import Router from "./components/Router"
 import LogoWithRipples from "./components/UI/LogoWithRipples"
-import { ThemeProvider } from "./components/Context/ThemeContext"
-import { NotificationProvider } from "./Context/NotificationContext"
 import "./splash.css"
 
 function App() {
@@ -17,19 +15,13 @@ function App() {
 
   if (loading) {
     return (
-      <div className="h-screen w-screen flex items-center justify-center bg-gray-100">
+      <div className="h-screen w-screen flex items-center justify-center bg-gray-100 dark:bg-gray-900">
         <LogoWithRipples />
       </div>
     )
   }
 
-  return (
-    <ThemeProvider>
-      <NotificationProvider>
-        <Router />
-      </NotificationProvider>
-    </ThemeProvider>
-  )
+  return <Router />
 }
 
 export default App

@@ -2,7 +2,7 @@
 import { useState, useEffect } from "react"
 import { useNavigate, useParams } from "react-router-dom"
 import axios from "axios"
-import { useAuth } from "../Context/userStore"
+import { useAuth } from "../../context/AppProvider"
 import Navbar from "../Pages/Navbar"
 import Footer from "../Pages/Footer"
 import { ArrowLeft, ArrowRight, Upload, X, Users, Globe, Eye, EyeOff, MapPin, Save, Trash2, CheckCircle, Loader2, Building2 } from 'lucide-react'

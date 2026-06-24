@@ -3,7 +3,7 @@ import { Link } from 'react-router-dom';
 import img1 from '../images/user-profile-icon-profile-avatar-user-icon-male-icon-face-icon-profile-icon-free-png.webp';
 import Footer from './Footer';
 import Navbar from './Navbar';
-import { useTheme } from '../Context/ThemeContext';
+import { useTheme } from '../../context/AppProvider';
 
 const About = () => {
   const { theme } = useTheme();

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/userStore";
+import { useAuth } from "../../context/AppProvider";
 import { toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
 

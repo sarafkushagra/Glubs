@@ -10,7 +10,7 @@ import { Card } from "../ui/card"
 import { Badge } from "../ui/badge"
 import { Button } from "../ui/button"
 import { Users, Send, Loader } from "lucide-react"
-import { useTheme } from "../Context/ThemeContext"
+import { useTheme } from "../../context/AppProvider"
 
 const getCategoryColor = (category) => {
   const colors = {

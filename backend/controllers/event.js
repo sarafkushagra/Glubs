@@ -31,9 +31,16 @@ module.exports.createEvent = async (req, res) => {
   session.startTransaction();
 
   try {
-    const { title, description, details, eventType, date, venue, mode, visibility, categories, skillsToBeAssessed, website, festival, participationType, teamMin, teamMax, registrationStart, registrationEnd, registrationLimit, hideContact, prizePool, eligibility, rules, contactEmail, contactPhone, logo, club, registrationFee } = req.body;
+    const { title, description, details, eventType, date, eventDate, venue, mode, visibility, categories, skillsToBeAssessed, website, festival, participationType, registrationType, teamMin, teamMax, registrationStart, registrationEnd, registrationLimit, maxRegistrations, hideContact, prizePool, eligibility, rules, contactEmail, contactPhone, logo, club, clubId, registrationFee } = req.body;
 
-    const clubDoc = await Club.findById(club).session(session);
+    const targetClubId = club || clubId;
+    if (!targetClubId) {
+      await session.abortTransaction();
+      session.endSession();
+      return res.status(400).json({ message: "Club ID is required" });
+    }
+
+    const clubDoc = await Club.findById(targetClubId).session(session);
     if (!clubDoc) {
       await session.abortTransaction();
       session.endSession();
@@ -42,7 +49,7 @@ module.exports.createEvent = async (req, res) => {
 
     // Check if user is admin of this specific club
     const isClubAdmin = req.user.adminOfClubs?.some(
-      adminClubId => adminClubId.toString() === club.toString()
+      adminClubId => adminClubId.toString() === targetClubId.toString()
     );
 
     // System admins can create events for any club
@@ -56,13 +63,47 @@ module.exports.createEvent = async (req, res) => {
       });
     }
 
+    const targetDate = date || eventDate;
+    const targetLimit = registrationLimit || maxRegistrations;
+    const rawParticipationType = participationType || registrationType || "Individual";
+    const targetParticipationType = rawParticipationType.trim().charAt(0).toUpperCase() + rawParticipationType.trim().slice(1).toLowerCase();
+
     // Create the event
-    const event = new Event({ title, description, details, eventType, date, venue, mode, visibility, categories, skillsToBeAssessed, website, festival, participationType, teamMin: participationType === "Individual" ? null : teamMin, teamMax: participationType === "Individual" ? null : teamMax, registrationStart, registrationEnd, registrationLimit, hideContact, prizePool, eligibility, rules, contactEmail, contactPhone, logo, createdBy: req.user, club: club, registrationFee });
+    const event = new Event({
+      title,
+      description,
+      details,
+      eventType,
+      date: targetDate,
+      venue,
+      mode,
+      visibility,
+      categories,
+      skillsToBeAssessed,
+      website,
+      festival,
+      participationType: targetParticipationType,
+      teamMin: targetParticipationType === "Individual" ? null : teamMin,
+      teamMax: targetParticipationType === "Individual" ? null : teamMax,
+      registrationStart,
+      registrationEnd,
+      registrationLimit: targetLimit,
+      hideContact,
+      prizePool,
+      eligibility,
+      rules,
+      contactEmail,
+      contactPhone,
+      logo,
+      createdBy: req.user,
+      club: targetClubId,
+      registrationFee
+    });
 
     const savedEvent = await event.save({ session });
 
     await Club.findByIdAndUpdate(
-      club,
+      targetClubId,
       { $push: { events: savedEvent._id } },
       { session }
     );
@@ -108,6 +149,20 @@ module.exports.updateEvent = async (req, res) => {
       return res.status(403).json({
         message: "You don't have permission to update this event"
       });
+    }
+
+    if (req.body.eventDate) {
+      req.body.date = req.body.eventDate;
+    }
+    if (req.body.clubId) {
+      req.body.club = req.body.clubId;
+    }
+    if (req.body.maxRegistrations) {
+      req.body.registrationLimit = req.body.maxRegistrations;
+    }
+    if (req.body.registrationType || req.body.participationType) {
+      const rawType = req.body.participationType || req.body.registrationType;
+      req.body.participationType = rawType.trim().charAt(0).toUpperCase() + rawType.trim().slice(1).toLowerCase();
     }
 
     const updatedEvent = await Event.findByIdAndUpdate(

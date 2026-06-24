@@ -37,14 +37,30 @@ import {
   Shield,
   UserPlus,
   Home,
+  LogOut,
 } from "lucide-react"
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 
 // If you deploy the backend elsewhere (e.g. Render, Railway) set NEXT_PUBLIC_API_BASE_URL.
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || "http://localhost:3000";
 
 const userss = JSON.parse(localStorage.getItem("glubsUser") || "null")
-const ClubAdminDashboard = () => {
+const AdminDashboard = () => {
+  const navigate = useNavigate()
+
+  const handleLogout = async () => {
+    try {
+      await apiRequest("/users/logout", { method: "POST" })
+    } catch (err) {
+      console.error("Logout request failed", err)
+    } finally {
+      localStorage.removeItem("glubsUser")
+      localStorage.removeItem("glubsToken")
+      window.dispatchEvent(new Event("authUpdate"))
+      navigate("/")
+      window.location.reload()
+    }
+  }
   // State management
   const [activeTab, setActiveTab] = useState("dashboard")
   const [sidebarOpen, setSidebarOpen] = useState(true)
@@ -614,6 +630,7 @@ const ClubAdminDashboard = () => {
   )
 
   // Form Components
+  // Form Components
   const UserForm = ({ user, onSave, onCancel }) => {
     const [formData, setFormData] = useState({
       name: user?.username || "",
@@ -627,36 +644,45 @@ const ClubAdminDashboard = () => {
     }
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md">
-          <h3 className="text-lg font-semibold mb-4">{user ? "Edit User" : "Create User"}</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-md transform scale-100 transition-all duration-300">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-900">{user ? "Edit User" : "Create User"}</h3>
+            <button 
+              type="button" 
+              onClick={onCancel}
+              className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Name</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Email</label>
               <input
                 type="email"
                 value={formData.email}
                 onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white"
                 required
               />
             </div>
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Role</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Role</label>
               <select
                 value={formData.role}
                 onChange={(e) => setFormData({ ...formData, role: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white"
               >
                 <option value="student">Student</option>
                 <option value="club_admin">Club Admin</option>
@@ -664,32 +690,32 @@ const ClubAdminDashboard = () => {
                 <option value="admin">Admin</option>
               </select>
             </div>
-            <div className="flex items-center">
+            <div className="flex items-center py-1">
               <input
                 type="checkbox"
                 id="isActive"
                 checked={formData.isActive}
                 onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="mr-2"
+                className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500/20 focus:ring-2 transition-colors cursor-pointer"
               />
-              <label htmlFor="isActive" className="text-sm font-medium text-gray-700">
-                Active
+              <label htmlFor="isActive" className="ml-2.5 text-sm font-medium text-gray-700 cursor-pointer select-none">
+                Active Member
               </label>
             </div>
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={loading.action}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading.action ? "Saving..." : "Save"}
-              </button>
+            <div className="flex gap-3 pt-4 border-t border-gray-100">
               <button
                 type="button"
                 onClick={onCancel}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-500 font-semibold rounded-xl hover:bg-gray-50 transition-colors"
               >
                 Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading.action}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 transition-all"
+              >
+                {loading.action ? "Saving..." : "Save User"}
               </button>
             </div>
           </form>
@@ -698,83 +724,165 @@ const ClubAdminDashboard = () => {
     )
   }
 
-  const EventForm = ({ event, onSave, onCancel }) => {
+  const EventForm = ({ event, onSave, onCancel, clubs = [] }) => {
     const [formData, setFormData] = useState({
-      name: event?.title || "",
-      eventType: event?.eventType || "Workshop",
-      date: event?.date ? event.date.split("T")[0] : "",
-      location: event?.venue || "",
+      title: event?.title || "",
       description: event?.description || "",
+      clubId: event?.clubId || clubs[0]?._id || "",
+      eventDate: event?.eventDate ? event.eventDate.split("T")[0] : "",
+      registrationType: event?.registrationType || "individual",
+      maxRegistrations: event?.maxRegistrations || "",
+      registrationFee: event?.registrationFee || "",
     })
+    const [errors, setErrors] = useState({})
+
+    const validateForm = () => {
+      const newErrors = {}
+      if (!formData.title || formData.title.length < 3) {
+        newErrors.title = "Title must be at least 3 characters"
+      }
+      if (!formData.description || formData.description.length < 10) {
+        newErrors.description = "Description must be at least 10 characters"
+      }
+      if (!formData.clubId) {
+        newErrors.clubId = "Please select a club"
+      }
+      if (!formData.eventDate) {
+        newErrors.eventDate = "Event date is required"
+      }
+      if (!formData.registrationType) {
+        newErrors.registrationType = "Registration type is required"
+      }
+      setErrors(newErrors)
+      return Object.keys(newErrors).length === 0
+    }
 
     const handleSubmit = (e) => {
       e.preventDefault()
-      onSave(formData)
+      if (validateForm()) {
+        onSave(formData)
+      }
     }
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md">
-          <h3 className="text-lg font-semibold mb-4">{event ? "Edit Event" : "Create Event"}</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-md max-h-[90vh] overflow-y-auto transform scale-100 transition-all duration-300">
+          <div className="flex items-center justify-between mb-6 sticky top-0 bg-white pb-3 border-b border-gray-100 z-10">
+            <h3 className="text-xl font-bold text-gray-900">{event ? "Edit Event" : "Create Event"}</h3>
+            <button 
+              type="button" 
+              onClick={onCancel}
+              className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Title *</label>
               <input
                 type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                value={formData.title}
+                onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                className={`w-full px-4 py-2.5 border ${errors.title ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:ring-blue-500/20'} rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white`}
                 required
               />
+              {errors.title && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.title}</p>}
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Type</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description *</label>
+              <textarea
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                className={`w-full px-4 py-2.5 border ${errors.description ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:ring-blue-500/20'} rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white`}
+                rows="3"
+                required
+              />
+              {errors.description && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.description}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Club *</label>
               <select
-                value={formData.eventType}
-                onChange={(e) => setFormData({ ...formData, eventType: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                value={formData.clubId}
+                onChange={(e) => setFormData({ ...formData, clubId: e.target.value })}
+                className={`w-full px-4 py-2.5 border ${errors.clubId ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:ring-blue-500/20'} rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white`}
+                required
               >
-                <option value="Workshop">Workshop</option>
-                <option value="Seminar">Seminar</option>
-                <option value="Hackathon">Hackathon</option>
-                <option value="Webinar">Webinar</option>
-                <option value="Bootcamp">Bootcamp</option>
+                <option value="">Select a club</option>
+                {clubs.map((club) => (
+                  <option key={club._id} value={club._id}>
+                    {club.name}
+                  </option>
+                ))}
               </select>
+              {errors.clubId && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.clubId}</p>}
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Event Date *</label>
               <input
                 type="date"
-                value={formData.date}
-                onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                value={formData.eventDate}
+                onChange={(e) => setFormData({ ...formData, eventDate: e.target.value })}
+                className={`w-full px-4 py-2.5 border ${errors.eventDate ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:ring-blue-500/20'} rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white`}
                 required
               />
+              {errors.eventDate && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.eventDate}</p>}
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Location</label>
-              <input
-                type="text"
-                value={formData.location}
-                onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Registration Type *</label>
+              <select
+                value={formData.registrationType}
+                onChange={(e) => setFormData({ ...formData, registrationType: e.target.value })}
+                className={`w-full px-4 py-2.5 border ${errors.registrationType ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:ring-blue-500/20'} rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white`}
                 required
+              >
+                <option value="individual">Individual</option>
+                <option value="team">Team</option>
+              </select>
+              {errors.registrationType && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.registrationType}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Max Registrations (Optional)</label>
+              <input
+                type="number"
+                value={formData.maxRegistrations}
+                onChange={(e) => setFormData({ ...formData, maxRegistrations: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white"
+                min="1"
               />
             </div>
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={loading.action}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading.action ? "Saving..." : "Save"}
-              </button>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Registration Fee (Optional)</label>
+              <input
+                type="number"
+                value={formData.registrationFee}
+                onChange={(e) => setFormData({ ...formData, registrationFee: e.target.value })}
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white"
+                min="0"
+                step="0.01"
+              />
+            </div>
+
+            <div className="flex gap-3 pt-4 border-t border-gray-100">
               <button
                 type="button"
                 onClick={onCancel}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-500 font-semibold rounded-xl hover:bg-gray-50 transition-colors"
               >
                 Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading.action}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 transition-all"
+              >
+                {loading.action ? "Saving..." : "Save Event"}
               </button>
             </div>
           </form>
@@ -787,64 +895,99 @@ const ClubAdminDashboard = () => {
     const [formData, setFormData] = useState({
       name: club?.name || "",
       description: club?.description || "",
-      isActive: club?.isActive !== false,
+      category: club?.category || "Technology",
     })
+    const [errors, setErrors] = useState({})
+
+    const categories = ["Sports", "Arts", "Technology", "Environment", "Academic", "Literature"]
+
+    const validateForm = () => {
+      const newErrors = {}
+      if (!formData.name || formData.name.length < 3) {
+        newErrors.name = "Name must be at least 3 characters"
+      }
+      if (!formData.category) {
+        newErrors.category = "Please select a category"
+      }
+      setErrors(newErrors)
+      return Object.keys(newErrors).length === 0
+    }
 
     const handleSubmit = (e) => {
       e.preventDefault()
-      onSave(formData)
+      if (validateForm()) {
+        onSave(formData)
+      }
     }
 
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-        <div className="bg-white rounded-lg p-6 w-full max-w-md">
-          <h3 className="text-lg font-semibold mb-4">{club ? "Edit Club" : "Create Club"}</h3>
-          <form onSubmit={handleSubmit} className="space-y-4">
+      <div className="fixed inset-0 bg-black/40 backdrop-blur-sm flex items-center justify-center p-4 z-50 animate-in fade-in duration-200">
+        <div className="bg-white rounded-2xl shadow-2xl border border-gray-100 p-6 w-full max-w-md transform scale-100 transition-all duration-300">
+          <div className="flex items-center justify-between mb-6">
+            <h3 className="text-xl font-bold text-gray-900">{club ? "Edit Club" : "Create Club"}</h3>
+            <button 
+              type="button" 
+              onClick={onCancel}
+              className="p-1.5 hover:bg-gray-100 rounded-lg text-gray-400 hover:text-gray-600 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
+          <form onSubmit={handleSubmit} className="space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Name</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Name *</label>
               <input
                 type="text"
                 value={formData.name}
                 onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className={`w-full px-4 py-2.5 border ${errors.name ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:ring-blue-500/20'} rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white`}
                 required
               />
+              {errors.name && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.name}</p>}
             </div>
+
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Category *</label>
+              <select
+                value={formData.category}
+                onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+                className={`w-full px-4 py-2.5 border ${errors.category ? 'border-red-500 focus:ring-red-500/20' : 'border-gray-200 focus:ring-blue-500/20'} rounded-xl focus:outline-none focus:ring-2 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white`}
+                required
+              >
+                <option value="">Select a category</option>
+                {categories.map((cat) => (
+                  <option key={cat} value={cat}>
+                    {cat}
+                  </option>
+                ))}
+              </select>
+              {errors.category && <p className="text-xs text-red-500 mt-1.5 font-medium">{errors.category}</p>}
+            </div>
+
+            <div>
+              <label className="block text-sm font-semibold text-gray-700 mb-1.5">Description (Optional)</label>
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+                className="w-full px-4 py-2.5 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all text-gray-900 bg-gray-50/50 hover:bg-gray-50 focus:bg-white"
                 rows="3"
               />
             </div>
-            <div className="flex items-center">
-              <input
-                type="checkbox"
-                id="clubActive"
-                checked={formData.isActive}
-                onChange={(e) => setFormData({ ...formData, isActive: e.target.checked })}
-                className="mr-2"
-              />
-              <label htmlFor="clubActive" className="text-sm font-medium text-gray-700">
-                Active
-              </label>
-            </div>
-            <div className="flex gap-3 pt-4">
-              <button
-                type="submit"
-                disabled={loading.action}
-                className="flex-1 bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 disabled:opacity-50"
-              >
-                {loading.action ? "Saving..." : "Save"}
-              </button>
+
+            <div className="flex gap-3 pt-4 border-t border-gray-100">
               <button
                 type="button"
                 onClick={onCancel}
-                className="flex-1 bg-gray-300 text-gray-700 py-2 rounded-lg hover:bg-gray-400"
+                className="flex-1 px-4 py-2.5 border border-gray-200 text-gray-500 font-semibold rounded-xl hover:bg-gray-50 transition-colors"
               >
                 Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={loading.action}
+                className="flex-1 px-4 py-2.5 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg disabled:opacity-50 transition-all"
+              >
+                {loading.action ? "Saving..." : "Save Club"}
               </button>
             </div>
           </form>
@@ -852,6 +995,7 @@ const ClubAdminDashboard = () => {
       </div>
     )
   }
+     
 
   // Render functions
   const renderDashboard = () => (
@@ -1509,12 +1653,13 @@ const ClubAdminDashboard = () => {
       {editingEvent && (
         <EventForm
           event={editingEvent}
+          clubs={clubs}
           onSave={(data) => updateEvent(editingEvent._id, data)}
           onCancel={() => setEditingEvent(null)}
         />
       )}
       {showCreateForm.event && (
-        <EventForm onSave={createEvent} onCancel={() => setShowCreateForm({ ...showCreateForm, event: false })} />
+        <EventForm clubs={clubs} onSave={createEvent} onCancel={() => setShowCreateForm({ ...showCreateForm, event: false })} />
       )}
     </div>
   )
@@ -2162,7 +2307,7 @@ const ClubAdminDashboard = () => {
         <header className="bg-white shadow-sm border-b border-gray-200 px-6 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-4">
-              <Link to="/"><Home className="w-6 h-6" /></Link>
+              <Link to={userss?.role === "admin" ? "/admin/dash" : "/"}><Home className="w-6 h-6" /></Link>
               <h2 className="text-2xl font-semibold text-gray-900">
                 {sidebarItems.find((item) => item.id === activeTab)?.label}
               </h2>
@@ -2175,6 +2320,14 @@ const ClubAdminDashboard = () => {
               <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-full flex items-center justify-center shadow-lg">
                 <span className="text-white font-semibold"><CgProfile size={30} /></span>
               </div>
+              <button 
+                onClick={handleLogout}
+                className="flex items-center gap-2 px-3 py-2 bg-red-50 text-red-600 hover:bg-red-100 border border-red-100 rounded-xl transition-colors font-semibold text-sm"
+                title="Logout"
+              >
+                <LogOut className="w-4 h-4" />
+                <span className="hidden sm:inline">Logout</span>
+              </button>
             </div>
           </div>
         </header>
@@ -2186,5 +2339,5 @@ const ClubAdminDashboard = () => {
   )
 }
 
-export default ClubAdminDashboard;
+export default AdminDashboard;
 

@@ -2,7 +2,7 @@ import { useState, useEffect } from "react"
 import { useParams, useNavigate } from "react-router-dom"
 import axios from "axios"
 import { loadRazorpay } from "../../utils/razorpay"
-import { useAuth } from "../Context/userStore"
+import { useAuth } from "../../context/AppProvider"
 import Navbar from "../Pages/Navbar"
 import Footer from "../Pages/Footer"
 import {

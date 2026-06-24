@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import axios from "axios";
 import { HiMiniHome } from "react-icons/hi2";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../Context/userStore";
+import { useAuth } from "../../context/AppProvider";
 import { toast } from "react-toastify";
 
 const SignInForm = ({ onSwitch }) => {

@@ -8,8 +8,8 @@ import { CgProfile } from "react-icons/cg"
 import { BiLogIn } from "react-icons/bi"
 import { QrCode, Bell, Moon, Sun, Menu, X, Plus } from "lucide-react"
 import { RiLogoutCircleLine } from "react-icons/ri"
-import { useTheme } from "../Context/ThemeContext"
-import { useNotifications } from "../../Context/NotificationContext"
+import { useTheme } from "../../context/AppProvider"
+import { useNotifications } from "../../context/AppProvider"
 
 // Uses DM Sans Thin for a modern, thin navbar font
 const Navbar = React.memo(function Navbar() {
@@ -91,7 +91,24 @@ const Navbar = React.memo(function Navbar() {
       ? "bg-gray-900/80 backdrop-blur-xl border-gray-800/30"
       : "bg-white/80 backdrop-blur-xl border-gray-200/30"
 
-  const navItems = ["Home", "About", "Events", "Clubs"]
+  const navItems = user?.role === "admin"
+    ? ["Dashboard", "Users"]
+    : user?.role === "club-admin"
+      ? ["Dashboard", "Clubs", "QR Scan", "Add Event"]
+      : ["Home", "About", "Events", "Clubs"]
+
+  const getNavItemLink = (item) => {
+    const itemLower = item.toLowerCase();
+    if (itemLower === "home") return "/";
+    if (itemLower === "dashboard") {
+      if (user?.role === "club-admin") return "/clubadmin";
+      return "/admin/dash";
+    }
+    if (itemLower === "users") return "/allusers";
+    if (itemLower === "qr scan") return "/qr-scan";
+    if (itemLower === "add event") return "/events/add";
+    return `/${itemLower.replace(/\s+/g, "")}`;
+  };
 
   return (
     <>
@@ -113,7 +130,7 @@ const Navbar = React.memo(function Navbar() {
       >
         {/* Logo Section with Company Name */}
         <div className="flex-shrink-0 flex items-center gap-3">
-          <Link to="/" className="group relative flex items-center gap-3">
+          <Link to={user?.role === "admin" ? "/admin/dash" : "/"} className="group relative flex items-center gap-3">
             <div className="relative overflow-hidden rounded-xl p-2 transition-all duration-300 group-hover:bg-gradient-to-r group-hover:from-cyan-500/10 group-hover:to-blue-500/10">
               <img
                 src={img1 || "/placeholder.svg"}
@@ -135,12 +152,12 @@ const Navbar = React.memo(function Navbar() {
         <div className="hidden lg:block absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
           <div className="flex items-center space-x-4">
             {navItems.map((item, index) => {
-              const isActive =
-                location.pathname === `/${item.toLowerCase()}` || (location.pathname === "/" && item === "Home")
+              const itemLink = getNavItemLink(item)
+              const isActive = location.pathname === itemLink
               return (
                 <Link
                   key={item}
-                  to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
+                  to={itemLink}
                   className={`relative px-4 py-2 text-base tracking-wide transition-all duration-300 group font-normal` +
                     (isActive
                       ? theme === "dark"
@@ -221,8 +238,8 @@ const Navbar = React.memo(function Navbar() {
                 <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
               </Link>
 
-              {/* FeedBack/Create Event - Admin & Club Admin */}
-              {(user?.role === "admin" || user?.role === "club-admin") && (
+              {/* FeedBack/Create Event - Admin Only */}
+              {user?.role === "admin" && (
                 <Link
                   to="/events/add"
                   className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
@@ -233,21 +250,6 @@ const Navbar = React.memo(function Navbar() {
                 >
                   <Plus className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-90" />
                   <div className="absolute inset-0 bg-gradient-to-r from-cyan-500/0 via-cyan-500/20 to-cyan-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
-                </Link>
-              )}
-
-              {/* QR Scan - Club Admin Only */}
-              {user?.role === "club-admin" && (
-                <Link
-                  to="/qr-scan"
-                  className={`p-3 rounded-2xl transition-all duration-300 group relative overflow-hidden ${theme === "dark"
-                    ? "bg-gray-800/50 hover:bg-gray-700/50 text-gray-300 hover:text-green-400 border border-gray-700/50 hover:border-green-500/30"
-                    : "bg-gray-100/50 hover:bg-gray-200/50 text-gray-600 hover:text-green-600 border border-gray-200/50 hover:border-green-300/50"
-                    } hover:scale-110 hover:shadow-lg hover:shadow-green-500/20`}
-                  title="QR Scan"
-                >
-                  <QrCode className="w-5 h-5 transition-all duration-300 group-hover:scale-110 group-hover:rotate-3" />
-                  <div className="absolute inset-0 bg-gradient-to-r from-green-500/0 via-green-500/20 to-green-500/0 translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-500" />
                 </Link>
               )}
 
@@ -301,20 +303,24 @@ const Navbar = React.memo(function Navbar() {
       {menuOpen && (
         <div className="lg:hidden fixed top-20 right-4 bg-gray-900/90 backdrop-blur-md p-6 rounded-xl shadow-lg min-w-[180px] z-[10000] border border-gray-700/50">
           <ul className="flex flex-col space-y-4">
-            {["Home", "About", "Events", "Clubs"].map((item) => (
-              <li key={item}>
-                <Link
-                  to={`/${item.toLowerCase() === "home" ? "" : item.toLowerCase()}`}
-                  onClick={() => setMenuOpen(false)}
-                  className={`text-[16px] font-medium ${location.pathname === `/${item.toLowerCase()}` || (location.pathname === "/" && item === "Home")
-                    ? "text-cyan-400 font-semibold"
-                    : "text-gray-300 hover:text-white"
-                    }`}
-                >
-                  {item}
-                </Link>
-              </li>
-            ))}
+            {navItems.map((item) => {
+              const itemLink = getNavItemLink(item)
+              const isActive = location.pathname === itemLink
+              return (
+                <li key={item}>
+                  <Link
+                    to={itemLink}
+                    onClick={() => setMenuOpen(false)}
+                    className={`text-[16px] font-medium ${isActive
+                      ? "text-cyan-400 font-semibold"
+                      : "text-gray-300 hover:text-white"
+                      }`}
+                  >
+                    {item}
+                  </Link>
+                </li>
+              )
+            })}
             {/* Mobile Theme Toggle */}
             <li>
               <button
@@ -347,14 +353,14 @@ const Navbar = React.memo(function Navbar() {
                 </li>
                 <li>
                   <Link
-                    to="/profile"
+                    to={getProfileLink()}
                     onClick={() => setMenuOpen(false)}
                     className="flex items-center gap-2 text-gray-300 hover:text-white"
                   >
                     <CgProfile className="w-5 h-5" /> Profile
                   </Link>
                 </li>
-                {(user?.role === "admin" || user?.role === "club-admin") && (
+                {user?.role === "admin" && (
                   <li>
                     <Link
                       to="/events/add"
@@ -362,17 +368,6 @@ const Navbar = React.memo(function Navbar() {
                       className="flex items-center gap-2 text-gray-300 hover:text-white"
                     >
                       <Plus className="w-5 h-5" /> Create Event
-                    </Link>
-                  </li>
-                )}
-                {user?.role === "club-admin" && (
-                  <li>
-                    <Link
-                      to="/qr-scan"
-                      onClick={() => setMenuOpen(false)}
-                      className="flex items-center gap-2 text-gray-300 hover:text-white"
-                    >
-                      <QrCode className="w-5 h-5" /> QR Scan
                     </Link>
                   </li>
                 )}
